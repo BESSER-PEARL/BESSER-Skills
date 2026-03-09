@@ -1,0 +1,36 @@
+{
+  "eval_id": 1,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Response includes correct imports from besser.BUML.metamodel.structural",
+      "passed": true,
+      "evidence": "Imports DomainModel, Class, Property, Multiplicity, BinaryAssociation, StringType, IntegerType correctly"
+    },
+    {
+      "text": "Response defines 3 classes: Student, Course, Professor",
+      "passed": true,
+      "evidence": "Defines Student (student_id, name, email), Course (code, name, credits), Professor (professor_id, name, department)"
+    },
+    {
+      "text": "Response includes BinaryAssociation with correct multiplicities",
+      "passed": true,
+      "evidence": "Enrollment: 0..* on both sides (many-to-many). Teaching: 1..* and 1..1 (one-to-many)."
+    },
+    {
+      "text": "Response assembles a DomainModel with types and associations",
+      "passed": true,
+      "evidence": "DomainModel(name='University', types={student, course, professor}, associations={enrollment, teaching})"
+    },
+    {
+      "text": "Response shows SQLAlchemyGenerator usage with generate() call",
+      "passed": true,
+      "evidence": "SQLAlchemyGenerator(model=university_model, output_dir='./output') followed by generator.generate()"
+    },
+    {
+      "text": "Code is syntactically correct Python (no hallucinated API calls)",
+      "passed": true,
+      "evidence": "All API calls match BESSER's actual API. Uses is_id=True, Multiplicity with '*', correct constructor signatures."
+    }
+  ]
+}

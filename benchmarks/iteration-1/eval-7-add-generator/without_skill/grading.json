@@ -1,0 +1,36 @@
+{
+  "eval_id": 7,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Response specifies correct file location: besser/generators/graphql/",
+      "passed": true,
+      "evidence": "States creating besser/generators/graphql/ directory with proper structure"
+    },
+    {
+      "text": "Response shows implementing GeneratorInterface with __init__ and generate methods",
+      "passed": true,
+      "evidence": "Complete GraphQLGenerator with super().__init__, Jinja2 rendering, build_generation_path"
+    },
+    {
+      "text": "Response shows registration in config/generators.py with GeneratorInfo",
+      "passed": true,
+      "evidence": "Shows adding import, GeneratorInfo in SUPPORTED_GENERATORS, and filename mapping"
+    },
+    {
+      "text": "Response specifies test location: tests/generators/graphql/",
+      "passed": true,
+      "evidence": "Shows tests/generators/graphql/test_graphql_generator.py with multiple test functions"
+    },
+    {
+      "text": "Response mentions Jinja2 templates in a templates/ subdirectory",
+      "passed": true,
+      "evidence": "Provides concrete GraphQL schema template"
+    },
+    {
+      "text": "Response mentions documentation in docs/source/generators/",
+      "passed": true,
+      "evidence": "Shows creating docs/source/generators/graphql.rst"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "config": "without_skill",
+  "expectations": [
+    {"text": "Uses correct imports from besser.BUML.metamodel.structural", "passed": true, "evidence": "Imports DomainModel, Class, Property, Multiplicity, BinaryAssociation, StringType, IntegerType correctly"},
+    {"text": "Defines 3 classes: Student, Course, Professor", "passed": true, "evidence": "Defines Student, Course, Professor classes with attributes"},
+    {"text": "Creates associations with correct multiplicities", "passed": true, "evidence": "Many-to-many enrollment (0..* both sides), one-to-many teaching (0..* and 1..1)"},
+    {"text": "Assembles a DomainModel with types and associations", "passed": true, "evidence": "DomainModel(name='University', types={student, course, professor}, associations={...})"},
+    {"text": "Uses SQLAlchemyGenerator with correct import and invocation", "passed": true, "evidence": "from besser.generators.sql_alchemy import SQLAlchemyGenerator; .generate(dbms='sqlite')"},
+    {"text": "Produced Python code is syntactically plausible", "passed": true, "evidence": "Code matches codebase patterns. Also shows generated output and DB usage examples."}
+  ]
+}

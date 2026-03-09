@@ -1,0 +1,10 @@
+{
+  "eval_id": 6,
+  "config": "without_skill",
+  "expectations": [
+    {"text": "Explains that B-UML names cannot contain spaces", "passed": true, "evidence": "Explains NamedElement.name setter rejects spaces with source code from structural.py"},
+    {"text": "Recommends using underscores: 'first_name'", "passed": true, "evidence": "Property(name='first_name', type=StringType) with explanation of why"},
+    {"text": "Explains that enumeration literals must have unique names", "passed": true, "evidence": "Shows Enumeration.literals setter source code with uniqueness check"},
+    {"text": "Provides corrected code for both issues", "passed": true, "evidence": "Complete working example plus detailed summary table of 6 naming rules with enforcement locations"}
+  ]
+}

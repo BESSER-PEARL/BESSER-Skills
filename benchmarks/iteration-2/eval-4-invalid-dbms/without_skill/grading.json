@@ -1,0 +1,10 @@
+{
+  "eval_id": 4,
+  "config": "without_skill",
+  "expectations": [
+    {"text": "Identifies that 'postgres' is wrong and 'postgresql' is the correct string", "passed": true, "evidence": "The valid value for PostgreSQL is 'postgresql' (not 'postgres')"},
+    {"text": "Lists all valid DBMS options", "passed": true, "evidence": "VALID_DBMS = {'sqlite', 'postgresql', 'mysql', 'mssql', 'mariadb', 'oracle'}"},
+    {"text": "Shows corrected code with postgresql", "passed": true, "evidence": "SQLGenerator(model=my_model, sql_dialect='postgresql')"},
+    {"text": "No hallucinated DBMS names or wrong parameter names", "passed": true, "evidence": "All correct. Also found documentation bug in docs/source/generators/sql.rst that incorrectly says 'postgres'."}
+  ]
+}

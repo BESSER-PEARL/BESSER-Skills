@@ -1,0 +1,10 @@
+{
+  "eval_id": 6,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Explains that B-UML names cannot contain spaces", "passed": true, "evidence": "All B-UML names must not contain spaces"},
+    {"text": "Recommends using underscores: 'first_name'", "passed": true, "evidence": "Property(name='first_name', type=StringType)"},
+    {"text": "Explains that enumeration literals must have unique names", "passed": true, "evidence": "Each EnumerationLiteral within an Enumeration must have a unique name"},
+    {"text": "Provides corrected code for both issues", "passed": true, "evidence": "Full working example with both fixes applied, plus summary table of naming rules"}
+  ]
+}

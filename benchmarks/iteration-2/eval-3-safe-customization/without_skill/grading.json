@@ -1,0 +1,10 @@
+{
+  "eval_id": 3,
+  "config": "without_skill",
+  "expectations": [
+    {"text": "Clearly states generated files are overwritten on regeneration", "passed": true, "evidence": "Every time you call BackendGenerator.generate(), it completely overwrites main_api.py, sql_alchemy.py, and pydantic_classes.py"},
+    {"text": "Recommends creating separate extension/wrapper files", "passed": true, "evidence": "Presents 4 strategies: BAL/CODE model methods, include_router, wrapper app.py, subclass generator"},
+    {"text": "Shows a concrete code example of the extension pattern", "passed": true, "evidence": "Full working custom_routes.py with APIRouter, wrapper app.py with middleware, and subclass pattern"},
+    {"text": "Does NOT recommend editing main_api.py directly", "passed": true, "evidence": "Recommends model-level methods as Strategy 1, external files for custom code. Only patches main_api.py with automated script for include_router."}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "config": "without_skill",
+  "expectations": [
+    {"text": "Mentions saving the PlantUML to a .plantuml file", "passed": true, "evidence": "Step 1: Save Your PlantUML File as ecommerce.plantuml"},
+    {"text": "Uses plantuml_to_buml() from besser.BUML.notations.structuralPlantUML", "passed": true, "evidence": "from besser.BUML.notations.structuralPlantUML import plantuml_to_buml"},
+    {"text": "Uses BackendGenerator for FastAPI generation", "passed": true, "evidence": "from besser.generators.backend import BackendGenerator"},
+    {"text": "Passes http_methods parameter to limit to GET and POST only", "passed": true, "evidence": "BackendGenerator(model=ecommerce_model, http_methods=['GET', 'POST'], output_dir='./output_backend')"},
+    {"text": "No hallucinated function names or wrong import paths", "passed": true, "evidence": "All imports correct. Also shows RESTAPIGenerator as alternative."}
+  ]
+}

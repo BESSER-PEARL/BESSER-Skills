@@ -1,0 +1,61 @@
+{
+  "skill_name": "besser-skills",
+  "evals": [
+    {
+      "id": 1,
+      "skill": "besser-user",
+      "prompt": "I want to model a university system with Students, Courses, and Professors. Students can enroll in many courses, professors teach courses. Each course has a name and credits. How do I do this in BESSER and then generate a SQLAlchemy ORM from it?",
+      "expected_output": "A complete B-UML model with 3 classes, proper associations with correct multiplicities, and SQLAlchemyGenerator usage. Should include imports, class definitions, associations, DomainModel assembly, and generator invocation.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "skill": "besser-user",
+      "prompt": "I have this PlantUML file for an e-commerce system. How do I convert it to BESSER and generate a FastAPI backend? I want POST and GET endpoints only.\n\n@startuml\nclass Customer {\n  + name: str\n  + email: str\n}\nclass Order {\n  + order_date: date\n  + total: float\n}\nCustomer \"1\" -- \"0..*\" Order : places\n@enduml",
+      "expected_output": "Instructions to use plantuml_to_buml() to convert the file, then BackendGenerator with http_methods=['GET', 'POST']. Should mention saving the PlantUML to a file first, the conversion call, and the generator call with the http_methods option.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "skill": "besser-generators",
+      "prompt": "I generated a backend with BackendGenerator but I need to add custom validation logic to the API. If I edit main_api.py directly, will my changes survive the next generation? What's the right way to add custom endpoints?",
+      "expected_output": "Explains that generated files are overwritten on regeneration. Recommends the wrapper/extension pattern: create a separate file that imports the generated FastAPI app and adds custom routes. Should NOT recommend editing main_api.py directly.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "skill": "besser-generators",
+      "prompt": "I'm trying to generate SQL for PostgreSQL but I keep getting 'Invalid DBMS' error. I'm using SQLGenerator with sql_dialect='postgres'.",
+      "expected_output": "Identifies that the correct DBMS string is 'postgresql' not 'postgres'. Lists all valid options: sqlite, postgresql, mysql, mssql, mariadb, oracle.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "skill": "besser-troubleshooting",
+      "prompt": "I just cloned the BESSER repo and ran pip install -e . but when I try 'from besser.BUML.metamodel.structural import String' I get ImportError. What's wrong?",
+      "expected_output": "Explains that the correct import name is 'StringType' not 'String'. These are pre-built singleton instances, not classes. Provides the correct import statement.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "skill": "besser-troubleshooting",
+      "prompt": "I'm trying to create a class with a property name 'first name' and BESSER is throwing a ValueError about spaces. Also, my enum has two literals both called 'ACTIVE' and that's also failing. How do I fix both issues?",
+      "expected_output": "Explains that B-UML names cannot contain spaces (use underscores: 'first_name') and enumeration literals must have unique names within the same enum. Provides corrected code.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "skill": "besser-dev",
+      "prompt": "I want to add a new GraphQL generator to BESSER. What's the step-by-step process? Where do I put the files, how do I register it, and what tests should I write?",
+      "expected_output": "Step-by-step: create besser/generators/graphql/ package, implement GeneratorInterface, write Jinja2 templates, register in config/generators.py with GeneratorInfo, write tests in tests/generators/graphql/, and add docs in docs/source/generators/. Should include code examples for each step.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "skill": "besser-dev",
+      "prompt": "I'm writing tests for a new generator. What's the typical test pattern? How do I set up fixtures for domain models? Should I use tmp_path or manually create directories?",
+      "expected_output": "Explains pytest patterns used in BESSER: @pytest.fixture for domain models built inline, tmp_path for output directories (auto-cleaned), asserting both file existence and content, testing error conditions with pytest.raises. Should include a concrete example fixture and test function.",
+      "files": []
+    }
+  ]
+}

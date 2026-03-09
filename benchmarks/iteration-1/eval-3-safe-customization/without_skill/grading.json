@@ -1,0 +1,26 @@
+{
+  "eval_id": 3,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Response explicitly warns that generated files are overwritten on regeneration",
+      "passed": true,
+      "evidence": "Clearly states 'No, Direct Edits to main_api.py Will Not Survive Regeneration' with code evidence from BackendGenerator"
+    },
+    {
+      "text": "Response recommends creating a separate extension file that imports from the generated code",
+      "passed": true,
+      "evidence": "Recommends separate APIRouter file plus post-generation injection, and other patterns"
+    },
+    {
+      "text": "Response provides a concrete code example of the wrapper/extension pattern",
+      "passed": true,
+      "evidence": "Provides 5 different strategies with code examples including APIRouter, OCL constraints, Method with code, subclassing, and template modification"
+    },
+    {
+      "text": "Response does NOT recommend editing main_api.py directly as the primary approach",
+      "passed": true,
+      "evidence": "Recommends separate files as primary approach"
+    }
+  ]
+}

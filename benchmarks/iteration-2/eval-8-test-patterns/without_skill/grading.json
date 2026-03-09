@@ -1,0 +1,11 @@
+{
+  "eval_id": 8,
+  "config": "without_skill",
+  "expectations": [
+    {"text": "Recommends @pytest.fixture for domain model setup", "passed": true, "evidence": "@pytest.fixture with inline model construction, drawn from actual test files"},
+    {"text": "Recommends tmp_path for output directories", "passed": true, "evidence": "Recommends tmpdir/tmp_path. Shows most modern tests use it for automatic cleanup."},
+    {"text": "Shows a concrete fixture example building a small DomainModel inline", "passed": true, "evidence": "Fixture with Library, Book classes based on actual test_sql_generator.py patterns"},
+    {"text": "Shows a concrete test function asserting both file existence and content", "passed": true, "evidence": "Three-phase pattern: Arrange-Act-Assert with file existence and content checks"},
+    {"text": "Mentions pytest.raises for testing error conditions", "passed": true, "evidence": "Six assertion patterns documented including error condition testing"}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "eval_id": 6,
+  "eval_name": "construction-errors-spaces-duplicates",
+  "skill": "besser-troubleshooting",
+  "prompt": "I'm trying to create a class with a property name 'first name' and BESSER is throwing a ValueError about spaces. Also, my enum has two literals both called 'ACTIVE' and that's also failing. How do I fix both issues?",
+  "assertions": [
+    {
+      "text": "Explains that B-UML names cannot contain spaces",
+      "type": "content_check"
+    },
+    {
+      "text": "Recommends using underscores: 'first_name' instead of 'first name'",
+      "type": "content_check"
+    },
+    {
+      "text": "Explains that enumeration literals must have unique names within the same enum",
+      "type": "content_check"
+    },
+    {
+      "text": "Provides corrected code for both issues",
+      "type": "contains_pattern"
+    }
+  ]
+}

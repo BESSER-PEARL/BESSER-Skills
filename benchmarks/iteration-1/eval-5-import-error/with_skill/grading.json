@@ -1,0 +1,26 @@
+{
+  "eval_id": 5,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Response identifies that the correct name is StringType, not String",
+      "passed": true,
+      "evidence": "States 'The correct name for the string type is StringType, not String'"
+    },
+    {
+      "text": "Response explains these are pre-built singleton instances",
+      "passed": true,
+      "evidence": "Explains 'the primitive data types are pre-built singleton instances of PrimitiveDataType'"
+    },
+    {
+      "text": "Response provides the corrected import statement",
+      "passed": true,
+      "evidence": "Shows 'from besser.BUML.metamodel.structural import StringType'"
+    },
+    {
+      "text": "Response lists other common type names (IntegerType, FloatType, BooleanType, etc.)",
+      "passed": true,
+      "evidence": "Full table of Wrong vs Correct: String->StringType, Integer->IntegerType, Float->FloatType, Boolean->BooleanType, Date->DateType, DateTime->DateTimeType, Time->TimeType, Association->BinaryAssociation"
+    }
+  ]
+}

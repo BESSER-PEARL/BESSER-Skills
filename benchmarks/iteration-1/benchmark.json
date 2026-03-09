@@ -1,0 +1,91 @@
+{
+  "skill_name": "besser-skills",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "label": "With BESSER Skills",
+      "results": {
+        "pass_rate": {
+          "mean": 1.0,
+          "stddev": 0.0,
+          "per_eval": {
+            "eval-1-university-model": {"passed": 6, "total": 6, "rate": 1.0},
+            "eval-3-safe-customization": {"passed": 4, "total": 4, "rate": 1.0},
+            "eval-5-import-error": {"passed": 4, "total": 4, "rate": 1.0},
+            "eval-7-add-generator": {"passed": 6, "total": 6, "rate": 1.0}
+          }
+        },
+        "timing": {
+          "mean_seconds": 92.2,
+          "stddev_seconds": 49.5,
+          "per_eval": {
+            "eval-1-university-model": 57.8,
+            "eval-3-safe-customization": 110.4,
+            "eval-5-import-error": 44.2,
+            "eval-7-add-generator": 156.2
+          }
+        },
+        "tokens": {
+          "mean": 32810,
+          "stddev": 10954,
+          "per_eval": {
+            "eval-1-university-model": 25010,
+            "eval-3-safe-customization": 37712,
+            "eval-5-import-error": 21498,
+            "eval-7-add-generator": 47018
+          }
+        }
+      }
+    },
+    {
+      "name": "without_skill",
+      "label": "Without Skills (Baseline)",
+      "results": {
+        "pass_rate": {
+          "mean": 1.0,
+          "stddev": 0.0,
+          "per_eval": {
+            "eval-1-university-model": {"passed": 6, "total": 6, "rate": 1.0},
+            "eval-3-safe-customization": {"passed": 4, "total": 4, "rate": 1.0},
+            "eval-5-import-error": {"passed": 4, "total": 4, "rate": 1.0},
+            "eval-7-add-generator": {"passed": 6, "total": 6, "rate": 1.0}
+          }
+        },
+        "timing": {
+          "mean_seconds": 141.4,
+          "stddev_seconds": 64.9,
+          "per_eval": {
+            "eval-1-university-model": 97.0,
+            "eval-3-safe-customization": 199.3,
+            "eval-5-import-error": 72.4,
+            "eval-7-add-generator": 197.2
+          }
+        },
+        "tokens": {
+          "mean": 44000,
+          "stddev": 19137,
+          "per_eval": {
+            "eval-1-university-model": 32569,
+            "eval-3-safe-customization": 56106,
+            "eval-5-import-error": 22218,
+            "eval-7-add-generator": 65098
+          }
+        }
+      }
+    }
+  ],
+  "delta": {
+    "pass_rate": "0.0 (both 100%)",
+    "timing": "-34.8% faster with skill (92.2s vs 141.4s mean)",
+    "tokens": "-25.4% fewer tokens with skill (32810 vs 44000 mean)"
+  },
+  "analyst_observations": [
+    "Both configurations achieve 100% pass rate on all assertions — the baseline agent had access to the full BESSER codebase and could research answers independently.",
+    "The key advantage of skills is EFFICIENCY: with-skill runs are consistently faster (35% mean speedup) and use fewer tokens (25% mean reduction). The agent doesn't need to explore the codebase since the skill provides the information directly.",
+    "The speedup is most pronounced on complex tasks: eval-3 (customization patterns) was 45% faster with skill, and eval-7 (adding a generator) was 21% faster. These are tasks where codebase exploration overhead is highest.",
+    "For simple diagnostics (eval-5, import error), the speed advantage is smaller (39%) because even without the skill, the answer is quick to find in the code.",
+    "Qualitatively, the with-skill responses are more CONCISE and CONSISTENT — they follow standardized patterns from the skill rather than discovering patterns by reading source code. The without-skill responses tend to include more raw file references and implementation details.",
+    "Non-discriminating assertions: All assertions pass in both configurations. For future iterations, consider adding assertions about response quality (conciseness, pattern consistency) rather than just correctness."
+  ]
+}

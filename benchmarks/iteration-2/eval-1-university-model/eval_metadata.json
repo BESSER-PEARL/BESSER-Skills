@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "university-model-sqlalchemy",
+  "skill": "besser-user",
+  "prompt": "I want to model a university system with Students, Courses, and Professors. Students can enroll in many courses, professors teach courses. Each course has a name and credits. How do I do this in BESSER and then generate a SQLAlchemy ORM from it?",
+  "assertions": [
+    {
+      "text": "Uses correct imports from besser.BUML.metamodel.structural (DomainModel, Class, Property, etc.)",
+      "type": "contains_pattern"
+    },
+    {
+      "text": "Defines 3 classes: Student, Course, Professor (or equivalent names)",
+      "type": "content_check"
+    },
+    {
+      "text": "Creates associations with correct multiplicities (many-to-many for student-course, one/many-to-many for professor-course)",
+      "type": "content_check"
+    },
+    {
+      "text": "Assembles a DomainModel with types and associations",
+      "type": "content_check"
+    },
+    {
+      "text": "Uses SQLAlchemyGenerator with correct import and invocation",
+      "type": "contains_pattern"
+    },
+    {
+      "text": "Produced Python code is syntactically plausible (no hallucinated API calls)",
+      "type": "correctness"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "eval_id": 3,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Clearly states generated files are overwritten on regeneration", "passed": true, "evidence": "Regeneration always overwrites. Every call to generate() replaces the output files entirely."},
+    {"text": "Recommends creating separate extension/wrapper files", "passed": true, "evidence": "Presents wrapper pattern (app.py), extension pattern (custom_validators.py, custom_queries.py)"},
+    {"text": "Shows a concrete code example of the extension pattern", "passed": true, "evidence": "Full working app.py with custom validation endpoint, custom query, and stats endpoint"},
+    {"text": "Does NOT recommend editing main_api.py directly", "passed": true, "evidence": "Explicitly states: Do not edit main_api.py, pydantic_classes.py, or sql_alchemy.py directly"}
+  ]
+}

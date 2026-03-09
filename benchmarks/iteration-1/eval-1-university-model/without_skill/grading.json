@@ -1,0 +1,36 @@
+{
+  "eval_id": 1,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Response includes correct imports from besser.BUML.metamodel.structural",
+      "passed": true,
+      "evidence": "Imports DomainModel, Class, Property, Multiplicity, BinaryAssociation, StringType, IntegerType correctly"
+    },
+    {
+      "text": "Response defines 3 classes: Student, Course, Professor",
+      "passed": true,
+      "evidence": "Defines Student (name, email), Course (name, credits), Professor (name, department)"
+    },
+    {
+      "text": "Response includes BinaryAssociation with correct multiplicities",
+      "passed": true,
+      "evidence": "Enrollment: 0..* on both sides. Teaches: 1..1 and 0..*."
+    },
+    {
+      "text": "Response assembles a DomainModel with types and associations",
+      "passed": true,
+      "evidence": "DomainModel(name='University', types={student, course, professor}, associations={enrollment_association, teaches_association})"
+    },
+    {
+      "text": "Response shows SQLAlchemyGenerator usage with generate() call",
+      "passed": true,
+      "evidence": "SQLAlchemyGenerator(model=university_model) followed by sqlalchemy_gen.generate()"
+    },
+    {
+      "text": "Code is syntactically correct Python (no hallucinated API calls)",
+      "passed": true,
+      "evidence": "All API calls match BESSER's actual API. However, DjangoGenerator call is missing required project_name/app_name args."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Mentions saving the PlantUML to a .plantuml file", "passed": true, "evidence": "Step 2 explicitly says: \"Save your diagram as `ecommerce.plantuml` next to the script you'll run\""},
+    {"text": "Uses plantuml_to_buml() from besser.BUML.notations.structuralPlantUML", "passed": true, "evidence": "from besser.BUML.notations.structuralPlantUML import plantuml_to_buml; model = plantuml_to_buml('ecommerce.plantuml')"},
+    {"text": "Uses BackendGenerator (not just RESTAPIGenerator) for FastAPI generation", "passed": true, "evidence": "from besser.generators.backend import BackendGenerator; gen = BackendGenerator(...)"},
+    {"text": "Passes http_methods parameter to limit to GET and POST only", "passed": true, "evidence": "http_methods=['GET', 'POST'] passed to BackendGenerator with comment '# <-- restricts endpoints to read + create'"},
+    {"text": "No hallucinated function names or wrong import paths", "passed": true, "evidence": "All imports match BESSER API. Mentions invalid HTTP method names are silently filtered, which is accurate."}
+  ]
+}

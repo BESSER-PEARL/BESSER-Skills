@@ -46,10 +46,11 @@ guidelines and applied a structural pass.
   for progressive disclosure (SKILL.md → references → scripts).
 
 ### Notes
-- Iteration-2 benchmarks were measured against v0.2.0 SKILL.md content;
-  they are retained for historical comparison. A re-run on v0.3.0 is
-  warranted to confirm the restructured skills do not regress on the
-  97.4% pass rate or the 64% / 51% time/token savings.
+- Iteration-3 re-ran the eight evals against v0.3.0; results in
+  `benchmarks/iteration-3/`. **100% pass rate** (38/38, up from 97.4%),
+  **27% faster** than v0.2.0 with-skill, **48% fewer tokens** than the
+  without-skill baseline. The previously-known `http_methods`
+  correctness gap is closed; no new regressions surfaced.
 
 ## [0.2.0] - 2026-03-03
 

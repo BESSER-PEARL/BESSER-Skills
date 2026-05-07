@@ -1,0 +1,57 @@
+{
+  "skill_name": "besser-skills",
+  "iteration": 3,
+  "skill_version": "0.3.0",
+  "compared_to": "iteration-2 with_skill (v0.2.0)",
+  "note": "iteration-3 only re-runs the with_skill side; the iteration-2 baseline (without_skill, full codebase access) is reused as the yardstick since the BESSER source did not change.",
+  "configurations": [
+    {
+      "name": "with_skill_v0.3.0",
+      "iteration": 3,
+      "evals": [
+        {"id": 1, "name": "university-model", "passed": 6, "total": 6, "tokens": 24126, "duration_s": 45.2},
+        {"id": 2, "name": "plantuml-backend",  "passed": 5, "total": 5, "tokens": 24790, "duration_s": 35.8},
+        {"id": 3, "name": "safe-customization", "passed": 4, "total": 4, "tokens": 25704, "duration_s": 44.3},
+        {"id": 4, "name": "invalid-dbms",      "passed": 4, "total": 4, "tokens": 25669, "duration_s": 29.0},
+        {"id": 5, "name": "import-error",      "passed": 4, "total": 4, "tokens": 24427, "duration_s": 23.5},
+        {"id": 6, "name": "construction-errors", "passed": 4, "total": 4, "tokens": 24540, "duration_s": 25.0},
+        {"id": 7, "name": "add-generator",     "passed": 6, "total": 6, "tokens": 26776, "duration_s": 53.9},
+        {"id": 8, "name": "test-patterns",     "passed": 5, "total": 5, "tokens": 25416, "duration_s": 35.6}
+      ],
+      "summary": {
+        "pass_rate": 1.000,
+        "passed": 38,
+        "total": 38,
+        "mean_tokens": 25181,
+        "mean_duration_s": 36.5
+      }
+    },
+    {
+      "name": "with_skill_v0.2.0",
+      "iteration": 2,
+      "evals": [
+        {"id": 1, "name": "university-model", "passed": 6, "total": 6, "tokens": 24059, "duration_s": 49.8},
+        {"id": 2, "name": "plantuml-backend",  "passed": 4, "total": 5, "tokens": 23587, "duration_s": 48.4},
+        {"id": 3, "name": "safe-customization", "passed": 4, "total": 4, "tokens": 24296, "duration_s": 63.9},
+        {"id": 4, "name": "invalid-dbms",      "passed": 4, "total": 4, "tokens": 22576, "duration_s": 35.9},
+        {"id": 5, "name": "import-error",      "passed": 4, "total": 4, "tokens": 21640, "duration_s": 32.6},
+        {"id": 6, "name": "construction-errors", "passed": 4, "total": 4, "tokens": 21994, "duration_s": 36.3},
+        {"id": 7, "name": "add-generator",     "passed": 6, "total": 6, "tokens": 26041, "duration_s": 82.6},
+        {"id": 8, "name": "test-patterns",     "passed": 5, "total": 5, "tokens": 22788, "duration_s": 49.9}
+      ],
+      "summary": {
+        "pass_rate": 0.974,
+        "passed": 37,
+        "total": 38,
+        "mean_tokens": 23373,
+        "mean_duration_s": 49.9
+      }
+    }
+  ],
+  "delta_v0.3.0_vs_v0.2.0": {
+    "pass_rate_delta_pp": 2.6,
+    "duration_delta_pct": -26.9,
+    "tokens_delta_pct": 7.7,
+    "interpretation": "Skill-creator pass closed the only previously-known correctness gap (eval-2 http_methods) and reduced wall-clock time by ~27%. Token usage rose ~8% — the agent occasionally reads one references/*.md beyond SKILL.md, which is the intended trade-off of progressive disclosure (deeper detail available without bloating SKILL.md by default)."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 8,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Recommends @pytest.fixture for domain model setup", "passed": true, "evidence": "@pytest.fixture def domain_model(): shown as the standard pattern; explicitly says 'Build the model inline as a @pytest.fixture'"},
+    {"text": "Recommends tmp_path (not manual directory creation) for output directories", "passed": true, "evidence": "'Use tmp_path (or tmpdir). That's the project-wide convention.' with @pytest.fixture def output_dir(tmp_path): wrapper"},
+    {"text": "Shows a concrete fixture example building a small DomainModel inline", "passed": true, "evidence": "Inline domain_model fixture builds Person Class with name and age Property objects, then DomainModel(name='TestModel', types={person})"},
+    {"text": "Shows a concrete test function asserting both file existence and content", "passed": true, "evidence": "test_generate_creates_output_file asserts os.path.exists(...); test_generate_contains_class_name asserts 'Person', 'name', 'age' in content"},
+    {"text": "Mentions pytest.raises for testing error conditions", "passed": true, "evidence": "'Error paths — use pytest.raises(ValueError) for invalid inputs' in the conventions list"}
+  ]
+}

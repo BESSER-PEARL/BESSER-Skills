@@ -1,0 +1,10 @@
+{
+  "eval_id": 6,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Explains that B-UML names cannot contain spaces", "passed": true, "evidence": "'All B-UML names — classes, attributes, associations, enumerations, literals — must not contain spaces.' Also notes hyphens are similarly rejected."},
+    {"text": "Recommends using underscores: 'first_name' instead of 'first name'", "passed": true, "evidence": "Property(name='first_name', type=StringType) shown as the correction; 'Replace the space with an underscore'"},
+    {"text": "Explains that enumeration literals must have unique names within the same enum", "passed": true, "evidence": "'Each EnumerationLiteral inside a single Enumeration must have a unique name. You can't have two literals both called ACTIVE in the same enum'"},
+    {"text": "Provides corrected code for both issues", "passed": true, "evidence": "Combined corrected example shows Person class with first_name and Status enum with ACTIVE/INACTIVE"}
+  ]
+}

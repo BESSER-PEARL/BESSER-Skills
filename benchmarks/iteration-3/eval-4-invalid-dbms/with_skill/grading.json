@@ -1,0 +1,10 @@
+{
+  "eval_id": 4,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Identifies that 'postgres' is wrong and 'postgresql' is the correct string", "passed": true, "evidence": "'BESSER does not accept postgres. The correct string for PostgreSQL is postgresql (with the ql)'"},
+    {"text": "Lists all valid DBMS options (sqlite, postgresql, mysql, mssql, mariadb, oracle)", "passed": true, "evidence": "'sqlite | postgresql | mysql | mssql | mariadb | oracle' enumerated"},
+    {"text": "Shows corrected code with sql_dialect='postgresql' or dbms='postgresql'", "passed": true, "evidence": "Shows BOTH: gen.generate(sql_dialect='postgresql') for SQLGenerator and gen.generate(dbms='postgresql') for SQLAlchemyGenerator"},
+    {"text": "No hallucinated DBMS names or wrong parameter names", "passed": true, "evidence": "Correctly distinguishes sql_dialect (SQLGenerator) vs dbms (SQLAlchemyGenerator); mentions silent subprocess failures accurately"}
+  ]
+}

@@ -1,10 +1,21 @@
 ---
 name: besser-dev
 description: >
-  Contributor guide for developing BESSER itself — adding generators, adding
-  sub-DSLs and metamodels, writing tests, building documentation, and following
-  project conventions. Covers the PR workflow, coding standards, test patterns,
-  documentation structure, and CI/release process for the BESSER repository.
+  Contributor guide for developing BESSER itself
+  (https://github.com/BESSER-PEARL/BESSER). Use this skill whenever the user
+  is working *inside* the BESSER source tree — adding a new generator (the
+  most common contribution), adding a new metamodel or sub-DSL under
+  `besser/BUML/metamodel/`, writing pytest tests for generators or
+  metamodels, writing JSON↔BUML converters for the web editor, building
+  Sphinx documentation under `docs/source/`, registering a generator in
+  `SUPPORTED_GENERATORS`, or preparing a pull request to BESSER. Trigger on
+  phrases like "add a new generator", "register in the web editor",
+  "GeneratorInterface", "json_to_buml", "buml_to_json", "write tests for my
+  generator", "build the docs", "open a PR to BESSER", or any work that
+  touches `besser/generators/`, `besser/BUML/metamodel/`,
+  `besser/utilities/web_modeling_editor/`, or `tests/`. Prefer this skill
+  over besser-user when the user is contributing *to* BESSER rather than
+  *using* BESSER to build something else.
 license: Apache-2.0
 compatibility:
   - claude-code
@@ -14,8 +25,8 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.2.0"
-  repository: https://github.com/BESSER-PEARL/besser-skills
+  version: "0.3.0"
+  repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
 # Contributing to BESSER
@@ -47,7 +58,20 @@ Python 3.10+ is required (Django 5.x dependency).
 
 ## Adding a New Generator
 
-This is the most common type of contribution. Follow these 6 steps:
+This is the most common type of contribution. To skip the boilerplate, run
+the bundled scaffold:
+
+```bash
+python scripts/scaffold_generator.py <name> <path/to/BESSER/repo>
+# e.g.: python scripts/scaffold_generator.py graphql ~/code/BESSER
+```
+
+That writes a working stub package (generator class + Jinja template +
+pytest), runnable immediately. You still need to implement real logic,
+register the generator in the web-editor config, and add docs — covered
+in the steps below.
+
+If you prefer to do it by hand, follow these 6 steps:
 
 ### Step 1: Create the Generator Package
 

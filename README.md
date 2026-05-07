@@ -108,17 +108,41 @@ See [`benchmarks/iteration-2/benchmark.md`](benchmarks/iteration-2/benchmark.md)
 
 ```
 besser-skills/
-  skills/                        # installable skills
-    besser-user/SKILL.md
-    besser-generators/SKILL.md
+  skills/                                 # installable skills
+    besser-user/
+      SKILL.md
+      references/                         # progressive-disclosure references
+        metamodel.md                      # full B-UML structural reference
+        plantuml.md                       # PlantUML notation
+        state-machines.md
+        agents.md                         # chatbot/agent modeling
+        gui-models.md                     # GUI for WebApp/Django
+      scripts/
+        scaffold_model.py                 # prints a starter DomainModel
+    besser-generators/
+      SKILL.md
+      references/
+        python-and-data.md                # Python, Java, Pydantic, JSONSchema, RDF
+        persistence.md                    # SQLAlchemy, SQL
+        api-and-web.md                    # Backend, Django, WebApp, React, Flutter
+        agents-and-other.md               # BAF, Qiskit, Terraform, Pytorch, TF
+        debugging.md                      # generation-failure recipes
     besser-troubleshooting/SKILL.md
-    besser-dev/SKILL.md
-  evals/                         # eval definitions
+    besser-dev/
+      SKILL.md
+      scripts/
+        scaffold_generator.py             # scaffolds a new generator package
+  evals/                                  # eval definitions
     evals.json
-  benchmarks/                    # benchmark results
-    iteration-1/                 # 4-eval benchmark
-    iteration-2/                 # 8-eval benchmark (current)
+  benchmarks/                             # benchmark results
+    iteration-1/                          # 4-eval benchmark
+    iteration-2/                          # 8-eval benchmark (v0.2.0 baseline)
 ```
+
+The `besser-user` and `besser-generators` skills follow the
+[skill-creator](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md)
+progressive-disclosure pattern: `SKILL.md` stays under ~300 lines and
+points into `references/` for detail when it's needed.
 
 ## Related
 

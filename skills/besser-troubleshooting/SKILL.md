@@ -1,11 +1,27 @@
 ---
 name: besser-troubleshooting
 description: >
-  Diagnoses and fixes common BESSER issues — installation failures, import errors,
-  generator crashes, validation problems, Docker/deployment issues, and
-  model-to-output drift. Covers error messages, dependency conflicts, version
-  mismatches, environment setup problems, and provides quick diagnostic commands
-  and minimal reproduction templates.
+  Diagnose and fix BESSER errors fast. Use this skill whenever the user is
+  staring at a Python traceback, ImportError, ModuleNotFoundError, ValueError,
+  TypeError, AttributeError, jinja2.TemplateNotFoundError,
+  subprocess.CalledProcessError, or any other failure originating from
+  BESSER (besser.BUML, besser.generators, besser.utilities). Covers
+  installation failures (`pip install besser` errors, native dependency
+  build failures for psycopg2/pyodbc/oracledb, Python version mismatches,
+  Windows venv path quirks), import errors (`String` vs `StringType`,
+  missing `bocl==0.3.1`, `antlr4-python3-runtime` version mismatch), model
+  construction errors (spaces or hyphens in names, duplicate enum literals,
+  invalid multiplicities, generalization-to-self, more than one is_id per
+  class), generator crashes (Invalid DBMS, Django subprocess failures,
+  missing GUIModel for WebApp, silent SQLGenerator failures, invalid Qiskit
+  backend), Docker and deployment problems (port conflicts, docker-compose
+  vs docker compose, missing system libs in slim images), OCL constraint
+  parse failures, and model-to-output drift (changes not appearing in
+  regenerated code). Trigger on any error message that mentions `besser`
+  in the traceback, even if the user does not explicitly ask for
+  troubleshooting. Provides minimal-reproduction templates and quick
+  diagnostic commands; defer to besser-generators for non-error questions
+  about specific generator behavior.
 license: Apache-2.0
 compatibility:
   - claude-code
@@ -15,8 +31,8 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.2.0"
-  repository: https://github.com/BESSER-PEARL/besser-skills
+  version: "0.3.0"
+  repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
 # BESSER Troubleshooting
@@ -212,53 +228,26 @@ won't block generation.
 
 ---
 
-## Generator Failures
+## Generator Failures (quick reference)
 
-### Generator produces no output (no file created)
+When a `generate()` call fails or produces wrong output, the table below
+maps symptom → likely cause → first thing to try. For per-generator deep
+dives (every option, every gotcha), defer to the **besser-generators**
+skill — particularly its `references/debugging.md`.
 
-1. Check that `output_dir` exists or is writable.
-2. Check model validity: `model.validate()`.
-3. For `SQLGenerator`: output is generated via subprocess — check stdout for error messages that aren't raised as exceptions.
+| Symptom | Likely cause | First fix |
+|---------|--------------|-----------|
+| No output file, no exception | Invalid model or `SQLGenerator` subprocess swallowed an error | `model.validate()` and check stdout |
+| `ValueError: Invalid DBMS` | DBMS string is not one of `sqlite`, `postgresql`, `mysql`, `mssql`, `mariadb`, `oracle` | Use exactly `postgresql` (not `postgres`) |
+| `ValueError: Invalid backend` (Qiskit) | `backend_type` is not `aer_simulator`, `fake_backend`, or `ibm_quantum` | Pick a valid backend |
+| `subprocess.CalledProcessError` (Django) | Django not installed, project name conflict, or invalid Python identifier | `python -m django --version`; delete stale project; rename |
+| `AttributeError` inside `WebAppGenerator` | `gui_model=None` was passed | Build a `GUIModel` first (see besser-user skill) |
+| `jinja2.TemplateNotFoundError` | BESSER package corrupted or templates missing | `pip install --force-reinstall besser` |
+| Raw `[[` `]]` in generated React files | ReactGenerator template rendering failed silently | Check console for Jinja errors; React uses `[[ ]]` to avoid JSX clashes |
 
-### `ValueError: Invalid DBMS` (SQLAlchemy / SQL generators)
-
-Only these DBMS strings are valid: `sqlite`, `postgresql`, `mysql`, `mssql`,
-`mariadb`, `oracle`. Check spelling and case.
-
-### `ValueError: Invalid backend` (QiskitGenerator)
-
-Valid backends: `aer_simulator`, `fake_backend`, `ibm_quantum`.
-
-### Django generator: `subprocess.CalledProcessError`
-
-The Django generator runs `django-admin startproject` as a subprocess. If this
-fails:
-
-1. Is Django installed? `python -m django --version`
-2. Does a project with that name already exist in the output directory? Delete it first.
-3. Is the project name a valid Python identifier? (no hyphens, no spaces, no starting with numbers)
-
-The generator catches this error and prints it but doesn't re-raise — check
-console output.
-
-### WebApp generator: `AttributeError` on gui_model
-
-`WebAppGenerator` requires both a `DomainModel` and a `GUIModel`. If `gui_model`
-is `None`, you'll get an `AttributeError` when the ReactGenerator tries to access
-GUI elements. Ensure you provide a valid `GUIModel`.
-
-### Template not found: `jinja2.TemplateNotFoundError`
-
-The generator can't find its Jinja2 templates. This usually means:
-- BESSER was installed incorrectly (templates not included in the package).
-- Fix: `pip install -e .` from the repo root, or `pip install --force-reinstall besser`.
-
-### ReactGenerator: JSX syntax in generated files looks like Jinja errors
-
-The React generator uses non-standard Jinja delimiters (`[[` and `]]` instead of
-`{{` and `}}`) to avoid conflicts with React JSX. If you see raw `[[ ]]` in
-generated React files, the template rendering failed — check for Jinja errors in
-the console.
+The Django generator catches subprocess errors and prints them rather than
+re-raising — if the generator "succeeded" but produced no project, scroll
+back through the console.
 
 ---
 

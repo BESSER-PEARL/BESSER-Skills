@@ -1,13 +1,20 @@
 ---
 name: besser-user
 description: >
-  Guides building software with BESSER, the low-code model-driven platform.
-  Covers creating domain models, generating code (Django, FastAPI, SQLAlchemy,
-  React, etc.), using B-UML classes, picking and running generators, building
-  web apps and REST APIs, converting PlantUML to code, and following the
-  model-first workflow. Activates on imports from besser.BUML or
-  besser.generators, questions about modeling with BESSER, and mentions of
-  B-UML, BESSER generators, or the BESSER web editor.
+  Build software with BESSER, the low-code model-driven platform. Use this
+  skill whenever the user is creating a B-UML domain model (classes,
+  attributes, associations, enumerations, generalizations), running any
+  BESSER generator (Django, FastAPI, SQLAlchemy, Pydantic, React, WebApp,
+  BAF, Qiskit, etc.), converting PlantUML to BESSER, modeling state machines
+  or chatbot agents, designing GUI models for web apps, or working with the
+  BESSER web editor at editor.besser-pearl.org. Trigger on imports from
+  `besser.BUML` or `besser.generators`, mentions of B-UML, DomainModel,
+  BinaryAssociation, GUIModel, or any BESSER generator class — even if the
+  user does not say "BESSER" by name. Prefer this skill over generic Python,
+  Django, or FastAPI guidance whenever the project uses BESSER for modeling.
+  For per-generator deep dives (output paths, options, customization
+  patterns), defer to the besser-generators skill; for errors and
+  diagnostics, defer to besser-troubleshooting.
 license: Apache-2.0
 compatibility:
   - claude-code
@@ -17,29 +24,50 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.2.0"
-  repository: https://github.com/BESSER-PEARL/besser-skills
+  version: "0.3.0"
+  repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
 # Working with BESSER
 
-BESSER is a model-driven platform: you describe your domain as a model, then generators
-turn that model into running code. The model is always the source of truth — when
-requirements change, you update the model and regenerate.
+BESSER is a model-driven platform: describe your domain as a model, then
+generators turn that model into running code. The model is the source of
+truth — when requirements change, update the model and regenerate. Never
+hand-edit generated code as your primary change.
 
-## Core Workflow
+## Core workflow
 
 ```
 1. Define requirements
-2. Build a B-UML model (Python API or PlantUML or web editor)
-3. Pick a generator for your target platform
-4. Generate code
-5. Verify the output (run, test, inspect)
-6. Iterate: update the model, regenerate
+2. Build a B-UML model (Python API, PlantUML, or web editor)
+3. Validate the model: model.validate()
+4. Pick a generator for your target platform
+5. Generate code
+6. Verify the output (run, test, inspect)
+7. Iterate: update the model, regenerate
 ```
 
-Never hand-edit generated code as the primary change — update the model instead.
-Generated files are overwritten on each generation cycle.
+## Reference layout
+
+This skill keeps SKILL.md short. Reach into `references/` and `scripts/`
+when you need depth:
+
+| You need | Read |
+|----------|------|
+| Full B-UML metamodel (classes, attributes, associations, enums, generalizations, methods, validation) | `references/metamodel.md` |
+| PlantUML notation and the `plantuml_to_buml()` call | `references/plantuml.md` |
+| State machine modeling | `references/state-machines.md` |
+| Chatbot/agent modeling and the BAFGenerator | `references/agents.md` |
+| GUI modeling for WebAppGenerator/DjangoGenerator | `references/gui-models.md` |
+| Per-generator options, output paths, customization | the **besser-generators** skill |
+| Errors and diagnostics | the **besser-troubleshooting** skill |
+
+To bootstrap a new model quickly:
+
+```bash
+python scripts/scaffold_model.py Library Book Author
+# prints ready-to-edit Python that builds a DomainModel with those classes
+```
 
 ---
 
@@ -59,273 +87,122 @@ cd BESSER
 pip install -e .
 ```
 
-Verify the install:
+Verify:
 
 ```bash
 python -c "from besser.BUML.metamodel.structural import DomainModel; print('OK')"
 ```
 
+Python 3.10+ required.
+
 ---
 
-## Building a Domain Model (Structural)
+## Building a domain model — quick start
 
-A domain model contains **classes**, **associations**, **generalizations**, and
-**enumerations**. Everything descends from `NamedElement` — names must not contain
-spaces or hyphens (use underscores).
-
-### Imports
+Most projects only need classes, attributes, and associations. Here is the
+minimum that gets you to a runnable generator. For the full reference (all
+multiplicities, generalizations, enumerations, methods, OCL constraints),
+read `references/metamodel.md`.
 
 ```python
 from besser.BUML.metamodel.structural import (
     DomainModel, Class, Property, Multiplicity,
-    BinaryAssociation, Generalization,
-    Enumeration, EnumerationLiteral,
-    Method, Parameter,
-    StringType, IntegerType, FloatType, BooleanType,
-    DateType, DateTimeType, TimeType, TimeDeltaType,
-    UNLIMITED_MAX_MULTIPLICITY,  # 9999, means "many"
+    BinaryAssociation, StringType, IntegerType,
 )
-```
 
-### Classes and Attributes
-
-```python
-# Primitive type singletons: StringType, IntegerType, FloatType, BooleanType,
-# DateType, DateTimeType, TimeType, TimeDeltaType
-# You can also pass type as a string: "str", "int", "float", "bool", etc.
-
+# Classes
 title = Property(name="title", type=StringType)
 pages = Property(name="pages", type=IntegerType)
 book = Class(name="Book", attributes={title, pages})
 
-# Mark a primary key
-book_id = Property(name="id", type=IntegerType, is_id=True)
-# Only one is_id per class
-```
+author_name = Property(name="name", type=StringType)
+author = Class(name="Author", attributes={author_name})
 
-### Enumerations
-
-```python
-genre = Enumeration(name="Genre", literals={
-    EnumerationLiteral(name="FICTION"),
-    EnumerationLiteral(name="SCIENCE"),
-    EnumerationLiteral(name="HISTORY"),
-})
-# Use as attribute type:
-book_genre = Property(name="genre", type=genre)
-# Access literals: genre.FICTION, genre.SCIENCE
-# Default values: Property(name="genre", type=genre, default_value=genre.FICTION)
-```
-
-### Associations
-
-Associations connect two classes. Each end is a `Property` whose `type` is the
-target class and whose `multiplicity` defines cardinality.
-
-```python
-# Multiplicity(min, max)  — max can be "*" or UNLIMITED_MAX_MULTIPLICITY
-located_in = Property(name="locatedIn", type=library, multiplicity=Multiplicity(1, 1))
-has_books  = Property(name="has",       type=book,    multiplicity=Multiplicity(0, "*"))
-
-lib_book = BinaryAssociation(name="lib_book", ends={located_in, has_books})
-```
-
-Common cardinalities:
-| Pattern | Multiplicity |
-|---------|-------------|
-| Exactly one | `Multiplicity(1, 1)` |
-| Optional | `Multiplicity(0, 1)` |
-| One or more | `Multiplicity(1, "*")` |
-| Zero or more | `Multiplicity(0, "*")` |
-
-For composition (whole-part ownership), set `is_composite=True` on the "whole" end.
-
-### Inheritance
-
-```python
-person = Class(name="Person", attributes={name_prop, email_prop})
-employee = Class(name="Employee", attributes={salary_prop})
-gen = Generalization(general=person, specific=employee)
-# employee inherits person's attributes
-```
-
-### Methods
-
-```python
-from besser.BUML.metamodel.structural import Method, Parameter
-
-greet = Method(
-    name="greet",
-    parameters=[Parameter(name="message", type=StringType)],
-    type=StringType,  # return type
-    is_abstract=False,
-)
-person.add_method(greet)
-```
-
-### Assembling the Model
-
-```python
-model = DomainModel(
-    name="Library_model",
-    types={library, book, author, genre},
-    associations={lib_book, book_author},
-    generalizations={gen},
-)
-
-# Validate
-result = model.validate()
-# Returns {"success": True/False, "errors": [...], "warnings": [...]}
-```
-
-### Complete Example
-
-```python
-from besser.BUML.metamodel.structural import (
-    DomainModel, Class, Property, Multiplicity,
-    BinaryAssociation, StringType, IntegerType, DateType
-)
-
-# Classes
-library_name = Property(name="name", type=StringType)
-address = Property(name="address", type=StringType)
-library = Class(name="Library", attributes={library_name, address})
-
-title   = Property(name="title",   type=StringType)
-pages   = Property(name="pages",   type=IntegerType)
-release = Property(name="release", type=DateType)
-book    = Class(name="Book", attributes={title, pages, release})
-
-author_name = Property(name="name",  type=StringType)
-email       = Property(name="email", type=StringType)
-author      = Class(name="Author", attributes={author_name, email})
-
-# Associations
-located_in = Property(name="locatedIn", type=library, multiplicity=Multiplicity(1, 1))
-has        = Property(name="has",       type=book,    multiplicity=Multiplicity(0, "*"))
-lib_book   = BinaryAssociation(name="lib_book", ends={located_in, has})
-
-publishes  = Property(name="publishes", type=book,   multiplicity=Multiplicity(0, "*"))
+# Association: a Book has 1..* Authors; an Author writes 0..* Books
 written_by = Property(name="writtenBy", type=author, multiplicity=Multiplicity(1, "*"))
+publishes  = Property(name="publishes", type=book,   multiplicity=Multiplicity(0, "*"))
 book_author = BinaryAssociation(name="book_author", ends={written_by, publishes})
 
-# Model
-library_model = DomainModel(
-    name="Library_model",
-    types={library, book, author},
-    associations={lib_book, book_author},
-)
+model = DomainModel(name="Library", types={book, author}, associations={book_author})
+assert model.validate()["success"]
 ```
 
----
+**Naming rules**: no spaces, no hyphens. `My_Class` and `my_attribute`,
+not `My Class` or `my-attribute`.
 
-## Alternative: PlantUML Notation
+### Alternative: PlantUML
 
-Instead of building models in Python, you can write PlantUML and convert:
+If the user already has PlantUML, skip the Python API and convert:
 
 ```python
 from besser.BUML.notations.structuralPlantUML import plantuml_to_buml
-
 model = plantuml_to_buml("my_model.plantuml")
 ```
 
-Supported PlantUML syntax:
-
-```plantuml
-@startuml
-class Library {
-  + name: str
-  + address: str
-}
-
-class Book {
-  + title: str
-  + pages: int
-  + release: date
-}
-
-class Author {
-  + name: str
-  + email: str
-  + notify(sms: str = "message"): str
-}
-
-enum Genre {
-  FICTION
-  SCIENCE
-  HISTORY
-}
-
-abstract class Publication { }
-
-Library "1" -- "0..*" Book : has
-Book "*" -- "1..*" Author : writtenBy
-Book <|-- Publication
-@enduml
-```
-
-Visibility markers: `+` public, `-` private, `#` protected, `~` package.
-Cardinality: `"1"`, `"0..*"`, `"1..*"`, `"*"`.
-Inheritance: `Parent <|-- Child` or `class Child extends Parent`.
-Composition: `*--` or `--*`.
+See `references/plantuml.md` for the supported syntax (classes, enums,
+inheritance, composition, cardinality literals).
 
 ---
 
-## Picking a Generator
+## Picking a generator
 
 | Goal | Generator | Input | Output |
 |------|-----------|-------|--------|
 | Python classes | `PythonGenerator` | DomainModel | `classes.py` |
-| Java classes | `JavaGenerator` | DomainModel | `.java` files (ZIP) |
+| Java classes | `JavaGenerator` | DomainModel | `.java` files |
 | Pydantic models | `PydanticGenerator` | DomainModel | `pydantic_classes.py` |
 | SQLAlchemy ORM | `SQLAlchemyGenerator` | DomainModel | `sql_alchemy.py` |
-| Raw SQL DDL | `SQLGenerator` | DomainModel | `tables.sql` |
+| Raw SQL DDL | `SQLGenerator` | DomainModel | `tables_<dialect>.sql` |
 | JSON Schema | `JSONSchemaGenerator` | DomainModel | `json_schema.json` |
-| FastAPI backend | `BackendGenerator` | DomainModel | ZIP (API + ORM + Pydantic) |
-| Django app | `DjangoGenerator` | DomainModel + optional GUIModel | Django project (ZIP) |
-| Full-stack web app | `WebAppGenerator` | DomainModel + GUIModel | React + FastAPI + Docker (ZIP) |
-| Conversational agent | `BAFGenerator` | Agent model | Agent script + config (ZIP) |
+| FastAPI backend | `BackendGenerator` | DomainModel | API + ORM + Pydantic |
+| Django app | `DjangoGenerator` | DomainModel + optional GUIModel | Django project |
+| Full-stack web app | `WebAppGenerator` | DomainModel + GUIModel | React + FastAPI + Docker |
+| Conversational agent | `BAFGenerator` | Agent | Agent script + config |
 | Quantum circuit | `QiskitGenerator` | QuantumCircuit | `qiskit_circuit.py` |
 | RDF vocabulary | `RDFGenerator` | DomainModel | `vocabulary.ttl` |
-| Terraform infra | `TerraformGenerator` | DeploymentModel | `.tf` files per cluster |
+| Terraform infra | `TerraformGenerator` | DeploymentModel | `.tf` files |
 | Neural network | `PytorchGenerator` / `TFGenerator` | NN model | PyTorch/TF script |
 | Flutter app | `FlutterGenerator` | DomainModel + GUIModel | Dart files |
 
 ### Decision guide
 
-- **Just need data classes?** `PythonGenerator` or `PydanticGenerator`
-- **Need a database?** `SQLAlchemyGenerator` (ORM) or `SQLGenerator` (raw DDL)
-- **Need a REST API?** `BackendGenerator` gives you FastAPI + SQLAlchemy + Pydantic in one shot
-- **Need a full web app?** `WebAppGenerator` gives you React frontend + FastAPI backend + Docker Compose — but you need both a DomainModel and a GUIModel
-- **Need Django specifically?** `DjangoGenerator` builds a complete Django project
-- **Building a chatbot?** Model it as an `Agent` (state machine) and use `BAFGenerator`
+- **Just data classes?** `PythonGenerator` or `PydanticGenerator`.
+- **Persistent storage?** `SQLAlchemyGenerator` (ORM) or `SQLGenerator` (raw DDL).
+- **REST API?** `BackendGenerator` — gives you FastAPI + SQLAlchemy + Pydantic in one shot.
+- **Full web app?** `WebAppGenerator` — React + FastAPI + Docker Compose, but you must also build a `GUIModel` (see `references/gui-models.md`).
+- **Django specifically?** `DjangoGenerator`.
+- **Chatbot?** Model the dialog as an `Agent` (state machine + intents) and use `BAFGenerator` (see `references/agents.md`).
+
+For per-generator details — every option, every gotcha, every output path
+— defer to the **besser-generators** skill.
 
 ---
 
-## Running a Generator
+## Running a generator
 
-All generators follow the same pattern:
+All generators share the same shape:
 
 ```python
 from besser.generators.python_classes import PythonGenerator
-
 generator = PythonGenerator(model=my_model, output_dir="./output")
 generator.generate()
-# Output written to ./output/classes.py
 ```
 
-If `output_dir` is omitted, output goes to `<cwd>/output/`.
+If `output_dir` is omitted, output goes to `<cwd>/output/`. **Each call to
+`generate()` overwrites prior output** — that is intentional, the model is
+the source of truth.
 
 ### SQLAlchemy with a specific DBMS
 
 ```python
 from besser.generators.sql_alchemy import SQLAlchemyGenerator
-
 gen = SQLAlchemyGenerator(model=my_model, output_dir="./output")
-gen.generate(dbms="postgresql")  # sqlite, postgresql, mysql, mssql, mariadb, oracle
+gen.generate(dbms="postgresql")
+# Valid: sqlite | postgresql | mysql | mssql | mariadb | oracle
+# Note: it is "postgresql" not "postgres".
 ```
 
-### FastAPI Backend
+### FastAPI backend, with control over endpoints
 
 ```python
 from besser.generators.backend import BackendGenerator
@@ -333,14 +210,14 @@ from besser.generators.backend import BackendGenerator
 gen = BackendGenerator(
     model=my_model,
     output_dir="./output_backend",
-    http_methods=["GET", "POST", "PUT", "DELETE"],  # control which endpoints are generated
-    nested_creations=False,  # True to allow nested object creation in payloads
+    http_methods=["GET", "POST", "PUT", "DELETE"],  # subset to limit endpoints
+    nested_creations=False,                           # True allows nested creates in payloads
 )
 gen.generate()
 # Produces: main_api.py, pydantic_classes.py, sql_alchemy.py
 ```
 
-To generate only GET and POST endpoints (no PUT/DELETE):
+To generate only read+create endpoints:
 
 ```python
 gen = BackendGenerator(
@@ -350,6 +227,9 @@ gen = BackendGenerator(
 )
 gen.generate()
 ```
+
+Invalid method names are silently filtered with a warning log — double-check
+spelling.
 
 ### Django
 
@@ -361,13 +241,17 @@ gen = DjangoGenerator(
     project_name="myproject",
     app_name="myapp",
     output_dir="./output",
+    containerization=False,  # True adds docker-compose.yml + Dockerfile
 )
 gen.generate()
 ```
 
-### Full-Stack Web App
+Requires `django` installed in the environment (the generator runs
+`django-admin startproject` as a subprocess).
 
-Requires both a DomainModel and a GUIModel:
+### Full-stack web app
+
+Requires both a `DomainModel` and a `GUIModel`:
 
 ```python
 from besser.generators.web_app import WebAppGenerator
@@ -376,219 +260,55 @@ gen = WebAppGenerator(
     model=domain_model,
     gui_model=gui_model,
     output_dir="./webapp_output",
-    agent_model=None,  # optional Agent for chatbot
+    agent_model=None,        # optional Agent for an embedded chatbot
 )
 gen.generate()
-# Produces: frontend/ (React), backend/ (FastAPI), docker-compose.yml
+# Produces: frontend/ (React/Vite), backend/ (FastAPI),
+#           optional agent/, docker-compose.yml, Dockerfiles
 # Run with: cd webapp_output && docker-compose up --build
 ```
 
----
-
-## Using the Web Editor
-
-The visual editor at https://editor.besser-pearl.org lets you build models
-graphically and generate code without writing Python.
-
-1. Create a new diagram (Class Diagram, State Machine, GUI, etc.)
-2. Add classes, attributes, associations visually
-3. Click "Generate" and pick your target generator
-4. Download the generated code
-
-The editor uses the same generators as the Python API — the backend converts
-your visual diagram to a B-UML model, runs the generator, and streams the result.
+Default ports: frontend 3000, backend 8000, agent WS 8765.
 
 ---
 
-## State Machine Modeling
+## Using the web editor
 
-For behavioral modeling (e.g., workflows, chatbots):
+The visual editor at https://editor.besser-pearl.org lets users build
+models graphically and generate code without writing Python:
 
-```python
-from besser.BUML.metamodel.state_machine.state_machine import (
-    StateMachine, Body, Event, Condition, CustomCodeAction
-)
+1. Create a new diagram (Class, State Machine, GUI, Deployment, …).
+2. Add classes, attributes, and associations visually.
+3. Click "Generate" and pick a target generator.
+4. Download the generated code.
 
-sm = StateMachine(name="OrderProcess")
-initial = sm.new_state(name="pending", initial=True)
-confirmed = sm.new_state(name="confirmed")
-shipped = sm.new_state(name="shipped")
-
-# Transitions
-confirm_event = Event(name="confirm")
-initial.when_event(confirm_event).go_to(confirmed)
-
-ship_event = Event(name="ship")
-confirmed.when_event(ship_event).go_to(shipped)
-
-# State behavior
-confirmed.set_body(Body(
-    name="send_email",
-    actions=[CustomCodeAction(source="session.reply('Order confirmed!')")]
-))
-```
+The editor uses the same generators as the Python API — the backend
+converts the visual diagram to a B-UML model, runs the generator, and
+streams the result. Any generator that registers in `SUPPORTED_GENERATORS`
+(see the **besser-dev** skill) shows up in the dropdown.
 
 ---
 
-## Agent (Chatbot) Modeling
+## Verification checklist
 
-Agents extend state machines with NLP capabilities:
+After `generate()` returns:
 
-```python
-from besser.BUML.metamodel.state_machine.agent import (
-    Agent, AgentReply, LLMReply,
-    WebSocketPlatform,
-)
-from besser.BUML.metamodel.state_machine.state_machine import Body
+1. **Files exist** in the output directory.
+2. **Syntax parses** — for Python: `python -c "import ast; ast.parse(open('output/classes.py').read())"`.
+3. **It runs** — for backends: `cd output && pip install -r requirements.txt && uvicorn main_api:app`.
+4. **Relationships translate correctly** — foreign keys for 1..*, join tables for *..*, inheritance reflected.
+5. **Edge cases** — enumerations, optional fields (`Multiplicity(0, 1)`), inheritance hierarchies.
+6. **Docker** — for WebApp/Django containerized: `docker-compose up --build`.
 
-agent = Agent(name="helpdesk")
-agent.use_websocket_platform()
-
-# States
-initial = agent.new_state(name="initial", initial=True)
-greeting = agent.new_state(name="greeting")
-fallback = agent.new_state(name="fallback")
-
-# Intents (NLP training data)
-hello = agent.new_intent(
-    name="hello_intent",
-    training_sentences=["Hi", "Hello", "Hey there", "Good morning"],
-)
-
-# Transitions based on intent matching
-initial.when_intent_matched(hello).go_to(greeting)
-initial.when_no_intent_matched().go_to(fallback)
-
-# Behaviors
-greeting.set_body(Body(name="greet", actions=[
-    AgentReply(message="Hello! How can I help you today?"),
-]))
-fallback.set_body(Body(name="fallback", actions=[
-    AgentReply(message="Sorry, I didn't understand. Can you rephrase?"),
-]))
-
-# Auto-return to initial
-greeting.go_to(initial)
-fallback.go_to(initial)
-
-# Generate
-from besser.generators.agents import BAFGenerator
-gen = BAFGenerator(model=agent, output_dir="./agent_output")
-gen.generate()
-```
+If something is missing or wrong, the **besser-troubleshooting** skill
+maps symptoms to fixes.
 
 ---
 
-## GUI Modeling (for WebAppGenerator / DjangoGenerator)
+## Key principles
 
-GUI models define screens, data bindings, and navigation. They are required
-by `WebAppGenerator` and optional for `DjangoGenerator`.
-
-### Imports
-
-```python
-from besser.BUML.metamodel.gui import (
-    GUIModel, Module, Screen,
-    DataList, DataSourceElement,
-    Button, ButtonType, ButtonActionType,
-)
-```
-
-### Data Binding with DataSourceElement and DataList
-
-`DataSourceElement` binds a domain class to a UI list, selecting which fields
-to display. `DataList` groups one or more data sources into a displayable list.
-
-```python
-# Bind the Book class — show title and pages columns
-book_source = DataSourceElement(
-    name="book_list",
-    dataSourceClass=book,        # reference to a Class from your DomainModel
-    fields={title, pages},       # reference to Property objects from that Class
-)
-
-# Bind the Author class — show name and email
-author_source = DataSourceElement(
-    name="author_list",
-    dataSourceClass=author,
-    fields={author_name, email},
-)
-
-# Create display lists
-book_list = DataList(name="BookList", description="Shows books", list_sources={book_source})
-author_list = DataList(name="AuthorList", description="Shows authors", list_sources={author_source})
-```
-
-### Screens and Navigation
-
-```python
-# Main page — mark one screen as is_main_page=True
-home = Screen(
-    name="Home",
-    description="Home page",
-    view_elements={book_list},
-    is_main_page=True,
-)
-
-# Additional screens
-authors_page = Screen(
-    name="Authors",
-    description="Author management",
-    view_elements={author_list},
-)
-```
-
-### Assembling the GUI Model
-
-```python
-module = Module(name="main", screens={home, authors_page})
-gui = GUIModel(
-    name="MyApp",
-    package="com.example",
-    versionCode="1",
-    versionName="1.0",
-    description="Library app",
-    modules={module},
-)
-```
-
-### Using with WebAppGenerator
-
-```python
-from besser.generators.web_app import WebAppGenerator
-
-gen = WebAppGenerator(
-    model=domain_model,   # your DomainModel
-    gui_model=gui,        # the GUIModel above
-    output_dir="./webapp",
-)
-gen.generate()
-# Run with: cd webapp && docker-compose up --build
-```
-
-**Common pitfall:** If no screen has `is_main_page=True`, the generated app
-will have no landing page. Django prints a warning; WebApp may render an
-empty page.
-
----
-
-## Verification Checklist
-
-After generating code, verify:
-
-1. **Files exist** — check the output directory for expected files
-2. **Syntax is valid** — for Python: `python -c "import ast; ast.parse(open('output/classes.py').read())"`
-3. **Run it** — for backends: `cd output && pip install -r requirements.txt && uvicorn main_api:app`
-4. **Test relationships** — verify associations translated correctly (foreign keys, join tables)
-5. **Check edge cases** — enumerations, optional fields, inheritance hierarchies
-6. **Docker** — for WebApp: `cd output && docker-compose up --build`
-
----
-
-## Key Principles
-
-- **Model is the source of truth.** All changes flow from model to code, never the reverse.
-- **Regeneration overwrites.** Generated files are replaced on each `generate()` call. Don't make manual edits you want to keep in generated files.
-- **Validate early.** Call `model.validate()` before generating to catch issues like missing types or circular inheritance.
-- **One model, many targets.** The same DomainModel can feed multiple generators — Python classes, SQL, REST API, etc.
-- **Names matter.** B-UML names become identifiers in generated code. Use `snake_case` for attributes, `PascalCase` for classes, no spaces or hyphens.
+- **Model is the source of truth.** All changes flow model → code, never the reverse.
+- **Regeneration overwrites.** Every `generate()` replaces output files. Customizations live in *separate* files (see the besser-generators skill for safe customization patterns).
+- **Validate early.** Call `model.validate()` before generating.
+- **One model, many targets.** The same `DomainModel` feeds multiple generators — Python classes, SQL, REST API, etc. — so it is rarely worth maintaining target-specific models.
+- **Names matter.** B-UML names become identifiers in generated code: `snake_case` for attributes, `PascalCase` for classes, no spaces or hyphens.

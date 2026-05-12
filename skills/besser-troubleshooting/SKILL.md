@@ -31,7 +31,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.3.0"
+  version: "0.1.0"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 

@@ -2,25 +2,9 @@
   "eval_id": 3,
   "config": "without_skill",
   "expectations": [
-    {
-      "text": "Response explicitly warns that generated files are overwritten on regeneration",
-      "passed": true,
-      "evidence": "Clearly states 'No, Direct Edits to main_api.py Will Not Survive Regeneration' with code evidence from BackendGenerator"
-    },
-    {
-      "text": "Response recommends creating a separate extension file that imports from the generated code",
-      "passed": true,
-      "evidence": "Recommends separate APIRouter file plus post-generation injection, and other patterns"
-    },
-    {
-      "text": "Response provides a concrete code example of the wrapper/extension pattern",
-      "passed": true,
-      "evidence": "Provides 5 different strategies with code examples including APIRouter, OCL constraints, Method with code, subclassing, and template modification"
-    },
-    {
-      "text": "Response does NOT recommend editing main_api.py directly as the primary approach",
-      "passed": true,
-      "evidence": "Recommends separate files as primary approach"
-    }
+    {"text": "Clearly states generated files are overwritten on regeneration", "passed": true, "evidence": "Every time you call BackendGenerator.generate(), it completely overwrites main_api.py, sql_alchemy.py, and pydantic_classes.py"},
+    {"text": "Recommends creating separate extension/wrapper files", "passed": true, "evidence": "Presents 4 strategies: BAL/CODE model methods, include_router, wrapper app.py, subclass generator"},
+    {"text": "Shows a concrete code example of the extension pattern", "passed": true, "evidence": "Full working custom_routes.py with APIRouter, wrapper app.py with middleware, and subclass pattern"},
+    {"text": "Does NOT recommend editing main_api.py directly", "passed": true, "evidence": "Recommends model-level methods as Strategy 1, external files for custom code. Only patches main_api.py with automated script for include_router."}
   ]
 }

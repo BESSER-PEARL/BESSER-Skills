@@ -1,10 +1,28 @@
-# Modeling a University System in BESSER and Generating SQLAlchemy ORM
+# Modeling a University in BESSER and Generating a SQLAlchemy ORM
 
-BESSER follows a model-first workflow: you define your domain as a B-UML model in Python, then run a generator to produce code. Here is how to model your university system with Students, Courses, and Professors, and then generate a SQLAlchemy ORM from it.
+In BESSER, you describe your domain as a **B-UML model** (the source of truth) and then run a **generator** that produces the code for your target platform. For your university system, you'll define three classes (`Student`, `Course`, `Professor`), wire them up with two associations (enrollment and teaching), and then hand the model to the `SQLAlchemyGenerator`.
 
----
+## 1. Install BESSER
 
-## Step 1: Define the B-UML Domain Model
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+pip install besser
+```
+
+Python 3.10+ is required. Quick sanity check:
+
+```bash
+python -c "from besser.BUML.metamodel.structural import DomainModel; print('OK')"
+```
+
+## 2. Build the B-UML model
+
+Create a file `university_model.py`:
 
 ```python
 from besser.BUML.metamodel.structural import (
@@ -12,186 +30,111 @@ from besser.BUML.metamodel.structural import (
     BinaryAssociation, StringType, IntegerType,
 )
 
-# -----------------------------------------------------------
-# Classes
-# -----------------------------------------------------------
-
-# Student
+# --- Student ---
 student_name = Property(name="name", type=StringType)
-student_id   = Property(name="student_id", type=IntegerType, is_id=True)
-student_email = Property(name="email", type=StringType)
-student = Class(name="Student", attributes={student_id, student_name, student_email})
+student_id   = Property(name="student_id", type=IntegerType)
+student = Class(name="Student", attributes={student_name, student_id})
 
-# Course
+# --- Course ---
 course_name    = Property(name="name", type=StringType)
 course_credits = Property(name="credits", type=IntegerType)
-course_code    = Property(name="code", type=StringType, is_id=True)
-course = Class(name="Course", attributes={course_code, course_name, course_credits})
+course = Class(name="Course", attributes={course_name, course_credits})
 
-# Professor
-prof_name   = Property(name="name", type=StringType)
-prof_id     = Property(name="professor_id", type=IntegerType, is_id=True)
-prof_department = Property(name="department", type=StringType)
-professor = Class(name="Professor", attributes={prof_id, prof_name, prof_department})
+# --- Professor ---
+prof_name = Property(name="name", type=StringType)
+prof_id   = Property(name="prof_id", type=IntegerType)
+professor = Class(name="Professor", attributes={prof_name, prof_id})
 
-# -----------------------------------------------------------
-# Associations
-# -----------------------------------------------------------
+# --- Association: Student *..* Course (enrollment) ---
+enrolled_in = Property(name="enrolledIn", type=course,
+                       multiplicity=Multiplicity(0, "*"))
+students    = Property(name="students",   type=student,
+                       multiplicity=Multiplicity(0, "*"))
+enrollment = BinaryAssociation(name="enrollment",
+                               ends={enrolled_in, students})
 
-# Student enrolls in many Courses (many-to-many)
-enrolls_in   = Property(name="enrollsIn",   type=course,  multiplicity=Multiplicity(0, "*"))
-has_students = Property(name="hasStudents",  type=student, multiplicity=Multiplicity(0, "*"))
-enrollment = BinaryAssociation(name="Enrollment", ends={enrolls_in, has_students})
+# --- Association: Professor 1 -- 0..* Course (teaching) ---
+teaches      = Property(name="teaches",   type=course,
+                        multiplicity=Multiplicity(0, "*"))
+taught_by    = Property(name="taughtBy",  type=professor,
+                        multiplicity=Multiplicity(1, 1))
+teaching = BinaryAssociation(name="teaching",
+                             ends={teaches, taught_by})
 
-# Professor teaches Courses (one-to-many: one professor teaches many courses)
-teaches      = Property(name="teaches",  type=course,    multiplicity=Multiplicity(1, "*"))
-taught_by    = Property(name="taughtBy", type=professor,  multiplicity=Multiplicity(1, 1))
-teaching = BinaryAssociation(name="Teaching", ends={teaches, taught_by})
-
-# -----------------------------------------------------------
-# Assemble the Domain Model
-# -----------------------------------------------------------
-university_model = DomainModel(
-    name="University",
-    types={student, course, professor},
-    associations={enrollment, teaching},
-)
-```
-
-### What this model captures
-
-| Relationship | Meaning | Multiplicity |
-|---|---|---|
-| Student -- Course (Enrollment) | A student can enroll in zero or more courses; a course can have zero or more students | many-to-many (`0..*` on both sides) |
-| Professor -- Course (Teaching) | A professor teaches one or more courses; each course is taught by exactly one professor | one-to-many (`1..*` on the professor side, `1..1` on the course side) |
-
-### Validate the model (optional but recommended)
-
-```python
-result = university_model.validate()
-print(result)
-# Expected: {"success": True, "errors": [], "warnings": [...]}
-```
-
----
-
-## Step 2: Generate SQLAlchemy ORM Code
-
-```python
-from besser.generators.sql_alchemy import SQLAlchemyGenerator
-
-generator = SQLAlchemyGenerator(model=university_model, output_dir="./output")
-generator.generate()
-# Output: ./output/sql_alchemy.py
-```
-
-This produces a file called `sql_alchemy.py` in the `./output` directory containing:
-
-- SQLAlchemy `Base` declarative model classes for `Student`, `Course`, and `Professor`
-- Columns mapped from your B-UML attributes (e.g., `name` becomes `Column(String(100))`, `credits` becomes `Column(Integer)`)
-- A many-to-many association table for the `Enrollment` relationship between `Student` and `Course`
-- A foreign key on `Course` pointing to `Professor` for the `Teaching` one-to-many relationship
-- An SQLite engine and session setup by default
-
-### Targeting a different database
-
-Pass the `dbms` parameter to `generate()` to target a different database system:
-
-```python
-generator.generate(dbms="postgresql")   # PostgreSQL
-generator.generate(dbms="mysql")        # MySQL
-generator.generate(dbms="sqlite")       # SQLite (default)
-```
-
-Valid options are: `sqlite`, `postgresql`, `mysql`, `mssql`, `mariadb`, `oracle`.
-
----
-
-## Complete Script
-
-Here is the full script you can save as `university.py` and run:
-
-```python
-from besser.BUML.metamodel.structural import (
-    DomainModel, Class, Property, Multiplicity,
-    BinaryAssociation, StringType, IntegerType,
-)
-from besser.generators.sql_alchemy import SQLAlchemyGenerator
-
-# -----------------------------------------------------------
-# Classes
-# -----------------------------------------------------------
-
-student_name  = Property(name="name", type=StringType)
-student_id    = Property(name="student_id", type=IntegerType, is_id=True)
-student_email = Property(name="email", type=StringType)
-student = Class(name="Student", attributes={student_id, student_name, student_email})
-
-course_name    = Property(name="name", type=StringType)
-course_credits = Property(name="credits", type=IntegerType)
-course_code    = Property(name="code", type=StringType, is_id=True)
-course = Class(name="Course", attributes={course_code, course_name, course_credits})
-
-prof_name       = Property(name="name", type=StringType)
-prof_id         = Property(name="professor_id", type=IntegerType, is_id=True)
-prof_department = Property(name="department", type=StringType)
-professor = Class(name="Professor", attributes={prof_id, prof_name, prof_department})
-
-# -----------------------------------------------------------
-# Associations
-# -----------------------------------------------------------
-
-# Many-to-many: Student <-> Course
-enrolls_in   = Property(name="enrollsIn",  type=course,  multiplicity=Multiplicity(0, "*"))
-has_students = Property(name="hasStudents", type=student, multiplicity=Multiplicity(0, "*"))
-enrollment = BinaryAssociation(name="Enrollment", ends={enrolls_in, has_students})
-
-# One-to-many: Professor -> Course
-teaches   = Property(name="teaches",  type=course,    multiplicity=Multiplicity(1, "*"))
-taught_by = Property(name="taughtBy", type=professor, multiplicity=Multiplicity(1, 1))
-teaching = BinaryAssociation(name="Teaching", ends={teaches, taught_by})
-
-# -----------------------------------------------------------
-# Domain Model
-# -----------------------------------------------------------
-
-university_model = DomainModel(
+# --- Assemble the domain model ---
+model = DomainModel(
     name="University",
     types={student, course, professor},
     associations={enrollment, teaching},
 )
 
-# Validate
-result = university_model.validate()
-print("Validation:", result)
-
-# -----------------------------------------------------------
-# Generate SQLAlchemy ORM
-# -----------------------------------------------------------
-
-generator = SQLAlchemyGenerator(model=university_model, output_dir="./output")
-generator.generate()
-print("SQLAlchemy ORM generated at ./output/sql_alchemy.py")
+assert model.validate()["success"], "Model failed validation"
 ```
 
----
+A few things to note:
 
-## What to Expect in the Generated Output
+- **Naming rules**: `PascalCase` for classes, `snake_case` (or camelCase) for attributes/roles, no spaces or hyphens.
+- **Multiplicities**: `Multiplicity(0, "*")` for many, `Multiplicity(1, 1)` for exactly one. Use `"*"` (a string) for the unbounded upper end.
+- **Associations are symmetric in declaration**: each `BinaryAssociation` has two `ends`, one Property per end, and each end's `type` is the *opposite* class (the role-name property points to the other side).
+- The "many-to-many" between `Student` and `Course` produces a join table automatically when you generate the ORM. The "one-to-many" between `Professor` and `Course` produces a foreign key on the `Course` table.
+- Always call `model.validate()` before generating.
 
-The generated `sql_alchemy.py` file will contain:
+> If you'd rather sketch the model in PlantUML first, BESSER can convert it: `from besser.BUML.notations.structuralPlantUML import plantuml_to_buml`. Or use the visual editor at https://editor.besser-pearl.org.
 
-1. **Imports**: SQLAlchemy's `Column`, `Integer`, `String`, `ForeignKey`, `Table`, `create_engine`, `sessionmaker`, etc.
-2. **Association table**: An `enrollment` table for the many-to-many relationship between `Student` and `Course`.
-3. **ORM classes**:
-   - `Student` with columns `student_id` (primary key), `name`, and `email`, plus a `relationship()` to `Course` via the enrollment table.
-   - `Course` with columns `code` (primary key), `name`, and `credits`, plus a foreign key to `Professor` and relationships to both `Student` and `Professor`.
-   - `Professor` with columns `professor_id` (primary key), `name`, and `department`, plus a `relationship()` to `Course`.
-4. **Engine and session**: Pre-configured database engine and session factory.
+## 3. Generate the SQLAlchemy ORM
 
----
+Add this to the same file (or a separate runner script):
 
-## Next Steps
+```python
+from besser.generators.sql_alchemy import SQLAlchemyGenerator
 
-- **Need a full REST API?** Use `BackendGenerator` instead -- it generates a FastAPI application with SQLAlchemy ORM and Pydantic schemas in one shot.
-- **Need raw SQL?** Use `SQLGenerator` to get a `tables.sql` DDL file.
-- **Want to iterate?** Update the model (add attributes, change multiplicities, add new classes) and re-run the generator. The output file is overwritten each time -- never hand-edit generated code as your primary change.
+gen = SQLAlchemyGenerator(model=model, output_dir="./output")
+gen.generate(dbms="postgresql")
+# Valid dbms values: sqlite | postgresql | mysql | mssql | mariadb | oracle
+# (note: it is "postgresql", not "postgres")
+```
+
+Run it:
+
+```bash
+python university_model.py
+```
+
+You'll get `./output/sql_alchemy.py` containing SQLAlchemy `Mapped`/`Column` declarations for `Student`, `Course`, `Professor`, plus the join table for the student-course many-to-many and a `professor_id` foreign key on `Course`.
+
+If you don't yet have a database picked, use `dbms="sqlite"` to try it locally with zero setup.
+
+## 4. Verify
+
+After generation:
+
+1. **File exists**: confirm `./output/sql_alchemy.py` is there.
+2. **Syntax parses**:
+   ```bash
+   python -c "import ast; ast.parse(open('output/sql_alchemy.py').read())"
+   ```
+3. **Relationships look right**: open the file and check that
+   - `Course` has a `professor_id` FK and a `professor` relationship,
+   - There's an association table (something like `enrollment`) joining `student` and `course`,
+   - The many-to-many on `Student` and `Course` uses `secondary=`.
+
+## 5. Iterating
+
+The model is the source of truth. When requirements change — say you want to add a `Department` class, or give `Course` a `semester` attribute — **edit `university_model.py` and regenerate**. Don't hand-edit `sql_alchemy.py`; every call to `generate()` overwrites the output directory.
+
+## Bonus: also want a REST API?
+
+The same `model` object feeds any generator. To get a full FastAPI backend (Pydantic + SQLAlchemy + endpoints) in one shot:
+
+```python
+from besser.generators.backend import BackendGenerator
+
+BackendGenerator(
+    model=model,
+    output_dir="./output_backend",
+    http_methods=["GET", "POST", "PUT", "DELETE"],
+).generate()
+# Produces: main_api.py, pydantic_classes.py, sql_alchemy.py
+```
+
+That's the BESSER way: one model, many targets.

@@ -1,78 +1,63 @@
-# Diagnosis: `ImportError` When Importing `String` from `besser.BUML.metamodel.structural`
+# ImportError on `String` from `besser.BUML.metamodel.structural`
 
-## The Problem
+Good news: your install is almost certainly fine — you just hit one of the most common naming gotchas in BESSER. The primitive type is named **`StringType`**, not `String`.
 
-The name `String` does not exist in the `besser.BUML.metamodel.structural` module. That is why you get an `ImportError` when you run:
+## The fix
+
+Change your import to use the `*Type` suffix:
 
 ```python
+# Wrong (this is what's failing):
 from besser.BUML.metamodel.structural import String
-```
 
-## Root Cause
-
-In BESSER, the primitive data types are **pre-built singleton instances** of `PrimitiveDataType`, and they use the naming convention `<Type>Type` -- not bare names like `String`, `Integer`, etc.
-
-The correct name for the string type is **`StringType`**, not `String`.
-
-Here is the relevant code from `besser/BUML/metamodel/structural/structural.py` (around line 292):
-
-```python
-StringType = PrimitiveDataType("str")
-IntegerType = PrimitiveDataType("int")
-FloatType = PrimitiveDataType("float")
-BooleanType = PrimitiveDataType("bool")
-TimeType = PrimitiveDataType("time")
-DateType = PrimitiveDataType("date")
-DateTimeType = PrimitiveDataType("datetime")
-```
-
-## The Fix
-
-Change your import to use the correct name:
-
-```python
+# Correct:
 from besser.BUML.metamodel.structural import StringType
 ```
 
-## Full Reference: Common Naming Mistakes
+The same applies to all the other primitive types. Here's the full mapping in case you have related imports nearby:
 
-| Wrong (will cause ImportError) | Correct |
-|-------------------------------|---------|
+| Wrong | Correct |
+|-------|---------|
 | `String` | `StringType` |
 | `Integer` | `IntegerType` |
 | `Float` | `FloatType` |
 | `Boolean` | `BooleanType` |
 | `Date` | `DateType` |
 | `DateTime` | `DateTimeType` |
-| `Time` | `TimeType` |
-| `Association` | `BinaryAssociation` (for two-ended associations) |
+| `Association` | `BinaryAssociation` (for 2-end associations) |
 
-## Example: Correct Usage
+## Why it's named that way
+
+The primitive types in BESSER are **singleton instances**, not classes. You import them and use them directly — for example, when defining a `Property`:
 
 ```python
-from besser.BUML.metamodel.structural import (
-    DomainModel, Class, Property, BinaryAssociation,
-    Multiplicity, StringType, IntegerType,
-)
+from besser.BUML.metamodel.structural import Class, Property, StringType, IntegerType
 
-# Use StringType (not String) when defining attribute types
-name_attr = Property(name="name", type=StringType)
-age_attr = Property(name="age", type=IntegerType)
-person = Class(name="Person", attributes={name_attr, age_attr})
-model = DomainModel(name="example", types={person})
+User = Class(name="User", attributes={
+    Property(name="name", type=StringType),
+    Property(name="age", type=IntegerType),
+})
 ```
 
-## Quick Verification
+No `StringType()` call — just pass the singleton itself as the `type=`.
 
-After fixing the import, you can verify that BESSER is properly installed and importable by running:
+## Verifying your install is otherwise healthy
+
+Once you've fixed the name, sanity-check the install with this one-liner:
 
 ```bash
-python -c "from besser.BUML.metamodel.structural import StringType; print('OK')"
+python -c "from besser.BUML.metamodel.structural import DomainModel, StringType; print('OK')"
 ```
 
-If that prints `OK`, your installation is working correctly.
+If that prints `OK`, you're good to go.
 
-## Additional Notes
+## If you still get an ImportError after the rename
 
-- If you are also getting `ModuleNotFoundError: No module named 'besser'` (i.e., the entire `besser` package is not found, not just `String`), then the issue is with your installation or virtual environment. Make sure you activated your venv (`venv\Scripts\activate` on Windows, `source venv/bin/activate` on Unix) before running `pip install -e .`, and that you are running your script with the same Python interpreter.
-- BESSER requires **Python 3.10 or later**. Verify with `python --version`.
+A real install problem would more typically show up as `ModuleNotFoundError: No module named 'besser'` rather than a name-level `ImportError`. But if `StringType` itself fails to import, double-check:
+
+1. **You're in the right virtual environment** — `where python` (Windows) / `which python` (Unix) should point inside your venv. `pip install -e .` only installs into the active environment.
+2. **You ran `pip install -e .` from the repo root** (where `pyproject.toml` lives), not from a subdirectory.
+3. **`pip` and `python` agree** — if you have multiple Python installs, run `python -m pip install -e .` instead of bare `pip install -e .` to guarantee they target the same interpreter.
+4. **Python version is 3.10+** — BESSER requires it (Django 5.x dependency). Check with `python --version`.
+
+But for the symptom you described (`from besser.BUML.metamodel.structural import String` → ImportError), the rename to `StringType` is virtually guaranteed to be the fix.

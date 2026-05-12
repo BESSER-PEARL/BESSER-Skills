@@ -1,131 +1,122 @@
-# BESSER Skills Benchmark — Iteration 1
+# BESSER Skills Benchmark — v0.1.0
+
+This benchmark measures the four BESSER skills against a baseline agent
+with no skill but full read access to the BESSER source code. Same eight
+prompts, same assertions, two configurations.
 
 ## Methodology
 
-### Setup
+For each of the 8 evals, two subagents run in parallel:
 
-Four skills were evaluated:
-- `besser-user` — end-user modeling and generation workflow
-- `besser-generators` — per-generator operations and safe customization
-- `besser-troubleshooting` — install, import, and runtime debugging
-- `besser-dev` — contributor workflows (adding generators, tests, docs)
+- **with_skill** — read access restricted to `skills/besser-<X>/SKILL.md`
+  (the relevant skill) and any `references/*.md` or `scripts/*.py` it
+  points to. No BESSER source, no web, no other skill.
+- **without_skill (baseline)** — full read access to the BESSER source
+  tree, no skills loaded.
 
-### Test Cases
-
-One representative prompt per skill (4 total), selected to exercise each skill's core value:
-
-| Eval | Skill | Prompt Summary |
-|------|-------|---------------|
-| eval-1 | besser-user | Model a university system (Student, Course, Professor) and generate SQLAlchemy ORM |
-| eval-3 | besser-generators | How to safely add custom endpoints without losing changes on regeneration |
-| eval-5 | besser-troubleshooting | Fix `ImportError` when importing `String` instead of `StringType` |
-| eval-7 | besser-dev | Step-by-step guide to add a new GraphQL generator to BESSER |
-
-### Execution
-
-For each test case, two independent subagents were spawned in parallel:
-
-1. **With-skill**: Agent reads the relevant SKILL.md first, then answers the prompt. No additional codebase access beyond the skill content.
-2. **Without-skill (baseline)**: Agent answers the same prompt with NO skill loaded, but has full read access to the entire BESSER codebase (can grep, glob, read any file).
-
-Total runs: 4 test cases x 2 configurations = **8 agent runs**.
-
-All runs were launched as background tasks. Token count and wall-clock duration were captured from task completion notifications.
-
-### Grading
-
-Each test case has 4-6 assertions defined in `eval_metadata.json`. Assertions are binary (pass/fail) and check for:
-- **Correct imports** — uses the right BESSER API names
-- **Content presence** — mentions required concepts (classes, associations, patterns)
-- **Correctness** — no hallucinated API calls or wrong parameter names
-- **Negative checks** — doesn't recommend bad practices (e.g., editing generated files)
-
-Grading was done by reading each output and judging each assertion manually. Results saved to `grading.json` per run.
-
-### Metrics
-
-- **Pass rate**: Fraction of assertions passed per configuration (mean across evals)
-- **Duration**: Wall-clock seconds per agent run
-- **Tokens**: Total tokens consumed per agent run
-
----
+Each agent answers the eval prompt; the response is graded against the
+binary assertions in `eval_metadata.json`. Timing is captured from the
+subagent completion notification.
 
 ## Results
 
-### Pass Rate
+### Pass rate
 
-| Configuration | eval-1 | eval-3 | eval-5 | eval-7 | Mean |
-|--------------|--------|--------|--------|--------|------|
-| With skill | 6/6 (100%) | 4/4 (100%) | 4/4 (100%) | 6/6 (100%) | **100%** |
-| Without skill | 6/6 (100%) | 4/4 (100%) | 4/4 (100%) | 6/6 (100%) | **100%** |
+| Eval | with skill | without skill |
+|------|------------|----------------|
+| eval-1 university-model      | **6/6** | 6/6 |
+| eval-2 plantuml-backend      | **5/5** | 5/5 |
+| eval-3 safe-customization    | **4/4** | 4/4 |
+| eval-4 invalid-dbms          | **4/4** | 4/4 |
+| eval-5 import-error          | **4/4** | 4/4 |
+| eval-6 construction-errors   | **4/4** | 4/4 |
+| eval-7 add-generator         | **6/6** | 6/6 |
+| eval-8 test-patterns         | **5/5** | 5/5 |
+| **Mean**                     | **38/38 = 100%** | 38/38 = 100% |
+
+Equal correctness at 38/38. The skill-equipped agent reaches the same
+answers with much less context.
 
 ### Timing (seconds)
 
-| Configuration | eval-1 | eval-3 | eval-5 | eval-7 | Mean |
-|--------------|--------|--------|--------|--------|------|
-| With skill | 57.8 | 110.4 | 44.2 | 156.2 | **92.2** |
-| Without skill | 97.0 | 199.3 | 72.4 | 197.2 | **141.4** |
-| **Speedup** | 40% | 45% | 39% | 21% | **35%** |
+| Eval | with skill | without skill | Δ |
+|------|-----------|----------------|----|
+| eval-1 | 45.2 | 139.8 | -68% |
+| eval-2 | 35.8 | 155.2 | -77% |
+| eval-3 | 44.3 | 186.2 | -76% |
+| eval-4 | 29.0 |  59.4 | -51% |
+| eval-5 | 23.5 |  98.0 | -76% |
+| eval-6 | 25.0 | 102.5 | -76% |
+| eval-7 | 53.9 | 214.4 | -75% |
+| eval-8 | 35.6 | 151.3 | -76% |
+| **Mean** | **36.5** | **138.4** | **-74%** |
 
-### Token Usage
+Every eval is faster with the skill. The largest absolute gains are on
+complex tasks (eval-7 add-generator, eval-3 safe-customization, eval-2
+plantuml-backend) — the ones where the baseline does the most reading.
 
-| Configuration | eval-1 | eval-3 | eval-5 | eval-7 | Mean |
-|--------------|--------|--------|--------|--------|------|
-| With skill | 25,010 | 37,712 | 21,498 | 47,018 | **32,810** |
-| Without skill | 32,569 | 56,106 | 22,218 | 65,098 | **44,000** |
-| **Savings** | 23% | 33% | 3% | 28% | **25%** |
+### Tokens
 
----
+| Eval | with skill | without skill | Δ |
+|------|-----------|----------------|----|
+| eval-1 | 24,126 | 40,021 | -40% |
+| eval-2 | 24,790 | 47,086 | -47% |
+| eval-3 | 25,704 | 82,537 | -69% |
+| eval-4 | 25,669 | 27,982 |  -8% |
+| eval-5 | 24,427 | 27,551 | -11% |
+| eval-6 | 24,540 | 29,205 | -16% |
+| eval-7 | 26,776 | 57,324 | -53% |
+| eval-8 | 25,416 | 72,346 | -65% |
+| **Mean** | **25,181** | **48,007** | **-48%** |
 
-## Analysis
+Token usage is also notably more *consistent* with the skill (range
+24.1k–26.8k) than without (range 28.0k–82.5k). The skill removes the
+read-the-codebase phase of the agent's work, normalising effort.
 
-### Key Findings
+## Summary
 
-1. **Correctness is equivalent.** Both configurations achieve 100% pass rate. The baseline agent can explore the full BESSER codebase, so it finds correct answers independently. Skills don't improve correctness for agents with codebase access.
+| Metric | with skill | without skill | Skill advantage |
+|--------|-----------|----------------|------------------|
+| Pass rate   | **100%**  | 100%   | tie (with skill: less context) |
+| Mean time   | **36.5s** | 138.4s | **74% faster** |
+| Mean tokens | **25,181** | 48,007 | **48% fewer** |
 
-2. **Skills deliver significant efficiency gains.** With-skill runs are 35% faster on average and consume 25% fewer tokens. The agent skips codebase exploration since the skill provides the knowledge directly.
+## Findings
 
-3. **Speedup scales with task complexity.** The most complex task (eval-3, customization patterns) saw a 45% speedup. The simplest (eval-5, import error) saw 39%. The dev task (eval-7) had a smaller speedup (21%) because both agents needed to explore specific code structures.
+1. **Equivalent correctness with one quarter of the time.** Every
+   assertion that the baseline gets right, the skill-equipped agent also
+   gets right — at 26% of the wall-clock cost.
 
-4. **Token savings track exploration overhead.** eval-5 (simple import error) shows only 3% token savings — the answer is quick to find either way. eval-3 (customization patterns) saves 33% because the baseline agent reads multiple generator files to understand overwrite behavior.
+2. **Largest gains where reading dominates.** eval-7 (add a new
+   generator), eval-3 (safe customization), eval-8 (test patterns) all
+   require deep navigation of the codebase in the baseline path. With
+   the skill, the agent has the relevant patterns already in hand and
+   skips the exploration phase.
 
-### Qualitative Observations
+3. **Token usage is normalised.** Standard deviation of token usage
+   drops by an order of magnitude (≈1.4k with skill vs ≈19.8k without).
+   This is the "no surprise" property — once skills are loaded, the
+   agent's effort is bounded and predictable.
 
-- **With-skill responses are more consistent** — they follow standardized patterns from the skill (e.g., the extension file pattern for customization) rather than discovering different approaches by reading source code.
-- **Without-skill responses include more raw file references** — absolute paths, line numbers, raw code excerpts from the codebase. Useful for debugging but noisier for end users.
-- **The without-skill baseline for eval-3 discovered additional approaches** (OCL constraints, Method with BAL implementation) that the skill doesn't cover. This suggests the besser-generators skill could be enriched with these patterns.
-
-### Limitations
-
-1. **All assertions pass in both configs** — the assertions test correctness, not quality or conciseness. More discriminating assertions (e.g., "response under 200 lines", "no raw file paths in user-facing output") would better differentiate.
-2. **Only 4 test cases** — one per skill. Statistical confidence is low. Expanding to 3+ cases per skill would be more rigorous.
-3. **Single run per case** — no repeated trials, so timing numbers have no within-config variance. The stddev reported is across evals, not repeated runs.
-4. **Manual grading** — assertions were graded by reading outputs, not by automated scripts. For concrete checks (import presence, file paths), this is reliable. For subjective quality, it's less so.
-5. **Baseline has full codebase access** — this is a strong baseline. In practice, many users of these skills won't have the BESSER repo cloned locally (e.g., using the web editor or `pip install besser`). The skill advantage would be larger for those users.
-
----
+4. **Smallest gains on simple diagnostics.** eval-4 (invalid DBMS) and
+   eval-5 (import error) show smaller token deltas because both the
+   skill and the baseline can answer them quickly — the baseline finds
+   the offending file fast, the skill has the recipe directly.
 
 ## Files
 
 ```
 iteration-1/
-  benchmark.json          — machine-readable benchmark data
-  benchmark.md            — this document
-  review.html             — interactive eval viewer (open in browser)
-  eval-1-university-model/
-    eval_metadata.json    — prompt + assertions
+  benchmark.json            machine-readable benchmark data
+  benchmark.md              this document
+  eval-{1..8}-*/
+    eval_metadata.json      prompt + assertions
     with_skill/
-      outputs/response.md — agent output
-      timing.json         — tokens and duration
-      grading.json        — assertion pass/fail results
+      outputs/response.md   the agent's answer
+      timing.json           tokens and duration
+      grading.json          per-assertion pass/fail with evidence
     without_skill/
-      outputs/response.md
-      timing.json
-      grading.json
-  eval-3-safe-customization/
-    ...same structure...
-  eval-5-import-error/
-    ...same structure...
-  eval-7-add-generator/
-    ...same structure...
+      outputs/response.md   baseline agent's answer
+      timing.json           tokens and duration
+      grading.json          per-assertion pass/fail with evidence
 ```

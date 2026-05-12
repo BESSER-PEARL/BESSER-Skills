@@ -2,25 +2,9 @@
   "eval_id": 3,
   "config": "with_skill",
   "expectations": [
-    {
-      "text": "Response explicitly warns that generated files are overwritten on regeneration",
-      "passed": true,
-      "evidence": "Opens with 'No, Direct Edits to main_api.py Will Not Survive Regeneration' and explains the overwrite mechanism with code references"
-    },
-    {
-      "text": "Response recommends creating a separate extension file that imports from the generated code",
-      "passed": true,
-      "evidence": "Recommends 'Post-Generation Extension Files' pattern with app.py importing from main_api.py"
-    },
-    {
-      "text": "Response provides a concrete code example of the wrapper/extension pattern",
-      "passed": true,
-      "evidence": "Provides complete app.py example importing the generated FastAPI app and adding custom routes, plus APIRouter pattern and middleware pattern"
-    },
-    {
-      "text": "Response does NOT recommend editing main_api.py directly as the primary approach",
-      "passed": true,
-      "evidence": "Explicitly lists 'Direct editing' as an anti-pattern to avoid"
-    }
+    {"text": "Clearly states that generated files are overwritten on regeneration", "passed": true, "evidence": "Opens with 'Every call to BackendGenerator.generate() overwrites the output files entirely'. Restates 'Don't edit generated files directly as your primary workflow — they will be overwritten'"},
+    {"text": "Recommends creating separate extension/wrapper files that import from generated code", "passed": true, "evidence": "Section 2 'Wrapper script (recommended for custom endpoints)' is the headline recommendation, with a layout showing app.py and custom_endpoints.py separate from generated files"},
+    {"text": "Shows a concrete code example of the extension pattern", "passed": true, "evidence": "app.py example: 'from main_api import app' followed by @app.get('/custom/stats') and @app.post('/books/{book_id}/validate')"},
+    {"text": "Does NOT recommend editing main_api.py directly as the primary approach", "passed": true, "evidence": "Explicitly states 'Don't edit generated files directly as your primary workflow'. Also covers the BAL/CODE method-level approach as an alternative."}
   ]
 }

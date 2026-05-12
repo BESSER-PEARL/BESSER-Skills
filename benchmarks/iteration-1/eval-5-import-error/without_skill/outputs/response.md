@@ -1,20 +1,20 @@
-# Diagnosing the `ImportError` for `String` from `besser.BUML.metamodel.structural`
+# ImportError: Cannot Import `String` from `besser.BUML.metamodel.structural`
 
 ## The Problem
 
-The import statement:
+The import fails because there is **no symbol named `String`** in the BESSER structural metamodel. The correct name is **`StringType`**.
 
 ```python
+# This FAILS with ImportError
 from besser.BUML.metamodel.structural import String
+
+# This is CORRECT
+from besser.BUML.metamodel.structural import StringType
 ```
 
-fails with an `ImportError` because **there is no symbol called `String`** in the `besser.BUML.metamodel.structural` package. The correct name is **`StringType`**.
+## Why This Happens
 
-## Root Cause
-
-In the BESSER codebase, primitive data types are defined as module-level instances of `PrimitiveDataType` in the file:
-
-**`C:\Users\sulejmani\Desktop\BESSER\besser\BUML\metamodel\structural\structural.py`** (lines 291-302)
+In BESSER, primitive data types are pre-instantiated objects of the `PrimitiveDataType` class, and they all follow the naming convention `<Name>Type`. They are defined in `besser/BUML/metamodel/structural/structural.py` (lines 291-299):
 
 ```python
 # Define instances of PrimitiveDataType
@@ -26,73 +26,93 @@ TimeType = PrimitiveDataType("time")
 DateType = PrimitiveDataType("date")
 DateTimeType = PrimitiveDataType("datetime")
 TimeDeltaType = PrimitiveDataType("timedelta")
+```
+
+There is also a general-purpose type:
+
+```python
 AnyType = DataType("any")
 ```
 
-The naming convention uses the suffix `Type` (e.g., `StringType`, `IntegerType`, `FloatType`), not bare names like `String`, `Integer`, or `Float`. There is no alias called `String` anywhere in the module.
+These are **singleton instances**, not classes. When you use `StringType` as a type for a `Property`, you are passing this pre-built object directly.
 
-The `__init__.py` at `besser/BUML/metamodel/structural/__init__.py` simply re-exports everything via:
+## Complete List of Available Primitive Data Types
 
-```python
-from .structural import *
-```
+| Import Name      | Underlying Value | Use Case                     |
+|------------------|------------------|------------------------------|
+| `StringType`     | `"str"`          | Text / string attributes     |
+| `IntegerType`    | `"int"`          | Whole number attributes      |
+| `FloatType`      | `"float"`        | Decimal number attributes    |
+| `BooleanType`    | `"bool"`         | True/false attributes        |
+| `DateType`       | `"date"`         | Date-only attributes         |
+| `TimeType`       | `"time"`         | Time-only attributes         |
+| `DateTimeType`   | `"datetime"`     | Date and time attributes     |
+| `TimeDeltaType`  | `"timedelta"`    | Duration / time delta values |
+| `AnyType`        | `"any"`          | Generic / untyped attributes |
 
-So all the `*Type` names are available, but `String` is not -- because it was never defined.
+## Corrected Working Example
 
-## The Fix
-
-Change your import to use `StringType` instead of `String`:
-
-```python
-from besser.BUML.metamodel.structural import StringType
-```
-
-## Complete List of Available Primitive Types
-
-Here are all the primitive/data type instances you can import:
-
-| Import Name      | Underlying Value | Description           |
-|------------------|------------------|-----------------------|
-| `StringType`     | `"str"`          | String data type      |
-| `IntegerType`    | `"int"`          | Integer data type     |
-| `FloatType`      | `"float"`        | Float data type       |
-| `BooleanType`    | `"bool"`         | Boolean data type     |
-| `TimeType`       | `"time"`         | Time data type        |
-| `DateType`       | `"date"`         | Date data type        |
-| `DateTimeType`   | `"datetime"`     | DateTime data type    |
-| `TimeDeltaType`  | `"timedelta"`    | TimeDelta data type   |
-| `AnyType`        | `"any"`          | Generic/any data type |
-
-## Usage Example
-
-Here is the canonical usage pattern, taken from the library example at `tests/BUML/metamodel/structural/library/library.py`:
+Here is a complete working example based on the classic Library model from the BESSER documentation:
 
 ```python
 from besser.BUML.metamodel.structural import (
-    DomainModel, Class, Property,
-    Multiplicity, BinaryAssociation,
-    StringType, IntegerType, DateType
+    DomainModel, Class, Property, Multiplicity,
+    BinaryAssociation, StringType, IntegerType, DateType
 )
 
-# Define properties using the correct type names
-library_name: Property = Property(name="name", type=StringType)
-address: Property = Property(name="address", type=StringType)
+# Book attributes and class
 title: Property = Property(name="title", type=StringType)
 pages: Property = Property(name="pages", type=IntegerType)
 release: Property = Property(name="release", type=DateType)
+book: Class = Class(name="Book", attributes={title, pages, release})
+
+# Author attributes and class
+author_name: Property = Property(name="name", type=StringType)
+email: Property = Property(name="email", type=StringType)
+author: Class = Class(name="Author", attributes={author_name, email})
+
+# Library attributes and class
+library_name: Property = Property(name="name", type=StringType)
+address: Property = Property(name="address", type=StringType)
+library: Class = Class(name="Library", attributes={library_name, address})
+
+# Associations
+located_in: Property = Property(name="locatedIn", type=library, multiplicity=Multiplicity(1, 1))
+has: Property = Property(name="has", type=book, multiplicity=Multiplicity(0, "*"))
+lib_book_association: BinaryAssociation = BinaryAssociation(
+    name="lib_book_assoc", ends={located_in, has}
+)
+
+written_by: Property = Property(name="writtenBy", type=author, multiplicity=Multiplicity(1, "*"))
+publishes: Property = Property(name="publishes", type=book, multiplicity=Multiplicity(0, "*"))
+book_author_association: BinaryAssociation = BinaryAssociation(
+    name="book_author_assoc", ends={written_by, publishes}
+)
+
+# Domain model
+library_model: DomainModel = DomainModel(
+    name="Library_model",
+    types={library, book, author},
+    associations={lib_book_association, book_author_association}
+)
+
+print(f"Model '{library_model.name}' created with {len(library_model.types)} types.")
 ```
 
-## Alternative: Pass Type as a String
+## Quick Verification
 
-As a convenience, you can also pass the type as a plain string when constructing a `Property`. The `TypedElement` class (the parent of `Property`) has a built-in `type_mapping` dictionary (defined at line 458 of `structural.py`) that resolves string names to the corresponding `PrimitiveDataType` instance:
+You can verify your installation is working correctly by running:
 
-```python
-# This also works -- "str" is resolved to StringType automatically
-name_prop = Property(name="name", type="str")
+```bash
+python -c "from besser.BUML.metamodel.structural import StringType, IntegerType; print('Import successful:', StringType, IntegerType)"
 ```
 
-The supported string values are: `"str"`, `"string"`, `"int"`, `"float"`, `"bool"`, `"time"`, `"date"`, `"datetime"`, `"timedelta"`.
+Expected output:
+
+```
+Import successful: PrimitiveDataType(str, ...) PrimitiveDataType(int, ...)
+```
 
 ## Summary
 
-The `ImportError` occurs because the symbol is named `StringType`, not `String`. This naming convention (`*Type` suffix) applies to all primitive data types in BESSER. Replace `String` with `StringType` in your import statement and the error will be resolved.
+The fix is straightforward: replace `String` with `StringType` in your import statement. All primitive data types in BESSER use the `<Name>Type` naming convention (`StringType`, `IntegerType`, `FloatType`, `BooleanType`, `DateType`, `TimeType`, `DateTimeType`, `TimeDeltaType`). These are pre-instantiated `PrimitiveDataType` objects, not classes, so you use them directly as type arguments when defining `Property` instances.

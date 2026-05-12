@@ -65,7 +65,7 @@ Add at least 2 eval entries to `evals/evals.json`:
 
 ### 4. Run a benchmark
 
-Follow the methodology in [`benchmarks/iteration-2/benchmark.md`](benchmarks/iteration-2/benchmark.md):
+Follow the methodology in [`benchmarks/iteration-1/benchmark.md`](benchmarks/iteration-1/benchmark.md):
 
 1. For each eval, spawn two independent agents:
    - **With-skill**: Agent reads the SKILL.md, then answers (no codebase access)

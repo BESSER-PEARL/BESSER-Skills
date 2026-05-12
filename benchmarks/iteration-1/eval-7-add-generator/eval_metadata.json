@@ -1,30 +1,31 @@
 {
   "eval_id": 7,
   "eval_name": "add-graphql-generator",
+  "skill": "besser-dev",
   "prompt": "I want to add a new GraphQL generator to BESSER. What's the step-by-step process? Where do I put the files, how do I register it, and what tests should I write?",
   "assertions": [
     {
-      "text": "Response specifies correct file location: besser/generators/graphql/",
+      "text": "Specifies creating package at besser/generators/graphql/ (or similar path)",
       "type": "content_check"
     },
     {
-      "text": "Response shows implementing GeneratorInterface with __init__ and generate methods",
+      "text": "Shows implementing GeneratorInterface with __init__ and generate methods",
+      "type": "contains_pattern"
+    },
+    {
+      "text": "Mentions Jinja2 templates in a templates/ subdirectory",
       "type": "content_check"
     },
     {
-      "text": "Response shows registration in config/generators.py with GeneratorInfo",
+      "text": "Mentions registering in config/generators.py with GeneratorInfo",
       "type": "content_check"
     },
     {
-      "text": "Response specifies test location: tests/generators/graphql/",
+      "text": "Describes test file location (tests/generators/) and pytest patterns",
       "type": "content_check"
     },
     {
-      "text": "Response mentions Jinja2 templates in a templates/ subdirectory",
-      "type": "content_check"
-    },
-    {
-      "text": "Response mentions documentation in docs/source/generators/",
+      "text": "Mentions documentation in docs/source/generators/",
       "type": "content_check"
     }
   ]

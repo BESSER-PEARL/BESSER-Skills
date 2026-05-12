@@ -1,22 +1,23 @@
 {
   "eval_id": 5,
   "eval_name": "import-error-stringtype",
+  "skill": "besser-troubleshooting",
   "prompt": "I just cloned the BESSER repo and ran pip install -e . but when I try 'from besser.BUML.metamodel.structural import String' I get ImportError. What's wrong?",
   "assertions": [
     {
-      "text": "Response identifies that the correct name is StringType, not String",
+      "text": "Identifies that the correct name is 'StringType' not 'String'",
       "type": "content_check"
     },
     {
-      "text": "Response explains these are pre-built singleton instances",
+      "text": "Explains these are pre-built singleton instances, not classes",
       "type": "content_check"
     },
     {
-      "text": "Response provides the corrected import statement",
-      "type": "content_check"
+      "text": "Provides the correct import statement with StringType",
+      "type": "contains_pattern"
     },
     {
-      "text": "Response lists other common type names (IntegerType, FloatType, BooleanType, etc.)",
+      "text": "Mentions other commonly confused names (IntegerType, FloatType, BooleanType, etc.)",
       "type": "content_check"
     }
   ]

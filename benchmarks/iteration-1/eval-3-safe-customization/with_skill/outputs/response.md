@@ -1,269 +1,134 @@
-# Adding Custom Validation and Endpoints to a BackendGenerator Output
+# Will my edits to `main_api.py` survive regeneration?
 
-## Short Answer: No, Direct Edits to `main_api.py` Will Not Survive Regeneration
+**No.** Every call to `BackendGenerator.generate()` overwrites the output files entirely — `main_api.py`, `pydantic_classes.py`, and `sql_alchemy.py` in `./output_backend/` are all replaced. This is by design: the BUML model is the source of truth, and direct edits to generated files are the one workflow you should *not* adopt.
 
-Every call to `BackendGenerator.generate()` completely overwrites all three output files:
+> **Don't edit generated files directly as your primary workflow — they will be overwritten next time you generate.**
+> **Don't mix generated and hand-written code in the same file.**
 
-- `main_api.py` (the FastAPI application)
-- `pydantic_classes.py` (Pydantic request/response schemas)
-- `sql_alchemy.py` (SQLAlchemy ORM models)
-
-This is by design -- the B-UML model is the single source of truth, and regeneration replaces these files entirely. Any custom validation logic, endpoints, or middleware you add directly to `main_api.py` will be lost the next time you run `generate()`.
-
-The relevant code in `BackendGenerator.generate()` (at `besser/generators/backend/backend_generator.py`, line 85-86) shows how it delegates to sub-generators that each overwrite their output file unconditionally:
-
-```python
-rest_api = RESTAPIGenerator(model=self.model, http_methods=self.http_methods,
-    nested_creations=self.nested_creations, output_dir=backend_folder_path, backend=True, port=docker_port)
-rest_api.generate()  # Overwrites main_api.py
-
-sql_alchemy = SQLAlchemyGenerator(model=self.model, output_dir=backend_folder_path)
-sql_alchemy.generate()  # Overwrites sql_alchemy.py
-
-pydantic_model = PydanticGenerator(model=self.model, output_dir=backend_folder_path, backend=True,
-    nested_creations=self.nested_creations)
-pydantic_model.generate()  # Overwrites pydantic_classes.py
-```
+Here are the safe patterns, ordered from "try first" to "advanced".
 
 ---
 
-## The Right Way: Post-Generation Extension Files
+## 1. Check the generator options first
 
-The recommended approach is to keep your custom code in **separate files** that import from the generated files. Generated files get overwritten; your extension files do not.
+Many "I need to tweak the output" requests are already covered by `BackendGenerator` parameters. Before reaching for custom code, see if one of these does what you want:
 
-### Pattern 1: Wrapper App (Best for Custom Endpoints)
+```python
+BackendGenerator(
+    model=domain_model,
+    output_dir="./output_backend",
+    http_methods=["GET", "POST"],   # restrict which endpoints are generated
+    nested_creations=True,          # allow nested object creates
+)
+```
 
-Create a file called `app.py` (or any name you choose) alongside the generated files. This file imports the generated FastAPI `app` instance and adds your custom routes to it. The generated `main_api.py` defines `app = FastAPI(...)` at module level and only runs `uvicorn` inside an `if __name__ == "__main__"` guard, which means importing the module will not start the server -- it will just give you the `app` object with all the generated CRUD endpoints already registered.
+If you only need to limit verbs, change the dialect downstream, or toggle Docker, no custom code is needed.
+
+---
+
+## 2. Wrapper script (recommended for custom endpoints)
+
+This is the cleanest answer to "how do I add custom endpoints?" Put your code in a **separate file** that imports the generated FastAPI `app` and attaches new routes to it. Run this wrapper instead of `main_api.py` directly.
+
+```python
+# app.py — YOUR CODE, lives outside output_backend/ (or alongside it)
+from main_api import app
+from fastapi import HTTPException
+from sql_alchemy import Book, Session
+
+@app.get("/custom/stats")
+def custom_stats():
+    with Session() as session:
+        return {"book_count": session.query(Book).count()}
+
+@app.post("/books/{book_id}/validate")
+def validate_book(book_id: int):
+    with Session() as session:
+        book = session.query(Book).get(book_id)
+        if not book:
+            raise HTTPException(404, "not found")
+        # your custom validation logic here
+        if not book.title or len(book.title) < 2:
+            raise HTTPException(422, "title too short")
+        return {"valid": True}
+```
+
+Run with:
+
+```bash
+uvicorn app:app --reload
+```
+
+The generated `main_api.py` provides the baseline CRUD; your wrapper layers validation and custom routes on top. Regeneration overwrites `main_api.py` but never touches `app.py`.
+
+A typical layout:
 
 ```
 output_backend/
-    main_api.py          # GENERATED -- do not edit
-    pydantic_classes.py   # GENERATED -- do not edit
-    sql_alchemy.py        # GENERATED -- do not edit
-    app.py               # YOUR CODE -- safe from regeneration
-    custom_validators.py  # YOUR CODE -- safe from regeneration
+  main_api.py          # GENERATED — do not edit
+  pydantic_classes.py  # GENERATED — do not edit
+  sql_alchemy.py       # GENERATED — do not edit
+  app.py               # YOUR CODE — imports from main_api
+  custom_endpoints.py  # YOUR CODE — more routes, helpers, validators
 ```
 
-Here is a concrete example of `app.py`:
-
-```python
-# app.py -- YOUR CODE, not generated, safe from regeneration
-from main_api import app, get_db  # Import the generated FastAPI app and DB dependency
-from sql_alchemy import Book, Author, Session  # Import generated ORM models
-from pydantic_classes import *  # Import generated Pydantic schemas
-from fastapi import Depends, HTTPException, Body
-from sqlalchemy.orm import Session as SASession
-from pydantic import BaseModel, field_validator
-from typing import Optional
-
-# =============================================
-# Custom Pydantic models with validation logic
-# =============================================
-
-class BookCreateValidated(BaseModel):
-    """Custom schema with validation that goes beyond what the generator produces."""
-    title: str
-    isbn: str
-    year: int
-    author_id: int
-
-    @field_validator("isbn")
-    @classmethod
-    def validate_isbn(cls, v):
-        cleaned = v.replace("-", "").replace(" ", "")
-        if len(cleaned) not in (10, 13):
-            raise ValueError("ISBN must be 10 or 13 digits")
-        if not cleaned.isdigit():
-            raise ValueError("ISBN must contain only digits (and optional hyphens)")
-        return v
-
-    @field_validator("year")
-    @classmethod
-    def validate_year(cls, v):
-        if v < 1450 or v > 2030:
-            raise ValueError("Year must be between 1450 and 2030")
-        return v
-
-# =============================================
-# Custom endpoints
-# =============================================
-
-@app.post("/custom/book/validated/", tags=["Custom"])
-async def create_book_validated(
-    book_data: BookCreateValidated,
-    database: SASession = Depends(get_db)
-):
-    """Create a book with custom ISBN and year validation."""
-    # Your custom validation already ran via Pydantic validators above.
-    # Now check business rules:
-    existing = database.query(Book).filter(Book.isbn == book_data.isbn).first()
-    if existing:
-        raise HTTPException(status_code=409, detail="A book with this ISBN already exists")
-
-    author = database.query(Author).filter(Author.id == book_data.author_id).first()
-    if author is None:
-        raise HTTPException(status_code=404, detail="Author not found")
-
-    db_book = Book(
-        title=book_data.title,
-        isbn=book_data.isbn,
-        year=book_data.year,
-        author_id=book_data.author_id,
-    )
-    database.add(db_book)
-    database.commit()
-    database.refresh(db_book)
-    return db_book
-
-
-@app.get("/custom/stats/", tags=["Custom"])
-async def get_statistics(database: SASession = Depends(get_db)):
-    """Custom analytics endpoint not available in the generated CRUD API."""
-    book_count = database.query(Book).count()
-    author_count = database.query(Author).count()
-    return {
-        "total_books": book_count,
-        "total_authors": author_count,
-        "avg_books_per_author": round(book_count / max(author_count, 1), 2),
-    }
-
-
-# =============================================
-# Run the app (instead of running main_api.py directly)
-# =============================================
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
-
-**How to run**: Instead of `python main_api.py`, you run `python app.py`. The `app` object already contains all the generated CRUD routes. Your file simply adds more routes to the same application. After regeneration, the generated routes update automatically while your custom routes remain untouched.
-
-### Pattern 2: Separate Custom Endpoints Module (For Larger Projects)
-
-If you have many custom endpoints, put them in their own module and include them via a FastAPI router:
-
-```python
-# custom_endpoints.py -- YOUR CODE
-from fastapi import APIRouter, Depends, HTTPException
-from sql_alchemy import Book, Author
-from main_api import get_db
-from sqlalchemy.orm import Session
-
-router = APIRouter(prefix="/custom", tags=["Custom"])
-
-@router.get("/books/search/")
-async def search_books(q: str, database: Session = Depends(get_db)):
-    results = database.query(Book).filter(Book.title.ilike(f"%{q}%")).all()
-    return results
-
-@router.get("/authors/{author_id}/bibliography/")
-async def get_bibliography(author_id: int, database: Session = Depends(get_db)):
-    author = database.query(Author).filter(Author.id == author_id).first()
-    if not author:
-        raise HTTPException(status_code=404, detail="Author not found")
-    books = database.query(Book).filter(Book.author_id == author_id).order_by(Book.year).all()
-    return {"author": author.name, "books": books}
-```
-
-Then in your `app.py`:
-
-```python
-# app.py -- YOUR CODE
-from main_api import app
-from custom_endpoints import router
-
-app.include_router(router)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
-
-### Pattern 3: Custom Validators as Middleware
-
-If you want validation that applies to all requests (not just specific endpoints), add middleware in your wrapper:
-
-```python
-# app.py -- YOUR CODE
-from main_api import app
-from fastapi import Request
-from fastapi.responses import JSONResponse
-
-@app.middleware("http")
-async def validate_content_type(request: Request, call_next):
-    """Require JSON content type on all POST/PUT requests."""
-    if request.method in ("POST", "PUT"):
-        content_type = request.headers.get("content-type", "")
-        if "application/json" not in content_type:
-            return JSONResponse(
-                status_code=415,
-                content={"detail": "Content-Type must be application/json"}
-            )
-    return await call_next(request)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
+For shared validation helpers, the same pattern works — put them in `custom_validators.py` and import them from `app.py`.
 
 ---
 
-## Before You Write Custom Code: Check Generator Options First
+## 3. Push validation into the model (often cleanest)
 
-The `BackendGenerator` has built-in options that may already cover your needs, potentially making custom code unnecessary:
-
-| Option | What it does |
-|--------|-------------|
-| `http_methods=["GET", "POST"]` | Limit which CRUD endpoints are generated. For example, omit `DELETE` to prevent deletions via API. |
-| `nested_creations=True` | Changes POST behavior so that related entities can be created inline (nested in the request body) instead of requiring pre-existing IDs. |
-| `docker_image=True` | Generates a `Dockerfile` and `requirements.txt` for containerized deployment. |
-
-Example:
+If your "validation logic" is really a domain operation (e.g. "search books by title", "check ISBN"), the most regeneration-proof place for it is the **model itself**. Define a `Method` with a `MethodImplementation` of type `BAL` or `CODE`, and `BackendGenerator` will emit a matching REST endpoint automatically. The logic lives in the model, where regeneration cannot touch it because the model *drives* regeneration.
 
 ```python
-from besser.generators.backend import BackendGenerator
-
-gen = BackendGenerator(
-    model=domain_model,
-    http_methods=["GET", "POST"],      # No PUT or DELETE endpoints
-    nested_creations=True,             # Allow nested object creation
-    output_dir="./output_backend",
+from besser.BUML.metamodel.structural import Method, Parameter, StringType
+from besser.BUML.metamodel.action_language import (
+    MethodImplementationType, MethodImplementation,
 )
-gen.generate()
+
+search = Method(
+    name="search_by_title",
+    parameters=[Parameter(name="keyword", type=StringType)],
+    type=StringType,
+)
+search.implementation = MethodImplementation(
+    type=MethodImplementationType.BAL,
+    body='return session.query(Book).filter(Book.title.contains(keyword)).all()',
+)
+book.add_method(search)
 ```
 
----
-
-## What Not To Do
-
-1. **Do not edit `main_api.py`, `pydantic_classes.py`, or `sql_alchemy.py` directly.** They will be overwritten on the next `generate()` call.
-
-2. **Do not mix generated and hand-written code in the same file.** The file boundary is what protects your custom code from regeneration.
-
-3. **Do not fork the BackendGenerator** just to add a few endpoints. The wrapper pattern described above is simpler and survives BESSER updates.
-
-4. **If you must make small, repeatable edits to generated files** (e.g., adding a single import line), consider a git-based patch workflow as a last resort:
-
-   ```bash
-   # After generation, make your edits and save a patch
-   git diff output_backend/ > my_customizations.patch
-
-   # After regeneration, reapply
-   cd output_backend && git apply ../my_customizations.patch
-   ```
-
-   This is fragile and should only be used for small, stable changes. The extension file pattern is strongly preferred.
+Use this when the custom behavior is *part of the domain*. Use the wrapper script (#2) when it's *plumbing* (auth, logging, request shaping, cross-cutting validation).
 
 ---
 
-## Summary
+## 4. Template overrides (advanced, sparingly)
 
-| Approach | When to use | Survives regeneration? |
-|----------|------------|----------------------|
-| Generator options (`http_methods`, `nested_creations`) | Controlling which CRUD endpoints are generated | Yes (configuration, not code) |
-| Wrapper `app.py` that imports `main_api.app` | Adding custom endpoints, validation, middleware | Yes |
-| Separate router modules included via `app.include_router()` | Many custom endpoints, clean separation | Yes |
-| Editing `main_api.py` directly | Never recommended | **No** |
-| Git patch workflow | Tiny, stable edits to generated files | Fragile, last resort |
+If you need to change *how* `main_api.py` itself is rendered — e.g. inject a global middleware into every regeneration — you can copy the generator's Jinja template from `besser/generators/{name}/templates/`, edit your copy, and point the generator at it. Powerful, but BESSER updates won't propagate to your overrides. Use only when #1–#3 don't fit.
 
-The key insight is that the generated `main_api.py` exposes a standard FastAPI `app` object that you can import and extend from your own files. Run your wrapper file instead of the generated file, and your custom logic will coexist with the generated CRUD endpoints across any number of regeneration cycles.
+---
+
+## 5. Git patch workflow (small, stable edits)
+
+For tiny, repeatable tweaks to generated output:
+
+```bash
+git diff output_backend/ > my_customizations.patch          # save once
+cd output_backend && git apply ../my_customizations.patch   # reapply after each generate
+```
+
+Fine for one-line changes. Brittle for anything larger — prefer #2 or #3.
+
+---
+
+## TL;DR
+
+| Need | Do this |
+|------|---------|
+| Limit which HTTP verbs are generated | Pass `http_methods=[...]` to `BackendGenerator` |
+| Add a custom endpoint / validation route | **Wrapper script** that imports `app` from `main_api` |
+| Domain-level operation that should be a real endpoint | Add a `Method` with `BAL`/`CODE` implementation to the model |
+| Change how `main_api.py` is rendered globally | Template override |
+| Tiny stable tweak to generated text | Git patch reapplied after each generate |
+
+Whatever you do, keep generated files and hand-written files in **separate files**. That single rule keeps you safe across every regeneration.

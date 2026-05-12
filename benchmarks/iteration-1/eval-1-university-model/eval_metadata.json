@@ -1,30 +1,31 @@
 {
   "eval_id": 1,
   "eval_name": "university-model-sqlalchemy",
+  "skill": "besser-user",
   "prompt": "I want to model a university system with Students, Courses, and Professors. Students can enroll in many courses, professors teach courses. Each course has a name and credits. How do I do this in BESSER and then generate a SQLAlchemy ORM from it?",
   "assertions": [
     {
-      "text": "Response includes correct imports from besser.BUML.metamodel.structural",
+      "text": "Uses correct imports from besser.BUML.metamodel.structural (DomainModel, Class, Property, etc.)",
       "type": "contains_pattern"
     },
     {
-      "text": "Response defines 3 classes: Student, Course, Professor",
+      "text": "Defines 3 classes: Student, Course, Professor (or equivalent names)",
       "type": "content_check"
     },
     {
-      "text": "Response includes BinaryAssociation with correct multiplicities (many-to-many for student-course, one/many-to-many for professor-course)",
+      "text": "Creates associations with correct multiplicities (many-to-many for student-course, one/many-to-many for professor-course)",
       "type": "content_check"
     },
     {
-      "text": "Response assembles a DomainModel with types and associations",
+      "text": "Assembles a DomainModel with types and associations",
       "type": "content_check"
     },
     {
-      "text": "Response shows SQLAlchemyGenerator usage with generate() call",
-      "type": "content_check"
+      "text": "Uses SQLAlchemyGenerator with correct import and invocation",
+      "type": "contains_pattern"
     },
     {
-      "text": "Code is syntactically correct Python (no hallucinated API calls)",
+      "text": "Produced Python code is syntactically plausible (no hallucinated API calls)",
       "type": "correctness"
     }
   ]

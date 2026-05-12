@@ -5,9 +5,9 @@ description: >
   skill whenever the user is creating a B-UML domain model (classes,
   attributes, associations, enumerations, generalizations), running any
   BESSER generator (Django, FastAPI, SQLAlchemy, Pydantic, React, WebApp,
-  BAF, Qiskit, etc.), converting PlantUML to BESSER, modeling state machines
-  or chatbot agents, designing GUI models for web apps, or working with the
-  BESSER web editor at editor.besser-pearl.org. Trigger on imports from
+  BAF, Qiskit, etc.), modeling state machines or chatbot agents, designing
+  GUI models for web apps, or working with the BESSER web editor at
+  editor.besser-pearl.org. Trigger on imports from
   `besser.BUML` or `besser.generators`, mentions of B-UML, DomainModel,
   BinaryAssociation, GUIModel, or any BESSER generator class — even if the
   user does not say "BESSER" by name. Prefer this skill over generic Python,
@@ -24,7 +24,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.3.0"
+  version: "0.1.0"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
@@ -130,17 +130,9 @@ assert model.validate()["success"]
 **Naming rules**: no spaces, no hyphens. `My_Class` and `my_attribute`,
 not `My Class` or `my-attribute`.
 
-### Alternative: PlantUML
-
-If the user already has PlantUML, skip the Python API and convert:
-
-```python
-from besser.BUML.notations.structuralPlantUML import plantuml_to_buml
-model = plantuml_to_buml("my_model.plantuml")
-```
-
-See `references/plantuml.md` for the supported syntax (classes, enums,
-inheritance, composition, cardinality literals).
+PlantUML imports are also supported via `plantuml_to_buml()` — see
+`references/plantuml.md` if needed. The Python API is the recommended
+path.
 
 ---
 

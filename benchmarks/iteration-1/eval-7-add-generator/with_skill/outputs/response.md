@@ -1,662 +1,244 @@
-# Adding a GraphQL Generator to BESSER: Step-by-Step Guide
+# Adding a GraphQL Generator to BESSER
 
-This guide walks through every step needed to add a new GraphQL generator to the BESSER platform. It covers file placement, implementation, registration, testing, and documentation, all grounded in the actual patterns used by existing generators in the codebase.
+Great choice — generators are the most common type of contribution to BESSER. Here's the full walkthrough.
+
+## Quick start: use the scaffold
+
+BESSER ships a scaffold script that gets you 80% of the way there with a working stub (generator class + Jinja template + pytest), runnable immediately:
+
+```bash
+python scripts/scaffold_generator.py graphql ~/code/BESSER
+```
+
+After running it, you still need to:
+
+1. Implement the real GraphQL emission logic.
+2. Register the generator in the web-editor backend config.
+3. Add documentation under `docs/source/generators/`.
+
+The 6 steps below walk through what to do whether you used the scaffold or are doing it by hand.
 
 ---
 
-## Step 1: Create the Generator Package
+## Step 1 — Create the generator package
 
-Create a new directory under `besser/generators/graphql/` with the following structure:
+Layout under `besser/generators/`:
 
 ```
 besser/generators/graphql/
-    __init__.py
-    graphql_generator.py
-    templates/
-        graphql_schema.graphql.j2
+  __init__.py               # export: from .graphql_generator import GraphQLGenerator
+  graphql_generator.py      # the generator class
+  templates/                # Jinja2 templates
+    schema.graphql.j2
 ```
 
-### `__init__.py`
+Use an existing simple generator like `python_classes/` as the structural template.
 
-This file re-exports your generator class so it can be imported as `from besser.generators.graphql import GraphQLGenerator`.
-
-```python
-from .graphql_generator import *
-```
-
-This follows the exact pattern used in every existing generator. For example, `besser/generators/python_classes/__init__.py` contains:
+## Step 2 — Implement `GeneratorInterface`
 
 ```python
-from .python_classes_generator import *
-```
-
----
-
-## Step 2: Implement the Generator Class
-
-Create `besser/generators/graphql/graphql_generator.py`. Your class must inherit from `GeneratorInterface` and implement the `__init__` and `generate` methods.
-
-```python
+# besser/generators/graphql/graphql_generator.py
 import os
 from jinja2 import Environment, FileSystemLoader
-from besser.BUML.metamodel.structural import DomainModel
 from besser.generators import GeneratorInterface
 
 
 class GraphQLGenerator(GeneratorInterface):
-    """
-    GraphQLGenerator generates a GraphQL schema (.graphql) from a B-UML
-    structural domain model.
 
-    Args:
-        model (DomainModel): The B-UML domain model to transform.
-        output_dir (str, optional): Directory for generated output.
-            Defaults to None (uses ./output).
-    """
-
-    def __init__(self, model: DomainModel, output_dir: str = None):
+    def __init__(self, model, output_dir: str = None):
         super().__init__(model, output_dir)
 
     def generate(self):
-        """
-        Generate a GraphQL schema file from the B-UML model.
-
-        Returns:
-            None. Writes a file named ``schema.graphql`` to the output directory.
-        """
-        file_path = self.build_generation_path(file_name="schema.graphql")
-        templates_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "templates"
-        )
+        """Generate a GraphQL schema from the B-UML model."""
+        templates_path = os.path.join(os.path.dirname(__file__), "templates")
         env = Environment(
             loader=FileSystemLoader(templates_path),
             trim_blocks=True,
             lstrip_blocks=True,
         )
-        template = env.get_template("graphql_schema.graphql.j2")
-        with open(file_path, mode="w", encoding="utf-8") as f:
-            generated_code = template.render(
-                classes=self.model.classes_sorted_by_inheritance(),
-                associations=self.model.associations,
-                enumerations=self.model.get_enumerations(),
-            )
-            f.write(generated_code)
-            print("Code generated in the location: " + file_path)
+        template = env.get_template("schema.graphql.j2")
+        output = template.render(
+            classes=self.model.get_classes(),
+            associations=self.model.associations,
+        )
+        file_path = self.build_generation_path("schema.graphql")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(output)
 ```
 
-### Key implementation requirements (from the codebase conventions):
+Key requirements (these apply to every generator):
 
-1. **Call `super().__init__(model, output_dir)`** -- this sets up `self.model` and `self.output_dir` with proper getters/setters defined in `GeneratorInterface` (`besser/generators/generator_interface.py`).
+- Call `super().__init__(model, output_dir)` — this sets `self.model` and `self.output_dir`.
+- Use `self.build_generation_path(filename)` to compose the output path.
+- Use `self.build_generation_dir()` if you only need the directory.
+- Templates live in a sibling `templates/` directory.
+- **Output must be deterministic** — same model in, same bytes out (no timestamps, no random ordering).
+- Reusable helpers (e.g. BUML-type → GraphQL-scalar mapping you'd want elsewhere) belong in `besser/utilities/`, not embedded in the generator.
 
-2. **Use `self.build_generation_path(file_name)`** to resolve the output file path. This method creates the output directory if it does not exist and returns the full path. If `output_dir` is `None`, it defaults to `<cwd>/output/`.
-
-3. **Use `self.build_generation_dir()`** if you only need the directory path (useful for multi-file generators).
-
-4. **Templates must live in a `templates/` subdirectory** alongside the generator module.
-
-5. **Output must be deterministic** -- the same model must produce the same output every time. Do not embed timestamps, random values, or non-deterministic orderings.
-
-6. **Reusable helpers go in `besser/utilities/`**, not in your generator. For example, `besser/generators/structural_utils.py` provides shared functions like `get_foreign_keys()` used by multiple generators.
-
----
-
-## Step 3: Write the Jinja2 Template
-
-Create `besser/generators/graphql/templates/graphql_schema.graphql.j2`:
+## Step 3 — Write the Jinja template
 
 ```jinja2
+{# besser/generators/graphql/templates/schema.graphql.j2 #}
 # Generated by BESSER GraphQLGenerator
-
-{% for enum in enumerations %}
-enum {{ enum.name }} {
-    {% for literal in enum.literals %}
-    {{ literal.name }}
-    {% endfor %}
-}
-
-{% endfor %}
 {% for cls in classes %}
 type {{ cls.name }} {
     {% for attr in cls.attributes %}
-    {{ attr.name }}: {{ attr.type.name | graphql_type }}{% if attr.is_id %}!{% endif %}
-
-    {% endfor %}
-    {% for end in cls.association_ends() if end.is_navigable %}
-    {{ end.name }}: {% if end.multiplicity.max > 1 %}[{{ end.type.name }}]{% else %}{{ end.type.name }}{% endif %}
-
+    {{ attr.name }}: {{ attr.type.name }}
     {% endfor %}
 }
 
 {% endfor %}
 ```
 
-### Template design notes:
+You'll want to flesh this out with proper BUML→GraphQL type mapping (`StringType`→`String`, `IntegerType`→`Int`, etc.), nullability (`!`), list types from multiplicities, and association resolution. The default Jinja delimiters (`{{ }}`, `{% %}`) are fine here — GraphQL SDL has no syntax conflict. (You'd only need custom delimiters like `[[ ]]` when generating JSX/React.)
 
-- You will likely need a **custom Jinja2 filter** to map B-UML primitive types to GraphQL scalar types. Register it on the Jinja2 Environment in your generator before rendering:
+## Step 4 — Register in the web-editor backend
 
-```python
-def graphql_type_filter(buml_type_name):
-    """Map B-UML type names to GraphQL scalar types."""
-    type_map = {
-        "str": "String",
-        "int": "Int",
-        "float": "Float",
-        "bool": "Boolean",
-        "date": "String",      # or use a custom scalar
-        "datetime": "String",  # or use a custom scalar
-        "time": "String",
-    }
-    return type_map.get(buml_type_name, buml_type_name)
-
-env.filters["graphql_type"] = graphql_type_filter
-```
-
-- Use `cls.attributes` for direct attributes and `cls.association_ends()` for navigable relationship ends (this is how the Python generator and others traverse the model).
-
-- Use `cls.all_attributes()` if you want inherited attributes included.
-
-- Use `self.model.classes_sorted_by_inheritance()` to get classes ordered by their inheritance hierarchy (parent classes first), which matters for GraphQL type extension/interface patterns.
-
-- For multiplicity, check `end.multiplicity.max > 1` to determine whether a field should be a list (`[TypeName]`) or a single value.
-
-- Consider whether to map B-UML `Generalization` to GraphQL `interface` types or `union` types -- this is a design decision specific to the GraphQL generator.
-
----
-
-## Step 4: Register in the Web Editor Backend
-
-Edit the file `besser/utilities/web_modeling_editor/backend/config/generators.py` to add your generator to the central registry.
-
-### 4a. Add the import
-
-Add this import at the top of the file, alongside the existing generator imports:
+Edit `besser/utilities/web_modeling_editor/backend/config/generators.py`:
 
 ```python
 from besser.generators.graphql import GraphQLGenerator
-```
 
-### 4b. Add the registry entry
-
-Add this entry to the `SUPPORTED_GENERATORS` dictionary:
-
-```python
-SUPPORTED_GENERATORS: Dict[str, GeneratorInfo] = {
-    # ... existing entries ...
-
-    # GraphQL schema generator (class diagram based)
+GENERATORS = {
+    # ... existing generators ...
     "graphql": GeneratorInfo(
         generator_class=GraphQLGenerator,
-        output_type="file",
+        output_type="file",              # single file → "file"; multi-file → "zip"
         file_extension=".graphql",
-        category="data_format",
-        requires_class_diagram=True,
+        category="api",                  # grouping label in the UI
+        requires_class_diagram=True,     # GraphQL needs a DomainModel
     ),
 }
 ```
 
-The fields mean:
-- **`generator_class`**: Your generator class.
-- **`output_type`**: `"file"` for single-file output, `"zip"` for multi-file output.
-- **`file_extension`**: The extension of the generated file (used by the backend to set Content-Type headers).
-- **`category`**: A grouping label. Use an existing category if appropriate (`"object_oriented"`, `"web_framework"`, `"database"`, `"data_format"`, `"ai_agent"`, `"quantum"`) or create a new one.
-- **`requires_class_diagram`**: `True` because the GraphQL generator consumes a structural `DomainModel`.
+Also update `get_filename_for_generator()` in the same file so the editor downloads `schema.graphql` (or whatever you named the output) rather than a generic name.
 
-### 4c. Update `get_filename_for_generator()`
+## Step 5 — Write tests
 
-In the same file, add a case for your generator in the `get_filename_for_generator()` function:
-
-```python
-def get_filename_for_generator(generator_type: str, base_name: str = "output") -> str:
-    """Get the appropriate filename for a generator."""
-    info = get_generator_info(generator_type)
-    if not info:
-        return f"{base_name}.txt"
-
-    if generator_type == "python":
-        return "classes.py"
-    elif generator_type == "pydantic":
-        return "pydantic_classes.py"
-    # ... existing cases ...
-    elif generator_type == "graphql":
-        return "schema.graphql"
-    else:
-        return f"{generator_type}_output{info.file_extension}"
-```
-
-This ensures the backend returns the correct filename when streaming the generated file to the frontend.
-
----
-
-## Step 5: Write Tests
-
-Create the test directory and test file at `tests/generators/graphql/test_graphql_generator.py`.
-
-### 5a. Recommended test structure
+Place them at `tests/generators/graphql/test_graphql_generator.py`:
 
 ```python
 import os
 import pytest
 from besser.BUML.metamodel.structural import (
-    Class, DomainModel, Enumeration, EnumerationLiteral,
-    Property, BinaryAssociation, Multiplicity,
-    StringType, IntegerType, FloatType, BooleanType, DateType,
+    DomainModel, Class, Property, BinaryAssociation,
+    Multiplicity, StringType, IntegerType,
 )
 from besser.generators.graphql import GraphQLGenerator
 
 
-# ------------------------------------------------------------------ #
-# Fixtures
-# ------------------------------------------------------------------ #
-
 @pytest.fixture
-def simple_model():
-    """A minimal model with one class and a few attributes."""
+def domain_model():
     name_prop = Property(name="name", type=StringType)
     age_prop = Property(name="age", type=IntegerType)
     person = Class(name="Person", attributes={name_prop, age_prop})
-    model = DomainModel(name="SimpleModel", types={person})
-    return model
+    return DomainModel(name="TestModel", types={person})
 
 
 @pytest.fixture
-def library_model():
-    """A richer model with multiple classes, enumerations, and associations."""
-    # Enumeration
-    member_type = Enumeration(
-        name="MemberType",
-        literals={
-            EnumerationLiteral(name="ADULT"),
-            EnumerationLiteral(name="CHILD"),
-        },
-    )
-
-    # Classes
-    book = Class(name="Book")
-    author = Class(name="Author")
-    library = Class(name="Library")
-
-    # Attributes
-    book.attributes = {
-        Property(name="title", type=StringType),
-        Property(name="pages", type=IntegerType),
-        Property(name="release", type=DateType),
-    }
-    author.attributes = {
-        Property(name="email", type=StringType),
-        Property(name="memberKind", type=member_type),
-    }
-    library.attributes = {
-        Property(name="name", type=StringType),
-        Property(name="address", type=StringType),
-    }
-
-    # Associations
-    has = BinaryAssociation(
-        name="Has",
-        ends={
-            Property(name="books", type=book, multiplicity=Multiplicity(0, "*")),
-            Property(name="library", type=library, multiplicity=Multiplicity(1, 1)),
-        },
-    )
-    written_by = BinaryAssociation(
-        name="WrittenBy",
-        ends={
-            Property(name="authors", type=author, multiplicity=Multiplicity(1, "*")),
-            Property(name="books", type=book, multiplicity=Multiplicity(0, "*")),
-        },
-    )
-
-    model = DomainModel(
-        name="LibraryModel",
-        types={book, author, library, member_type},
-        associations={has, written_by},
-    )
-    return model
+def output_dir(tmp_path):
+    return str(tmp_path)
 
 
-# ------------------------------------------------------------------ #
-# Tests: File creation
-# ------------------------------------------------------------------ #
-
-def test_generate_creates_output_file(simple_model, tmp_path):
-    """The generator must produce a schema.graphql file."""
-    gen = GraphQLGenerator(model=simple_model, output_dir=str(tmp_path))
+def test_generate_creates_output_file(domain_model, output_dir):
+    gen = GraphQLGenerator(model=domain_model, output_dir=output_dir)
     gen.generate()
-    output_file = tmp_path / "schema.graphql"
-    assert output_file.exists(), "schema.graphql was not created"
+    assert os.path.exists(os.path.join(output_dir, "schema.graphql"))
 
 
-def test_generate_default_output_dir(simple_model):
-    """When output_dir is None the generator writes to ./output/."""
-    gen = GraphQLGenerator(model=simple_model)
+def test_generate_contains_type_and_fields(domain_model, output_dir):
+    gen = GraphQLGenerator(model=domain_model, output_dir=output_dir)
     gen.generate()
-    default_path = os.path.join(os.getcwd(), "output", "schema.graphql")
-    assert os.path.isfile(default_path)
-    # Clean up
-    os.remove(default_path)
-
-
-# ------------------------------------------------------------------ #
-# Tests: Content correctness -- simple model
-# ------------------------------------------------------------------ #
-
-def test_simple_model_contains_type(simple_model, tmp_path):
-    """Generated schema must contain a 'type Person' block."""
-    gen = GraphQLGenerator(model=simple_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
+    with open(os.path.join(output_dir, "schema.graphql")) as f:
+        content = f.read()
     assert "type Person" in content
-
-
-def test_simple_model_contains_attributes(simple_model, tmp_path):
-    """Generated schema must contain mapped attribute names."""
-    gen = GraphQLGenerator(model=simple_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
     assert "name" in content
     assert "age" in content
-
-
-def test_type_mapping_string(simple_model, tmp_path):
-    """B-UML StringType should map to GraphQL 'String'."""
-    gen = GraphQLGenerator(model=simple_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    assert "String" in content
-
-
-def test_type_mapping_integer(simple_model, tmp_path):
-    """B-UML IntegerType should map to GraphQL 'Int'."""
-    gen = GraphQLGenerator(model=simple_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    assert "Int" in content
-
-
-# ------------------------------------------------------------------ #
-# Tests: Content correctness -- library model
-# ------------------------------------------------------------------ #
-
-def test_library_model_all_types_present(library_model, tmp_path):
-    """All classes and enumerations must appear in the generated schema."""
-    gen = GraphQLGenerator(model=library_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    assert "type Book" in content
-    assert "type Author" in content
-    assert "type Library" in content
-    assert "enum MemberType" in content
-
-
-def test_enumeration_literals(library_model, tmp_path):
-    """Enumeration literals must appear inside the enum block."""
-    gen = GraphQLGenerator(model=library_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    assert "ADULT" in content
-    assert "CHILD" in content
-
-
-def test_association_list_type(library_model, tmp_path):
-    """A many-end association should produce a list type like [Book]."""
-    gen = GraphQLGenerator(model=library_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    # The Library type should have a books field with list type
-    assert "[Book]" in content or "[Author]" in content
-
-
-def test_association_single_type(library_model, tmp_path):
-    """A 1-end association should produce a singular type reference."""
-    gen = GraphQLGenerator(model=library_model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    # The Book type should have a library field that is not a list
-    # Look for a line with 'Library' that is NOT wrapped in brackets
-    lines = content.split("\n")
-    found_singular = any(
-        "Library" in line and "[Library]" not in line
-        for line in lines
-        if "type Library" not in line and "enum" not in line
-    )
-    assert found_singular, "Expected a singular Library reference in Book type"
-
-
-# ------------------------------------------------------------------ #
-# Tests: Edge cases
-# ------------------------------------------------------------------ #
-
-def test_empty_model(tmp_path):
-    """An empty model should still produce a valid (possibly empty) schema file."""
-    model = DomainModel(name="EmptyModel", types=set())
-    gen = GraphQLGenerator(model=model, output_dir=str(tmp_path))
-    gen.generate()
-    output_file = tmp_path / "schema.graphql"
-    assert output_file.exists()
-
-
-def test_class_with_no_attributes(tmp_path):
-    """A class with no attributes should still generate a type block."""
-    empty_class = Class(name="EmptyEntity")
-    model = DomainModel(name="NoAttrModel", types={empty_class})
-    gen = GraphQLGenerator(model=model, output_dir=str(tmp_path))
-    gen.generate()
-    content = (tmp_path / "schema.graphql").read_text(encoding="utf-8")
-    assert "type EmptyEntity" in content
-
-
-def test_deterministic_output(simple_model, tmp_path):
-    """Running the generator twice must produce identical output."""
-    dir1 = tmp_path / "run1"
-    dir2 = tmp_path / "run2"
-    dir1.mkdir()
-    dir2.mkdir()
-
-    gen1 = GraphQLGenerator(model=simple_model, output_dir=str(dir1))
-    gen1.generate()
-    gen2 = GraphQLGenerator(model=simple_model, output_dir=str(dir2))
-    gen2.generate()
-
-    content1 = (dir1 / "schema.graphql").read_text(encoding="utf-8")
-    content2 = (dir2 / "schema.graphql").read_text(encoding="utf-8")
-    assert content1 == content2, "Generator output is not deterministic"
 ```
 
-### 5b. Test categories to cover
+What to cover for a generator (per the project's test conventions):
 
-Based on patterns observed across the existing test suites (e.g., `tests/generators/python/test_python_generator.py`, `tests/generators/sqlalchemy/`), here are the categories of tests you should write:
+- **File existence** — `schema.graphql` is produced where expected.
+- **Key content** — class names appear as `type` declarations, attributes appear as fields, associations show up correctly.
+- **Edge cases** — empty model, deep inheritance, many-to-many associations, optional vs. required attributes, list types from multiplicity `0..*` / `1..*`.
+- **Determinism** — run `generate()` twice and diff the output.
+- **Error cases** — use `pytest.raises(ValueError)` if the generator should reject certain models.
 
-| Category | What to verify | Priority |
-|----------|---------------|----------|
-| **File creation** | `schema.graphql` is created in the correct directory | Required |
-| **Type generation** | Each B-UML `Class` produces a GraphQL `type` block | Required |
-| **Attribute mapping** | Each `Property` appears as a field with the correct GraphQL scalar type | Required |
-| **Enumeration generation** | Each B-UML `Enumeration` produces a GraphQL `enum` block with all literals | Required |
-| **Association mapping** | Many-end associations produce list types `[T]`; single-end produce singular `T` | Required |
-| **Inheritance** | B-UML `Generalization` maps to GraphQL `interface` or `implements` | Important |
-| **Type mapping** | B-UML primitive types (`str`, `int`, `float`, `bool`, `date`, `datetime`) map to correct GraphQL scalars | Required |
-| **Empty model** | An empty `DomainModel` produces a valid (possibly empty) schema | Important |
-| **Determinism** | Two runs on the same model produce identical output | Required |
-| **Default output dir** | When `output_dir=None`, files go to `./output/` | Nice to have |
-| **Non-nullable fields** | Required attributes (min multiplicity > 0) produce `!` suffix in GraphQL | Important |
-| **Complex associations** | Many-to-many, self-referencing associations | Important |
+Conventions to follow:
 
-### 5c. Running the tests
+- Test files: `test_*.py`; test functions: `test_*`.
+- Use the `tmp_path` fixture for output dirs (auto-cleaned by pytest).
+- Build small inline models as fixtures — don't rely on external files.
+- Assert specific content, not just file existence.
+
+Run them with:
 
 ```bash
-# Run only the GraphQL generator tests
 python -m pytest tests/generators/graphql/ -v
-
-# Run with keyword filter
-python -m pytest -k "graphql"
-
-# Run all generator tests to ensure nothing is broken
-python -m pytest tests/generators/
 ```
 
----
-
-## Step 6: Add Documentation
-
-### 6a. Create the generator documentation page
+## Step 6 — Document
 
 Create `docs/source/generators/graphql.rst`:
 
 ```rst
-GraphQL Generator
-=================
+GraphQLGenerator
+================
 
-The GraphQL generator produces a GraphQL schema definition (``.graphql`` file) from a
-B-UML :doc:`structural model <../buml_language/model_types/structural>`.
+The GraphQLGenerator produces a GraphQL schema (SDL) from a B-UML domain model.
 
 Prerequisites
 -------------
 
-- BESSER installed (``pip install besser``)
-- A B-UML domain model defined in Python
+- BESSER installed
+- A ``DomainModel`` describing the types you want exposed
 
 Usage
 -----
 
 .. code-block:: python
 
-   from besser.BUML.metamodel.structural import (
-       DomainModel, Class, Property, StringType, IntegerType,
-       BinaryAssociation, Multiplicity,
-   )
    from besser.generators.graphql import GraphQLGenerator
 
-   # Define your model
-   name = Property(name="name", type=StringType)
-   person = Class(name="Person", attributes={name})
-   model = DomainModel(name="MyModel", types={person})
-
-   # Generate GraphQL schema
-   generator = GraphQLGenerator(model=model, output_dir="./output")
-   generator.generate()
+   gen = GraphQLGenerator(model=my_model, output_dir="./output")
+   gen.generate()
 
 Output
 ------
 
-The generator produces a single file ``schema.graphql`` containing:
-
-- **GraphQL enum types** for each B-UML ``Enumeration``
-- **GraphQL object types** for each B-UML ``Class``
-- **Field definitions** for each attribute and navigable association end
-- **List types** (``[T]``) for many-valued association ends
-
-Type Mapping
-~~~~~~~~~~~~
-
-.. list-table::
-   :header-rows: 1
-
-   * - B-UML Type
-     - GraphQL Type
-   * - ``str``
-     - ``String``
-   * - ``int``
-     - ``Int``
-   * - ``float``
-     - ``Float``
-   * - ``bool``
-     - ``Boolean``
-   * - ``date``
-     - ``String`` (custom scalar recommended)
-   * - ``datetime``
-     - ``String`` (custom scalar recommended)
-
-Limitations
------------
-
-- The current version generates schema types only. Query and Mutation root types are
-  not generated automatically.
-- Custom GraphQL scalars (e.g., ``Date``, ``DateTime``) are not defined in the output
-  by default.
+The generator produces a single file ``schema.graphql`` containing one
+``type`` declaration per B-UML class, with fields mapped from attributes
+and associations.
 ```
 
-### 6b. Register in the generators index
+Add the new page to the index in `docs/source/generators.rst`.
 
-Edit `docs/source/generators.rst` and add the GraphQL generator under the "Data & API" section:
-
-```rst
-Data & API
-----------
-
-Generate database schemas, APIs, and data formats:
-
-.. toctree::
-   :maxdepth: 1
-
-   generators/sql
-   generators/graphql
-   generators/json_schema
-   generators/rdf
-   generators/terraform
-```
-
-### 6c. Build and verify documentation locally
+Build the docs locally to confirm everything renders:
 
 ```bash
 cd docs
-
-# Windows:
-make.bat html
-
-# macOS/Linux:
-make html
-
-# Then open docs/build/html/generators/graphql.html in your browser
+make.bat html      # Windows
+# or: make html    # macOS/Linux
+# Open docs/build/html/index.html
 ```
 
 ---
 
-## Summary: Complete File Listing
+## Before opening the PR
 
-Here is every file you need to create or modify:
+1. Topic branch: `git checkout -b feature/add-graphql-generator`.
+2. Conventional commit messages, e.g. `feat: add GraphQL schema generator`.
+3. Run the full suite: `python -m pytest`.
+4. Build docs: `cd docs && make html`.
+5. Rebase on latest `master`: `git fetch origin && git rebase origin/master`.
+6. Push and open a PR against `master`, filling in the PR template.
+7. Two maintainer approvals are required to merge (one suffices after 14 days).
 
-### New files to create
+## Pitfalls to avoid
 
-| File | Purpose |
-|------|---------|
-| `besser/generators/graphql/__init__.py` | Re-exports `GraphQLGenerator` |
-| `besser/generators/graphql/graphql_generator.py` | Generator class implementing `GeneratorInterface` |
-| `besser/generators/graphql/templates/graphql_schema.graphql.j2` | Jinja2 template for GraphQL schema |
-| `tests/generators/graphql/test_graphql_generator.py` | Pytest tests |
-| `docs/source/generators/graphql.rst` | Sphinx documentation page |
+- **Don't duplicate logic** — if you write a BUML→GraphQL type mapper, put it in `besser/utilities/` so other generators can reuse it.
+- **Determinism** — no timestamps, no random/unsorted iteration in the output.
+- **Don't touch the frontend submodule** unless your change genuinely requires UI work; that lives in the WME repo.
+- **Update docs** in the same PR — the project considers backend changes incomplete without doc updates.
 
-### Existing files to modify
-
-| File | Change |
-|------|--------|
-| `besser/utilities/web_modeling_editor/backend/config/generators.py` | Add import and `SUPPORTED_GENERATORS` entry; update `get_filename_for_generator()` |
-| `docs/source/generators.rst` | Add `generators/graphql` to the toctree |
-
----
-
-## Contribution Workflow
-
-Once all files are in place:
-
-1. **Create a topic branch**: `git checkout -b feature/add-graphql-generator`
-2. **Run your tests**: `python -m pytest tests/generators/graphql/ -v`
-3. **Run all tests** to check for regressions: `python -m pytest`
-4. **Build documentation**: `cd docs && make html` (Windows: `make.bat html`)
-5. **Commit using Conventional Commits**: `git commit -m "feat: add GraphQL schema generator"`
-6. **Push and open a PR** against `master` (the main branch for this repository)
-7. **Fill in the PR template** with a description, list of tests executed, and any extra context
-
-Two maintainer approvals are required to merge (one approval is sufficient after 14 days).
-
----
-
-## Key References in the Codebase
-
-- **Generator interface**: `besser/generators/generator_interface.py` -- the abstract base class all generators must extend.
-- **Simple generator example**: `besser/generators/python_classes/python_classes_generator.py` -- the most straightforward existing generator to use as a scaffold.
-- **Complex generator example**: `besser/generators/rest_api/rest_api_generator.py` -- shows custom Jinja2 filters, multi-file output, and delegating to other generators.
-- **Structural utilities**: `besser/generators/structural_utils.py` -- shared helpers for working with associations and foreign keys.
-- **Generator registry**: `besser/utilities/web_modeling_editor/backend/config/generators.py` -- where all generators are registered for the web editor backend.
-- **Existing test example**: `tests/generators/python/test_python_generator.py` -- demonstrates fixture-based testing with model construction and content assertions.
-- **Build-your-own-generator docs**: `docs/source/generators/build_generator.rst` -- official documentation for the generator extension pattern.
-- **Contributor guide for generators**: `docs/source/contributing/create_generator.rst` -- additional guidance on the contribution workflow.
+That's the full path. If you used the scaffold script, Steps 1–3 and a baseline of Step 5 are already done and you're really just filling in the GraphQL-specific logic, registering in Step 4, and writing the docs in Step 6.

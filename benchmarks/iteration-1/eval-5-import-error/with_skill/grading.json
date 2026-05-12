@@ -2,25 +2,9 @@
   "eval_id": 5,
   "config": "with_skill",
   "expectations": [
-    {
-      "text": "Response identifies that the correct name is StringType, not String",
-      "passed": true,
-      "evidence": "States 'The correct name for the string type is StringType, not String'"
-    },
-    {
-      "text": "Response explains these are pre-built singleton instances",
-      "passed": true,
-      "evidence": "Explains 'the primitive data types are pre-built singleton instances of PrimitiveDataType'"
-    },
-    {
-      "text": "Response provides the corrected import statement",
-      "passed": true,
-      "evidence": "Shows 'from besser.BUML.metamodel.structural import StringType'"
-    },
-    {
-      "text": "Response lists other common type names (IntegerType, FloatType, BooleanType, etc.)",
-      "passed": true,
-      "evidence": "Full table of Wrong vs Correct: String->StringType, Integer->IntegerType, Float->FloatType, Boolean->BooleanType, Date->DateType, DateTime->DateTimeType, Time->TimeType, Association->BinaryAssociation"
-    }
+    {"text": "Identifies that the correct name is 'StringType' not 'String'", "passed": true, "evidence": "'The primitive type is named StringType, not String' stated upfront with corrected import"},
+    {"text": "Explains these are pre-built singleton instances, not classes", "passed": true, "evidence": "'The primitive types in BESSER are singleton instances, not classes. You import them and use them directly... No StringType() call — just pass the singleton itself as the type='"},
+    {"text": "Provides the correct import statement with StringType", "passed": true, "evidence": "'from besser.BUML.metamodel.structural import StringType' shown explicitly, plus combined import example with Class, Property"},
+    {"text": "Mentions other commonly confused names", "passed": true, "evidence": "Full table: String/StringType, Integer/IntegerType, Float/FloatType, Boolean/BooleanType, Date/DateType, DateTime/DateTimeType, Association/BinaryAssociation"}
   ]
 }

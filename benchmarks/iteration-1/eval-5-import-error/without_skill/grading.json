@@ -2,25 +2,9 @@
   "eval_id": 5,
   "config": "without_skill",
   "expectations": [
-    {
-      "text": "Response identifies that the correct name is StringType, not String",
-      "passed": true,
-      "evidence": "States 'The correct name is StringType'"
-    },
-    {
-      "text": "Response explains these are pre-built singleton instances",
-      "passed": true,
-      "evidence": "Explains they follow a '*Type naming convention' and are 'module-level instances of PrimitiveDataType'"
-    },
-    {
-      "text": "Response provides the corrected import statement",
-      "passed": true,
-      "evidence": "Shows 'from besser.BUML.metamodel.structural import StringType'"
-    },
-    {
-      "text": "Response lists other common type names (IntegerType, FloatType, BooleanType, etc.)",
-      "passed": true,
-      "evidence": "Lists StringType, IntegerType, FloatType, BooleanType etc."
-    }
+    {"text": "Identifies that the correct name is 'StringType' not 'String'", "passed": true, "evidence": "There is no symbol named String. The correct name is StringType."},
+    {"text": "Explains these are pre-built singleton instances, not classes", "passed": true, "evidence": "These are singleton instances, not classes. Pre-instantiated objects of the PrimitiveDataType class."},
+    {"text": "Provides the correct import statement with StringType", "passed": true, "evidence": "from besser.BUML.metamodel.structural import StringType"},
+    {"text": "Mentions other commonly confused names", "passed": true, "evidence": "Full table of all 9 types: StringType, IntegerType, FloatType, BooleanType, DateType, TimeType, DateTimeType, TimeDeltaType, AnyType. Shows source code line numbers."}
   ]
 }

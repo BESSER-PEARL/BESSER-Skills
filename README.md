@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agent--skills-compatible-brightgreen)](https://agentskills.io)
-[![BESSER](https://img.shields.io/badge/BESSER-v6.4.0-orange)](https://github.com/BESSER-PEARL/BESSER)
+[![BESSER](https://img.shields.io/badge/BESSER-v7.8.3-orange)](https://github.com/BESSER-PEARL/BESSER)
 
 [Agent Skills](https://agentskills.io) for [BESSER](https://github.com/BESSER-PEARL/BESSER), the low-code model-driven engineering platform. These skills give AI coding agents deep knowledge of BESSER's metamodel, code generators, troubleshooting patterns, and contributor workflows -- without needing the full BESSER codebase in context.
 
@@ -52,7 +52,7 @@ Copy the `SKILL.md` content into your agent's rules or instructions file (e.g., 
 
 ## How It Works
 
-Skills follow the [Agent Skills](https://agentskills.io) open standard. The agent loads only the skill name and description at startup (~100 tokens each). When your task matches a skill's description, the agent reads the full `SKILL.md` into context and applies its knowledge.
+Skills follow the [Agent Skills](https://agentskills.io) open standard. The agent loads only the skill name and description at startup (a few hundred tokens each). When your task matches a skill's description, the agent reads the full `SKILL.md` into context and applies its knowledge.
 
 **When do skills activate?**
 

@@ -6,13 +6,15 @@
 
 [Agent Skills](https://agentskills.io) for [BESSER](https://github.com/BESSER-PEARL/BESSER), the low-code model-driven engineering platform. These skills give AI coding agents deep knowledge of BESSER's metamodel, code generators, troubleshooting patterns, and contributor workflows -- without needing the full BESSER codebase in context.
 
+With these skills an agent can build **UML class models** -- classes, attributes, associations, inheritance -- plus state machines and chatbot agents, then generate working code (Python, SQL, REST APIs, Django, React, and more) straight from the model.
+
 Works with any agent that supports the Agent Skills standard: **Claude Code**, **Cursor**, **Cline**, **Windsurf**, **GitHub Copilot**, and [40+ others](https://agentskills.io).
 
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: domain modeling, code generation, PlantUML, web editor |
+| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), code generation, PlantUML, web editor |
 | [`besser-generators`](skills/besser-generators/SKILL.md) | Per-generator operations, safe customization, template overrides |
 | [`besser-troubleshooting`](skills/besser-troubleshooting/SKILL.md) | Diagnosis guide for install, import, runtime, and deployment issues |
 | [`besser-dev`](skills/besser-dev/SKILL.md) | Contributor guide: adding generators, tests, docs, PR workflow |

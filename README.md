@@ -8,6 +8,8 @@
 
 With these skills an agent can build **UML class models** -- classes, attributes, associations, inheritance -- plus state machines and chatbot agents, then generate working code (Python, SQL, REST APIs, Django, React, and more) straight from the model.
 
+The same knowledge lets an agent **draw correct UML class diagrams in B-UML and embed them straight into your Markdown docs** -- B-UML is BESSER's own model representation, so the diagram is valid, runnable, and *is* the model rather than a throwaway picture. See [Drawing correct UML diagrams](#drawing-correct-uml-diagrams).
+
 Works with any agent that supports the Agent Skills standard: **Claude Code**, **Cursor**, **Cline**, **Windsurf**, **GitHub Copilot**, and [40+ others](https://agentskills.io).
 
 ## Skills
@@ -18,6 +20,59 @@ Works with any agent that supports the Agent Skills standard: **Claude Code**, *
 | [`besser-generators`](skills/besser-generators/SKILL.md) | Per-generator operations, safe customization, template overrides |
 | [`besser-troubleshooting`](skills/besser-troubleshooting/SKILL.md) | Diagnosis guide for install, import, runtime, and deployment issues |
 | [`besser-dev`](skills/besser-dev/SKILL.md) | Contributor guide: adding generators, tests, docs, PR workflow |
+
+## Drawing correct UML diagrams
+
+AI agents are constantly asked to capture a system's structure while
+documenting it -- and they routinely get the modeling wrong: invalid
+multiplicities, associations pointing the wrong way, inheritance reversed.
+With `besser-user` loaded, the agent expresses the design directly in
+**B-UML, BESSER's own model representation**, and embeds it straight into
+a Markdown file:
+
+```python
+from besser.BUML.metamodel.structural import (
+    DomainModel, Class, Property, Multiplicity,
+    BinaryAssociation, Generalization, StringType, IntegerType,
+)
+
+publication = Class(name="Publication", attributes={
+    Property(name="title", type=StringType)})
+book = Class(name="Book", attributes={
+    Property(name="pages", type=IntegerType)})
+author = Class(name="Author", attributes={
+    Property(name="name", type=StringType)})
+
+# Book is a Publication
+book_is_a = Generalization(general=publication, specific=book)
+
+# A Book is written by 1..* Authors; an Author writes 0..* Books
+written_by = Property(name="writtenBy", type=author, multiplicity=Multiplicity(1, "*"))
+writes     = Property(name="writes",    type=book,   multiplicity=Multiplicity(0, "*"))
+book_author = BinaryAssociation(name="book_author", ends={written_by, writes})
+
+model = DomainModel(
+    name="Library",
+    types={publication, book, author},
+    associations={book_author},
+    generalizations={book_is_a},
+)
+assert model.validate()["success"]
+```
+
+The same B-UML works **two ways**:
+
+- **As documentation** -- a precise, readable structural model embedded in
+  your `README`, design doc, or `.md` spec. Drop it into
+  [editor.besser-pearl.org](https://editor.besser-pearl.org) (Import →
+  B-UML) whenever you want the rendered visual class diagram.
+- **As a real model** -- it isn't a drawing *of* the system, it *is* the
+  system: `validate()`-checked and fed straight to any generator (Python,
+  SQL, FastAPI, Django, React, …). No separate, drifting diagram to keep
+  in sync.
+
+Because the embedded B-UML is the source of truth, the documentation and
+the generated code never diverge.
 
 ## Installation
 

@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Identifies that 'postgres' is wrong and 'postgresql' is the correct string",
+      "passed": true,
+      "evidence": "Candidate states: 'You're using sql_dialect=\"postgres\", but the valid value is \"postgresql\" (with the ql suffix), not \"postgres\".' Correct per VALID_DBMS set (line 28)."
+    },
+    {
+      "text": "Lists all valid DBMS options (sqlite, postgresql, mysql, mssql, mariadb, oracle)",
+      "passed": true,
+      "evidence": "Candidate lists all six: sqlite (default), postgresql, mysql, mssql, mariadb, oracle. Matches source VALID_DBMS = {\"sqlite\", \"postgresql\", \"mysql\", \"mssql\", \"mariadb\", \"oracle\"} (line 28)."
+    },
+    {
+      "text": "Shows corrected code with sql_dialect='postgresql' or dbms='postgresql'",
+      "passed": true,
+      "evidence": "Provides runnable code block: SQLGenerator(..., sql_dialect=\"postgresql\") then generator.generate(). sql_dialect is the correct constructor param (line 11)."
+    },
+    {
+      "text": "No hallucinated DBMS names or wrong parameter names",
+      "passed": true,
+      "evidence": "Uses correct param sql_dialect for SQLGenerator (line 11) and dbms for SQLAlchemyGenerator.generate (line 30); all six DBMS names match source exactly; line references (11-13, 30, 172-173, 128-130, 50-59, 121-125) all verified accurate; no invented names."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

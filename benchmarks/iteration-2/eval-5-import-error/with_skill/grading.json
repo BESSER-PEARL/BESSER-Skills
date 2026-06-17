@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Identifies that the correct name is 'StringType' not 'String'",
+      "passed": true,
+      "evidence": "States 'The primitive type is named StringType' and shows wrong line 'import String' vs fix 'import StringType', plus a Wrong/Correct table mapping String -> StringType."
+    },
+    {
+      "text": "Explains these are pre-built singleton instances, not classes",
+      "passed": true,
+      "evidence": "Says \"BESSER's primitive types are **singleton instances** (not classes)\" and \"Because these are singleton instances, you import and use them directly \u2014 you do not instantiate them.\""
+    },
+    {
+      "text": "Provides the correct import statement with StringType",
+      "passed": true,
+      "evidence": "Provides 'from besser.BUML.metamodel.structural import StringType' (and a combined import with Class, Property, StringType, IntegerType)."
+    },
+    {
+      "text": "Mentions other commonly confused names (IntegerType, FloatType, BooleanType, etc.)",
+      "passed": true,
+      "evidence": "Table lists IntegerType, FloatType, BooleanType, DateType, DateTimeType, and notes BinaryAssociation."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

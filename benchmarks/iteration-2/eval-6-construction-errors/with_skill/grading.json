@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Explains that B-UML names cannot contain spaces",
+      "passed": true,
+      "evidence": "States 'BESSER does not allow spaces in any B-UML name (classes, attributes/properties, associations, enumerations, etc.)' and shows the exact ValueError: \"'first name' is invalid. Name cannot contain spaces.\" which matches the codebase error message."
+    },
+    {
+      "text": "Recommends using underscores: 'first_name' instead of 'first name'",
+      "passed": true,
+      "evidence": "Explicitly says 'Fix: replace the space with an underscore.' and shows Property(name=\"first_name\", type=StringType) as the correct version."
+    },
+    {
+      "text": "Explains that enumeration literals must have unique names within the same enum",
+      "passed": true,
+      "evidence": "States 'Each EnumerationLiteral inside an Enumeration must have a unique name' and shows the matching ValueError: 'An enumeration cannot have two literals with the same name'."
+    },
+    {
+      "text": "Provides corrected code for both issues",
+      "passed": true,
+      "evidence": "Provides corrected Property(name=\"first_name\", ...) for issue 1, a corrected Enumeration with unique literals (ACTIVE/INACTIVE) for issue 2, and a combined 'Putting it together' block fixing both."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

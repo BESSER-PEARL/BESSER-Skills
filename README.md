@@ -129,25 +129,38 @@ Skills follow the [Agent Skills](https://agentskills.io) open standard. The agen
 
 Skills evaluated across 8 test scenarios (2 per skill), with-skill vs
 without-skill baseline. The baseline has no skills loaded but full read
-access to the BESSER source tree. Run with Claude Code (Claude Sonnet 4).
+access to the BESSER source tree. Run with Claude Code.
 
-| Metric | With skills (v0.1.0) | Without skills (baseline) |
-|--------|----------------------|----------------------------|
-| **Pass rate** | **100%** | 100% |
-| **Mean response time** | **36.5s** | 138.4s |
-| **Mean token usage** | **25,181** | 48,007 |
+**Correctness** was re-run for v0.2.0 ([`benchmarks/iteration-2/`](benchmarks/iteration-2/benchmark.md),
+graded against BESSER v7.8.3): the skill-equipped agent passes **38/38
+(100%)**, matching the baseline — while reading only the relevant skill
+files, no BESSER source. **Performance** figures are carried over from the
+v0.1.0 benchmark ([`benchmarks/iteration-1/`](benchmarks/iteration-1/benchmark.md));
+the v0.2.0 changes are skill-text only and do not alter the agent's work
+pattern.
 
-vs the baseline, skills are **74% faster** and use **48% fewer tokens** at
-the same correctness. Skills give the agent the relevant patterns
-up-front and skip the read-the-codebase phase entirely.
+| Metric | With skills | Without skills (baseline) | Measured |
+|--------|-------------|----------------------------|----------|
+| **Pass rate** | **100% (38/38)** | 100% (38/38) | v0.2.0 (iteration-2) |
+| **Mean response time** | **36.5s** | 138.4s | v0.1.0 (iteration-1) |
+| **Mean token usage** | **25,181** | 48,007 | v0.1.0 (iteration-1) |
 
-### Key Findings
+At the same correctness, skills are (per the v0.1.0 perf run) **74% faster**
+and use **48% fewer tokens** — the agent gets the relevant patterns up-front
+and skips the read-the-codebase phase entirely.
 
-- **100% pass rate** — every assertion across all 8 evals passes.
-- **74% faster** on average; the largest gains are on complex tasks (eval-7 add-generator: -75%; eval-3 safe-customization: -76%; eval-2 PlantUML backend: -77%).
-- **Token usage is normalised** — stddev drops from ~19.8k (baseline) to ~1.4k (with skill). Effort becomes predictable.
+### Key findings
 
-### Per-eval timing
+- **100% pass rate at v0.2.0** — every assertion across all 8 evals passes,
+  with-skill and baseline alike.
+- **The re-run earned its keep:** it caught a real, pre-existing API error in
+  the skill — `SQLGenerator.generate(sql_dialect=...)`, which would
+  `TypeError` (the dialect is a constructor argument) — fixed before release.
+  See [`benchmarks/iteration-2/benchmark.md`](benchmarks/iteration-2/benchmark.md).
+- **Performance (v0.1.0):** token usage is also far more consistent — stddev
+  drops from ~19.8k (baseline) to ~1.4k (with skill).
+
+### Per-eval timing (v0.1.0 carry-over)
 
 ```
 Eval                       with skill    baseline    Δ
@@ -161,7 +174,8 @@ eval-7 (add generator)        53.9s       214.4s    -75%
 eval-8 (test patterns)        35.6s       151.3s    -76%
 ```
 
-Full benchmark data and methodology: [`benchmarks/iteration-1/benchmark.md`](benchmarks/iteration-1/benchmark.md)
+Correctness data: [`benchmarks/iteration-2/benchmark.md`](benchmarks/iteration-2/benchmark.md).
+Performance data and full methodology: [`benchmarks/iteration-1/benchmark.md`](benchmarks/iteration-1/benchmark.md)
 
 ## Evals
 
@@ -169,7 +183,7 @@ Eval definitions are in [`evals/evals.json`](evals/evals.json). Each eval specif
 
 **Methodology**: For each eval, two independent agents run in parallel -- one with the skill loaded (no codebase access), one without (full codebase access as baseline). Responses are graded against binary pass/fail assertions checking correctness, content presence, and negative checks.
 
-See [`benchmarks/iteration-1/benchmark.md`](benchmarks/iteration-1/benchmark.md) for the full methodology and analysis.
+See [`benchmarks/iteration-2/benchmark.md`](benchmarks/iteration-2/benchmark.md) (latest, v0.2.0 correctness) and [`benchmarks/iteration-1/benchmark.md`](benchmarks/iteration-1/benchmark.md) (v0.1.0 performance) for the full methodology and analysis.
 
 ## Project Structure
 
@@ -203,13 +217,14 @@ besser-skills/
   evals/                                  # eval definitions
     evals.json
   benchmarks/                             # benchmark results
-    iteration-1/                          # 8-eval with-skill vs baseline
+    iteration-1/                          # v0.1.0: 8-eval correctness + performance
+    iteration-2/                          # v0.2.0: correctness re-run (perf carried over)
 ```
 
 The `besser-user` and `besser-generators` skills follow the
 [skill-creator](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md)
-progressive-disclosure pattern: `SKILL.md` stays under ~300 lines and
-points into `references/` for detail when it's needed.
+progressive-disclosure pattern: `SKILL.md` stays lean (a few hundred lines)
+and points into `references/` for detail when it's needed.
 
 ## Related
 

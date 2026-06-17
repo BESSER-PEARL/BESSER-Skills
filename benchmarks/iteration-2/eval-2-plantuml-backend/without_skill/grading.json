@@ -1,0 +1,31 @@
+{
+  "assertions": [
+    {
+      "text": "Mentions saving the PlantUML to a .plantuml file",
+      "passed": true,
+      "evidence": "Answer says: 'Save your PlantUML exactly as-is to a file named `ecommerce.plantuml`' and passes plantUML_model_path=\"ecommerce.plantuml\". The .plantuml extension is explicitly used."
+    },
+    {
+      "text": "Uses plantuml_to_buml() from besser.BUML.notations.structuralPlantUML",
+      "passed": true,
+      "evidence": "Answer uses 'from besser.BUML.notations.structuralPlantUML import plantuml_to_buml'. Verified: the package __init__.py does 'from .plantuml_to_buml import *', so the import resolves correctly to the real function."
+    },
+    {
+      "text": "Uses BackendGenerator (not just RESTAPIGenerator) for FastAPI generation",
+      "passed": true,
+      "evidence": "Answer instantiates 'BackendGenerator(model=ecommerce, http_methods=[...], ...)' and only references RESTAPIGenerator as an underlying source file. BackendGenerator is confirmed in besser/generators/backend/backend_generator.py and is the FastAPI generator."
+    },
+    {
+      "text": "Passes http_methods parameter to limit to GET and POST only",
+      "passed": true,
+      "evidence": "Answer passes http_methods=[\"POST\", \"GET\"] to BackendGenerator. Verified the parameter exists and filters against allowed_methods=[\"GET\",\"POST\",\"PUT\",\"DELETE\"], so it correctly limits endpoints."
+    },
+    {
+      "text": "No hallucinated function names or wrong import paths",
+      "passed": true,
+      "evidence": "All verified against source: plantuml_to_buml signature (plantUML_model_path, buml_file_path) matches; BackendGenerator signature matches exactly (model, http_methods, nested_creations, output_dir, docker_image, docker_config_path); DomainModel import path and get_classes() method confirmed; output files main_api.py/sql_alchemy.py/pydantic_classes.py confirmed in docstring."
+    }
+  ],
+  "passed_count": 5,
+  "total_count": 5
+}

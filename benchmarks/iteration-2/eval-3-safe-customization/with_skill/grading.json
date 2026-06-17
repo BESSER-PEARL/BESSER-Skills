@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Clearly states that generated files are overwritten on regeneration",
+      "passed": true,
+      "evidence": "States 'your edits will not survive. BackendGenerator.generate() overwrites everything every time. Each call replaces all three output files (main_api.py, pydantic_classes.py, sql_alchemy.py) entirely.'"
+    },
+    {
+      "text": "Recommends creating separate extension/wrapper files that import from generated code",
+      "passed": true,
+      "evidence": "Option A recommends a 'wrapper script that mounts the generated app' in a separate file (app.py) that imports the generated FastAPI app, plus custom_queries.py importing from sql_alchemy. 'keep your custom logic in separate files... never in the generated file.'"
+    },
+    {
+      "text": "Shows a concrete code example of the extension pattern (importing from main_api or generated app)",
+      "passed": true,
+      "evidence": "Concrete example: 'from main_api import app' followed by '@app.get(\"/custom/stats\")' and '@app.post(\"/custom/books/validated\")' route definitions in app.py."
+    },
+    {
+      "text": "Does NOT recommend editing main_api.py directly as the primary approach",
+      "passed": true,
+      "evidence": "Explicitly advises against it: 'Don't touch main_api.py' and 'Don't edit main_api.py directly as your workflow \u2014 it's overwritten on every generate().' Primary approaches are the wrapper (A) and model-based (B) patterns."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

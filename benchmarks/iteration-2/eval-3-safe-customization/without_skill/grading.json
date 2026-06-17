@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Clearly states that generated files are overwritten on regeneration",
+      "passed": true,
+      "evidence": "Opens with 'No \u2014 your edits to main_api.py will be silently overwritten the next time you run the generator,' explains mode=\"w\" 'truncates & rewrites every run,' and notes the same applies to pydantic_classes.py and sql_alchemy.py. Verified against rest_api_generator.py line 91 (mode=\"w\")."
+    },
+    {
+      "text": "Recommends creating separate extension/wrapper files that import from generated code",
+      "passed": true,
+      "evidence": "Recommended approach: 'create custom_api.py that does from main_api import app, get_db' next to the generated files, which survives regeneration. Explicitly framed as the recommended primary path."
+    },
+    {
+      "text": "Shows a concrete code example of the extension pattern (importing from main_api or generated app)",
+      "passed": true,
+      "evidence": "Provides a full custom_api.py code block: 'from main_api import app, get_db' plus a working '@app.post(\"/library/{library_id}/validate-name/\")' endpoint, and a uvicorn custom_api:app run command."
+    },
+    {
+      "text": "Does NOT recommend editing main_api.py directly as the primary approach",
+      "passed": true,
+      "evidence": "Explicitly states 'Never edit main_api.py directly \u2014 treat the whole output directory as generated/disposable.' Primary recommendation is the wrapper file; no advice to edit the generated file directly."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

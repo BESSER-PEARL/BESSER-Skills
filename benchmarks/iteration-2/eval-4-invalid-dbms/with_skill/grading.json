@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Identifies that 'postgres' is wrong and 'postgresql' is the correct string",
+      "passed": true,
+      "evidence": "The answer opens with 'The root cause is the dialect string. `'postgres'` is not a valid value \u2014 the correct value is `'postgresql'`.' and repeats 'Use 'postgresql', not 'postgres'.' This matches the source skill (persistence.md lines 25-26, 36)."
+    },
+    {
+      "text": "Lists all valid DBMS options (sqlite, postgresql, mysql, mssql, mariadb, oracle)",
+      "passed": true,
+      "evidence": "The answer states: 'Valid sql_dialect values are exactly: sqlite | postgresql | mysql | mssql | mariadb | oracle' \u2014 all six options in the correct set, matching persistence.md line 35 and troubleshooting SKILL.md line 241."
+    },
+    {
+      "text": "Shows corrected code with sql_dialect='postgresql' or dbms='postgresql'",
+      "passed": true,
+      "evidence": "The answer provides a runnable corrected snippet: SQLGenerator(model=domain_model, output_dir=\"./output\", sql_dialect=\"postgresql\") followed by gen.generate(), plus an additional SQLAlchemyGenerator(model=...).generate(dbms=\"postgresql\") example."
+    },
+    {
+      "text": "No hallucinated DBMS names or wrong parameter names",
+      "passed": true,
+      "evidence": "No invented DBMS names appear. Parameter placement is correct per BESSER source: SQLGenerator takes sql_dialect in the CONSTRUCTOR with generate() taking no arguments, and SQLAlchemyGenerator takes dbms in generate(). The answer explicitly warns against SQLGenerator(...).generate(sql_dialect=...). This matches persistence.md lines 32-51 and satisfies the grader note on assertion 4."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

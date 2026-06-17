@@ -1,0 +1,36 @@
+{
+  "assertions": [
+    {
+      "text": "Uses correct imports from besser.BUML.metamodel.structural (DomainModel, Class, Property, etc.)",
+      "passed": true,
+      "evidence": "Answer imports `from besser.BUML.metamodel.structural import (DomainModel, Class, Property, Multiplicity, BinaryAssociation, StringType, IntegerType,)` \u2014 identical to the documented import block in metamodel.md (lines 24-34) and SKILL.md (lines 124-127)."
+    },
+    {
+      "text": "Defines 3 classes: Student, Course, Professor (or equivalent names)",
+      "passed": true,
+      "evidence": "Defines `student = Class(name=\"Student\", ...)`, `course = Class(name=\"Course\", attributes={course_name, course_credits})`, and `professor = Class(name=\"Professor\", ...)` \u2014 exactly the three required classes, with Course carrying name and credits."
+    },
+    {
+      "text": "Creates associations with correct multiplicities (many-to-many for student-course, one/many-to-many for professor-course)",
+      "passed": true,
+      "evidence": "enrollment uses Multiplicity(0,\"*\") on both ends (many-to-many); teaching uses taught_courses Multiplicity(0,\"*\") and taught_by Multiplicity(1,1) (one professor per course -> one-to-many FK), with a noted option to make it many-to-many. Matches documented cardinality patterns."
+    },
+    {
+      "text": "Assembles a DomainModel with types and associations",
+      "passed": true,
+      "evidence": "`university_model = DomainModel(name=\"University_model\", types={student, course, professor}, associations={enrollment, teaching})` \u2014 all three classes in types and both associations listed, matching the documented assembly pattern."
+    },
+    {
+      "text": "Uses SQLAlchemyGenerator with correct import and invocation",
+      "passed": true,
+      "evidence": "`from besser.generators.sql_alchemy import SQLAlchemyGenerator`, then `SQLAlchemyGenerator(model=university_model, output_dir=\"./output\")` and `gen.generate()` (with `generate(dbms=\"postgresql\")` option) \u2014 matches SKILL.md lines 215-219 exactly, including the postgresql-not-postgres note and sql_alchemy.py output."
+    },
+    {
+      "text": "Produced Python code is syntactically plausible (no hallucinated API calls)",
+      "passed": true,
+      "evidence": "All calls (Property, Class, BinaryAssociation with ends=, DomainModel, Multiplicity(min,max), validate() returning {\"success\":...}, dbms values) are documented in metamodel.md/SKILL.md. No invented APIs; code is well-formed Python."
+    }
+  ],
+  "passed_count": 6,
+  "total_count": 6
+}

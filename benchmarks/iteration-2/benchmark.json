@@ -1,0 +1,123 @@
+{
+  "version": "0.2.0",
+  "date": "2026-06-17",
+  "method": "with-skill (skill files only, no BESSER source) vs baseline (BESSER v7.8.3 source, no skill); each answer graded by an impartial grader agent against the eval's assertions.",
+  "performance_note": "Timing/token figures carried over from the v0.1.0 benchmark (iteration-1); 0.2.0 changes are skill-text only and do not alter the agent work pattern.",
+  "correction_note": "The initial 0.2.0 run scored with-skill 37/38: eval-4 failed because references/persistence.md documented SQLGenerator.generate(sql_dialect=...) (wrong; generate() takes no args, sql_dialect is a constructor arg). The skill was fixed and eval-4 with-skill re-run, now 4/4.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "eval-1-university-model",
+      "skill": "besser-user",
+      "with_skill": {
+        "passed": 6,
+        "total": 6
+      },
+      "without_skill": {
+        "passed": 6,
+        "total": 6
+      }
+    },
+    {
+      "id": 2,
+      "name": "eval-2-plantuml-backend",
+      "skill": "besser-user",
+      "with_skill": {
+        "passed": 5,
+        "total": 5
+      },
+      "without_skill": {
+        "passed": 5,
+        "total": 5
+      }
+    },
+    {
+      "id": 3,
+      "name": "eval-3-safe-customization",
+      "skill": "besser-generators",
+      "with_skill": {
+        "passed": 4,
+        "total": 4
+      },
+      "without_skill": {
+        "passed": 4,
+        "total": 4
+      }
+    },
+    {
+      "id": 4,
+      "name": "eval-4-invalid-dbms",
+      "skill": "besser-generators",
+      "with_skill": {
+        "passed": 4,
+        "total": 4
+      },
+      "without_skill": {
+        "passed": 4,
+        "total": 4
+      }
+    },
+    {
+      "id": 5,
+      "name": "eval-5-import-error",
+      "skill": "besser-troubleshooting",
+      "with_skill": {
+        "passed": 4,
+        "total": 4
+      },
+      "without_skill": {
+        "passed": 4,
+        "total": 4
+      }
+    },
+    {
+      "id": 6,
+      "name": "eval-6-construction-errors",
+      "skill": "besser-troubleshooting",
+      "with_skill": {
+        "passed": 4,
+        "total": 4
+      },
+      "without_skill": {
+        "passed": 4,
+        "total": 4
+      }
+    },
+    {
+      "id": 7,
+      "name": "eval-7-add-generator",
+      "skill": "besser-dev",
+      "with_skill": {
+        "passed": 6,
+        "total": 6
+      },
+      "without_skill": {
+        "passed": 6,
+        "total": 6
+      }
+    },
+    {
+      "id": 8,
+      "name": "eval-8-test-patterns",
+      "skill": "besser-dev",
+      "with_skill": {
+        "passed": 5,
+        "total": 5
+      },
+      "without_skill": {
+        "passed": 5,
+        "total": 5
+      }
+    }
+  ],
+  "totals": {
+    "with_skill": {
+      "passed": 38,
+      "total": 38
+    },
+    "without_skill": {
+      "passed": 38,
+      "total": 38
+    }
+  }
+}

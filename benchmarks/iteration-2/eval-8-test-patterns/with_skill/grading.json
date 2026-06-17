@@ -1,0 +1,31 @@
+{
+  "assertions": [
+    {
+      "text": "Recommends @pytest.fixture for domain model setup",
+      "passed": true,
+      "evidence": "The answer states 'Build small inline models as @pytest.fixture' and shows '@pytest.fixture\\ndef domain_model():' building the model."
+    },
+    {
+      "text": "Recommends tmp_path (not manual directory creation) for output directories",
+      "passed": true,
+      "evidence": "Section 'tmp_path vs. manual directories' says 'Use tmp_path (or tmpdir). It is the preferred convention because pytest auto-creates and auto-cleans it' and relegates manual creation to a fallback only."
+    },
+    {
+      "text": "Shows a concrete fixture example building a small DomainModel inline",
+      "passed": true,
+      "evidence": "Code shows @pytest.fixture def domain_model() creating Property objects, a Person Class, and 'model = DomainModel(name=\"TestModel\", types={person})'."
+    },
+    {
+      "text": "Shows a concrete test function asserting both file existence and content",
+      "passed": true,
+      "evidence": "test_generate_creates_output_file asserts os.path.exists(...); test_generate_contains_class_name reads content and asserts '\"Person\" in content', '\"name\" in content', '\"age\" in content'."
+    },
+    {
+      "text": "Mentions pytest.raises for testing error conditions",
+      "passed": true,
+      "evidence": "Under 'What to assert': 'Error conditions: use pytest.raises(ValueError) for invalid input.'"
+    }
+  ],
+  "passed_count": 5,
+  "total_count": 5
+}

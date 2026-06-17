@@ -179,6 +179,7 @@ besser-skills/
         state-machines.md
         agents.md                         # chatbot/agent modeling
         gui-models.md                     # GUI for WebApp/Django
+        delivering-models.md              # .py vs. Markdown delivery, code-vs-docs
       scripts/
         scaffold_model.py                 # prints a starter DomainModel
     besser-generators/

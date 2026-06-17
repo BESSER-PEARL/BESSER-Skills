@@ -54,21 +54,13 @@ hand-edit generated code as your primary change.
 
 ## Two outcomes: code *or* documentation
 
-A B-UML model is useful even if you never run a generator. There are two
-first-class things you can do with one:
-
-1. **Generate code** — feed the model to a generator (Python, SQL, FastAPI,
-   Django, React, …). This is BESSER's headline feature.
-2. **Document a system** — a B-UML model *is* a correct UML class diagram:
-   right multiplicities, associations, and inheritance, checked by
-   `model.validate()`. Embed it in a README, design doc, or `.md` spec to
-   document **any** project — no code generation required. Import it into
-   editor.besser-pearl.org for the rendered visual diagram.
-
-So reach for this skill whenever you need an accurate class diagram, not
-only when the project will use BESSER's generators. For how to deliver it
-(a `.py` file vs. a Markdown-embedded diagram), see "Delivering the model
-to the user" below.
+A B-UML model is useful even if you never run a generator. Feed it to a
+generator for **code**, *or* embed it in a README/design doc as a correct,
+`validate()`-checked class **diagram** that documents **any** project. So
+reach for this skill whenever you need an accurate class diagram — not only
+when the project will use BESSER's generators. For how to deliver a model
+(`.py` file vs. Markdown-embedded diagram, and what to tell the user), see
+`references/delivering-models.md`.
 
 ## Reference layout
 
@@ -82,6 +74,7 @@ when you need depth:
 | State machine modeling | `references/state-machines.md` |
 | Chatbot/agent modeling and the BAFGenerator | `references/agents.md` |
 | GUI modeling for WebAppGenerator/DjangoGenerator | `references/gui-models.md` |
+| How to deliver a model (`.py` vs. Markdown diagram) and code-vs-docs outcomes | `references/delivering-models.md` |
 | Per-generator options, output paths, customization | the **besser-generators** skill |
 | Errors and diagnostics | the **besser-troubleshooting** skill |
 
@@ -161,39 +154,10 @@ path.
 
 ## Delivering the model to the user
 
-**Choose the format from context — don't ask every time:**
-
-- **Default → a runnable `.py` file** (e.g. `library_model.py`). For almost
-  any "build/model X" request, this is the deliverable: a real artifact the
-  user can run and import into the web editor.
-- **Documentation context → embed the same B-UML in Markdown.** When the
-  user is writing docs (a README or design doc, "add the model to the
-  docs", "show me the diagram"), put the B-UML in a fenced Python code
-  block inside the `.md` instead — same B-UML, for reading rather than
-  running.
-- **Ambiguous? Don't block on a question.** Write the `.py` file and add
-  one line noting the same B-UML can be dropped into their docs.
-
-Whichever you produce, don't just paste code into chat with no artifact.
-Make the model self-contained: imports, class and association definitions,
-the `DomainModel` assembly, a `model.validate()` check, and a
-commented-out generator call the user can uncomment.
-(`scripts/scaffold_model.py` already prints code in this shape.)
-
-When you deliver the `.py` file, tell the user they have **two ways to use
-it**:
-
-1. **Run it directly** to validate and generate code:
-
-   ```bash
-   python library_model.py
-   ```
-
-2. **Import it into the web editor** at https://editor.besser-pearl.org —
-   use the editor's **Import** option and choose the **B-UML** format to
-   load the `.py` model and edit it visually. (The editor imports and
-   exports models in B-UML and JSON formats, so a model you write in code
-   round-trips with the visual editor.)
+Default to writing the model as a runnable `.py` file; embed the same B-UML
+in Markdown instead when the request is documentation-oriented. Full
+guidance — choosing the format, making the file self-contained, and the two
+ways the user runs or imports it — is in `references/delivering-models.md`.
 
 ---
 

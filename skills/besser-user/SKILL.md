@@ -138,16 +138,27 @@ path.
 
 ## Delivering the model to the user
 
-When you build a model for a user, **write it to a real `.py` file** in
-their project (e.g. `library_model.py`) — don't just paste the code into
-chat. A `.py` model is a runnable, reusable artifact; show a short inline
-preview if helpful, but the file is the deliverable. Make it
-self-contained: imports, class and association definitions, the
-`DomainModel` assembly, a `model.validate()` check, and a commented-out
-generator call the user can uncomment. (`scripts/scaffold_model.py`
-already prints code in this shape.)
+**Choose the format from context — don't ask every time:**
 
-Then tell the user they have **two ways to use the file**:
+- **Default → a runnable `.py` file** (e.g. `library_model.py`). For almost
+  any "build/model X" request, this is the deliverable: a real artifact the
+  user can run and import into the web editor.
+- **Documentation context → embed the same B-UML in Markdown.** When the
+  user is writing docs (a README or design doc, "add the model to the
+  docs", "show me the diagram"), put the B-UML in a fenced Python code
+  block inside the `.md` instead — same B-UML, for reading rather than
+  running.
+- **Ambiguous? Don't block on a question.** Write the `.py` file and add
+  one line noting the same B-UML can be dropped into their docs.
+
+Whichever you produce, don't just paste code into chat with no artifact.
+Make the model self-contained: imports, class and association definitions,
+the `DomainModel` assembly, a `model.validate()` check, and a
+commented-out generator call the user can uncomment.
+(`scripts/scaffold_model.py` already prints code in this shape.)
+
+When you deliver the `.py` file, tell the user they have **two ways to use
+it**:
 
 1. **Run it directly** to validate and generate code:
 

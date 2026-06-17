@@ -63,7 +63,9 @@ assert model.validate()["success"]
 The same B-UML works **two ways**:
 
 - **As documentation** -- a precise, readable structural model embedded in
-  your `README`, design doc, or `.md` spec. Drop it into
+  your `README`, design doc, or `.md` spec, to document **any** project --
+  no code generation required, even one that will never use BESSER's
+  generators. Drop it into
   [editor.besser-pearl.org](https://editor.besser-pearl.org) (Import →
   B-UML) whenever you want the rendered visual class diagram.
 - **As a real model** -- it isn't a drawing *of* the system, it *is* the
@@ -71,8 +73,11 @@ The same B-UML works **two ways**:
   SQL, FastAPI, Django, React, …). No separate, drifting diagram to keep
   in sync.
 
-Because the embedded B-UML is the source of truth, the documentation and
-the generated code never diverge.
+You don't have to generate anything: a correct B-UML diagram is a useful
+**documentation artifact on its own**, in any repo, whether or not it ever
+touches a BESSER generator. And when you *do* generate, the embedded B-UML
+is the source of truth, so the documentation and the generated code never
+diverge.
 
 ## Installation
 
@@ -179,6 +184,7 @@ besser-skills/
         state-machines.md
         agents.md                         # chatbot/agent modeling
         gui-models.md                     # GUI for WebApp/Django
+        delivering-models.md              # .py vs. Markdown delivery, code-vs-docs
       scripts/
         scaffold_model.py                 # prints a starter DomainModel
     besser-generators/

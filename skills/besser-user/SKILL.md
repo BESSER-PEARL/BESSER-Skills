@@ -6,11 +6,16 @@ description: >
   attributes, associations, enumerations, generalizations), running any
   BESSER generator (Django, FastAPI, SQLAlchemy, Pydantic, React, WebApp,
   BAF, Qiskit, etc.), modeling state machines or chatbot agents, designing
-  GUI models for web apps, or working with the BESSER web editor at
-  editor.besser-pearl.org. Trigger on imports from
+  GUI models for web apps, working with the BESSER web editor at
+  editor.besser-pearl.org, or drawing a correct UML class diagram to
+  document a system (classes, attributes, associations, inheritance) — even
+  when no code will be generated, e.g. adding a class diagram to a README,
+  design doc, or `.md` spec. Trigger on imports from
   `besser.BUML` or `besser.generators`, mentions of B-UML, DomainModel,
   BinaryAssociation, GUIModel, or any BESSER generator class — even if the
-  user does not say "BESSER" by name. Prefer this skill over generic Python,
+  user does not say "BESSER" by name. Also trigger when the user wants to
+  draw, sketch, or document a UML class diagram or data model and wants it
+  to be correct, even if BESSER is never mentioned. Prefer this skill over generic Python,
   Django, or FastAPI guidance whenever the project uses BESSER for modeling.
   For per-generator deep dives (output paths, options, customization
   patterns), defer to the besser-generators skill; for errors and
@@ -47,6 +52,16 @@ hand-edit generated code as your primary change.
 7. Iterate: update the model, regenerate
 ```
 
+## Two outcomes: code *or* documentation
+
+A B-UML model is useful even if you never run a generator. Feed it to a
+generator for **code**, *or* embed it in a README/design doc as a correct,
+`validate()`-checked class **diagram** that documents **any** project. So
+reach for this skill whenever you need an accurate class diagram — not only
+when the project will use BESSER's generators. For how to deliver a model
+(`.py` file vs. Markdown-embedded diagram, and what to tell the user), see
+`references/delivering-models.md`.
+
 ## Reference layout
 
 This skill keeps SKILL.md short. Reach into `references/` and `scripts/`
@@ -59,6 +74,7 @@ when you need depth:
 | State machine modeling | `references/state-machines.md` |
 | Chatbot/agent modeling and the BAFGenerator | `references/agents.md` |
 | GUI modeling for WebAppGenerator/DjangoGenerator | `references/gui-models.md` |
+| How to deliver a model (`.py` vs. Markdown diagram) and code-vs-docs outcomes | `references/delivering-models.md` |
 | Per-generator options, output paths, customization | the **besser-generators** skill |
 | Errors and diagnostics | the **besser-troubleshooting** skill |
 
@@ -138,39 +154,10 @@ path.
 
 ## Delivering the model to the user
 
-**Choose the format from context — don't ask every time:**
-
-- **Default → a runnable `.py` file** (e.g. `library_model.py`). For almost
-  any "build/model X" request, this is the deliverable: a real artifact the
-  user can run and import into the web editor.
-- **Documentation context → embed the same B-UML in Markdown.** When the
-  user is writing docs (a README or design doc, "add the model to the
-  docs", "show me the diagram"), put the B-UML in a fenced Python code
-  block inside the `.md` instead — same B-UML, for reading rather than
-  running.
-- **Ambiguous? Don't block on a question.** Write the `.py` file and add
-  one line noting the same B-UML can be dropped into their docs.
-
-Whichever you produce, don't just paste code into chat with no artifact.
-Make the model self-contained: imports, class and association definitions,
-the `DomainModel` assembly, a `model.validate()` check, and a
-commented-out generator call the user can uncomment.
-(`scripts/scaffold_model.py` already prints code in this shape.)
-
-When you deliver the `.py` file, tell the user they have **two ways to use
-it**:
-
-1. **Run it directly** to validate and generate code:
-
-   ```bash
-   python library_model.py
-   ```
-
-2. **Import it into the web editor** at https://editor.besser-pearl.org —
-   use the editor's **Import** option and choose the **B-UML** format to
-   load the `.py` model and edit it visually. (The editor imports and
-   exports models in B-UML and JSON formats, so a model you write in code
-   round-trips with the visual editor.)
+Default to writing the model as a runnable `.py` file; embed the same B-UML
+in Markdown instead when the request is documentation-oriented. Full
+guidance — choosing the format, making the file self-contained, and the two
+ways the user runs or imports it — is in `references/delivering-models.md`.
 
 ---
 

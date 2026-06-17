@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] - 2026-06-17
+
+### Added
+- **Modeling for documentation, not only code.** `besser-user` now frames a
+  B-UML model as having two first-class outcomes — generating code *and*
+  documenting a system — and its trigger description was broadened so the
+  skill activates on "draw/document a correct UML class diagram" requests
+  even when BESSER is not named.
+- **README "Drawing correct UML diagrams" section** showing how an agent
+  draws a correct class diagram in B-UML and embeds it in Markdown docs,
+  usable for any project whether or not code is generated.
+- **Model-delivery guidance** in `besser-user`: deliver a model as a runnable
+  `.py` file by default, or embed the same B-UML in Markdown for
+  documentation; plus how to import a model into the web editor
+  (Import → B-UML). Detail lives in the new
+  `references/delivering-models.md`.
+
+### Fixed
+- **`SQLGenerator` API in `references/persistence.md`.** It previously showed
+  `gen.generate(sql_dialect=...)`, which raises `TypeError` — `sql_dialect`
+  is a constructor argument and `generate()` takes none (only
+  `SQLAlchemyGenerator` takes `dbms` in `generate()`). Corrected, with a note
+  contrasting the two SQL generators. Caught by the 0.2.0 benchmark re-run.
+
+### Changed
+- Refactored `besser-user/SKILL.md` toward the progressive-disclosure target
+  by moving model-delivery detail into `references/delivering-models.md`.
+
+### Benchmarks
+- Correctness re-run for 0.2.0 in `benchmarks/iteration-2/`: **38/38 (100%)**
+  with-skill, matching the no-skill baseline against BESSER v7.8.3.
+  Performance figures are carried over from the v0.1.0 benchmark
+  (changes are skill-text only).
+
 ## [0.1.0] - 2026-05-12
 
 Initial public release of BESSER Skills.

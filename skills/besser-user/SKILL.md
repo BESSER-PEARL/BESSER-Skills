@@ -6,11 +6,16 @@ description: >
   attributes, associations, enumerations, generalizations), running any
   BESSER generator (Django, FastAPI, SQLAlchemy, Pydantic, React, WebApp,
   BAF, Qiskit, etc.), modeling state machines or chatbot agents, designing
-  GUI models for web apps, or working with the BESSER web editor at
-  editor.besser-pearl.org. Trigger on imports from
+  GUI models for web apps, working with the BESSER web editor at
+  editor.besser-pearl.org, or drawing a correct UML class diagram to
+  document a system (classes, attributes, associations, inheritance) — even
+  when no code will be generated, e.g. adding a class diagram to a README,
+  design doc, or `.md` spec. Trigger on imports from
   `besser.BUML` or `besser.generators`, mentions of B-UML, DomainModel,
   BinaryAssociation, GUIModel, or any BESSER generator class — even if the
-  user does not say "BESSER" by name. Prefer this skill over generic Python,
+  user does not say "BESSER" by name. Also trigger when the user wants to
+  draw, sketch, or document a UML class diagram or data model and wants it
+  to be correct, even if BESSER is never mentioned. Prefer this skill over generic Python,
   Django, or FastAPI guidance whenever the project uses BESSER for modeling.
   For per-generator deep dives (output paths, options, customization
   patterns), defer to the besser-generators skill; for errors and
@@ -46,6 +51,24 @@ hand-edit generated code as your primary change.
 6. Verify the output (run, test, inspect)
 7. Iterate: update the model, regenerate
 ```
+
+## Two outcomes: code *or* documentation
+
+A B-UML model is useful even if you never run a generator. There are two
+first-class things you can do with one:
+
+1. **Generate code** — feed the model to a generator (Python, SQL, FastAPI,
+   Django, React, …). This is BESSER's headline feature.
+2. **Document a system** — a B-UML model *is* a correct UML class diagram:
+   right multiplicities, associations, and inheritance, checked by
+   `model.validate()`. Embed it in a README, design doc, or `.md` spec to
+   document **any** project — no code generation required. Import it into
+   editor.besser-pearl.org for the rendered visual diagram.
+
+So reach for this skill whenever you need an accurate class diagram, not
+only when the project will use BESSER's generators. For how to deliver it
+(a `.py` file vs. a Markdown-embedded diagram), see "Delivering the model
+to the user" below.
 
 ## Reference layout
 

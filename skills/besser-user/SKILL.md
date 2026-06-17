@@ -136,6 +136,33 @@ path.
 
 ---
 
+## Delivering the model to the user
+
+When you build a model for a user, **write it to a real `.py` file** in
+their project (e.g. `library_model.py`) — don't just paste the code into
+chat. A `.py` model is a runnable, reusable artifact; show a short inline
+preview if helpful, but the file is the deliverable. Make it
+self-contained: imports, class and association definitions, the
+`DomainModel` assembly, a `model.validate()` check, and a commented-out
+generator call the user can uncomment. (`scripts/scaffold_model.py`
+already prints code in this shape.)
+
+Then tell the user they have **two ways to use the file**:
+
+1. **Run it directly** to validate and generate code:
+
+   ```bash
+   python library_model.py
+   ```
+
+2. **Import it into the web editor** at https://editor.besser-pearl.org —
+   use the editor's **Import** option and choose the **B-UML** format to
+   load the `.py` model and edit it visually. (The editor imports and
+   exports models in B-UML and JSON formats, so a model you write in code
+   round-trips with the visual editor.)
+
+---
+
 ## Picking a generator
 
 | Goal | Generator | Input | Output |
@@ -273,6 +300,13 @@ models graphically and generate code without writing Python:
 2. Add classes, attributes, and associations visually.
 3. Click "Generate" and pick a target generator.
 4. Download the generated code.
+
+You can also **import an existing model** instead of starting from a
+blank diagram: use **Import** and select the **B-UML** format to load a
+`.py` model file (or JSON). This means a model you build with the Python
+API can be opened in the editor, edited visually, and exported again — so
+handing the user a `.py` file (see "Delivering the model" above) doubles
+as a web-editor import.
 
 The editor uses the same generators as the Python API — the backend
 converts the visual diagram to a B-UML model, runs the generator, and

@@ -52,7 +52,7 @@ pip install -e .                       # editable install
 
 Verify: `python tests/BUML/metamodel/structural/library/library.py`
 
-Python 3.10+ is required (Django 5.x dependency).
+Python 3.11+ is required (enforced by `python_requires = >=3.11` in setup.cfg; CI tests 3.11 and 3.12).
 
 ---
 
@@ -154,7 +154,7 @@ Add your generator to `besser/utilities/web_modeling_editor/backend/config/gener
 ```python
 from besser.generators.my_generator import MyGenerator
 
-GENERATORS = {
+SUPPORTED_GENERATORS = {
     # ... existing generators ...
     "my_generator": GeneratorInfo(
         generator_class=MyGenerator,
@@ -420,7 +420,7 @@ Use Sphinx roles for cross-linking:
 - Import order: standard library, third-party, local modules.
 - `snake_case` functions/variables, `PascalCase` classes, `UPPER_CASE` constants.
 - No wildcard imports, no implicit re-exports.
-- Linting: pylint (no ruff/black/pre-commit hooks currently configured).
+- Linting: pylint config in `pyproject.toml` (`[tool.pylint.'FORMAT']`, 120-char limit); CI also runs `ruff check` on `besser/` with a curated rule set. No black/pre-commit hooks are configured.
 
 ---
 
@@ -468,7 +468,7 @@ When changes affect both BESSER and the web editor frontend:
 
 ## CI / Release
 
-- **CI**: There is no automated test workflow — tests run locally before PRs.
+- **CI**: `.github/workflows/ci.yml` runs pytest on every PR to `master`/`development` (Python 3.11 and 3.12) plus a `ruff` lint job. Run tests locally before pushing too.
 - **Release**: Triggered by creating a GitHub Release. The `python-publish.yml`
   workflow builds and publishes to PyPI using `PYPI_API_TOKEN`.
 - **Version**: Defined in `setup.cfg` under `[metadata] version`.

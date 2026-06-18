@@ -53,5 +53,6 @@ state is entered. The string is templated into the generated runner.
 State machines without NLP are typically embedded inside a larger
 application — there is no dedicated generator for plain state machines.
 Use the BAFGenerator (see `agents.md`) when you want a runnable
-chatbot/agent. For embedding in your own code, walk the `sm.states` and
-`sm.transitions` collections directly.
+chatbot/agent. For embedding in your own code, walk the `sm.states`
+collection and each state's `state.transitions` (transitions live on the
+individual `State` objects, not on the `StateMachine`).

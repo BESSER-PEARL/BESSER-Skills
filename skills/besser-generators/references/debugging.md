@@ -37,7 +37,7 @@ misbehaves.
   auto-generates an `id` column. Mark one attribute as `is_id=True` if
   you need control.
 - **Association tables**: many-to-many produces a join table whose name
-  is derived from the two class names plus the association name.
+  is the association name, lowercased (not the class names).
 
 ## Django specifics
 
@@ -61,14 +61,14 @@ misbehaves.
 
 ## Backend specifics
 
-- **Invalid HTTP method names** are silently filtered with a warning log.
-  Spell-check method strings.
+- **Invalid HTTP method names** are silently filtered (no warning is
+  emitted by `BackendGenerator`). Spell-check method strings.
 - **Docker image push fails**: `docker_image=True` requires the `docker`
   Python package and Docker Hub credentials in a config INI file.
 
 ## Template rendering errors
 
-`jinja2.TemplateNotFoundError` or `jinja2.UndefinedError` usually mean:
+`jinja2.TemplateNotFound` or `jinja2.UndefinedError` usually mean:
 
 - the generator's template directory is missing or corrupted.
 - BESSER was installed without templates (rare).

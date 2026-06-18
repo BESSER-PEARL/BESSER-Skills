@@ -27,8 +27,9 @@ To limit endpoints:
 BackendGenerator(model=m, output_dir="./out", http_methods=["GET", "POST"])
 ```
 
-Invalid method names are silently filtered with a warning log — check
-spelling.
+Invalid method names are silently filtered (no warning is emitted) —
+double-check spelling. (Only `RESTAPIGenerator` logs a warning; the
+`BackendGenerator` wrapper filters silently.)
 
 ## RESTAPIGenerator
 
@@ -105,12 +106,15 @@ rendering failed.
 
 ```python
 from besser.generators.flutter import FlutterGenerator
-gen = FlutterGenerator(model=domain_model, gui_model=gui, output_dir="./mobile")
+# main_page is REQUIRED — a Screen from your GUIModel.
+gen = FlutterGenerator(
+    model=domain_model, gui_model=gui, main_page=main_screen, output_dir="./mobile",
+)
 gen.generate()
 ```
 
 | Aspect | Detail |
 |--------|--------|
-| Input | `DomainModel` + `GUIModel` |
+| Input | `DomainModel` + `GUIModel` + `main_page` (a required `Screen` from the GUI model); optional `module` |
 | Output | `main.dart`, `sql_helper.dart`, `pubspec.yaml` |
-| Note | Not in the web editor's `SUPPORTED_GENERATORS` — Python API only. |
+| Note | Registered in the web editor's `SUPPORTED_GENERATORS` (key `flutter`); also usable via the Python API. |

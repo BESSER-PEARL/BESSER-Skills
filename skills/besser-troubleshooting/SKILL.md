@@ -3,13 +3,13 @@ name: besser-troubleshooting
 description: >
   Diagnose and fix BESSER errors fast. Use this skill whenever the user is
   staring at a Python traceback, ImportError, ModuleNotFoundError, ValueError,
-  TypeError, AttributeError, jinja2.TemplateNotFoundError,
+  TypeError, AttributeError, jinja2.TemplateNotFound,
   subprocess.CalledProcessError, or any other failure originating from
   BESSER (besser.BUML, besser.generators, besser.utilities). Covers
   installation failures (`pip install besser` errors, native dependency
   build failures for psycopg2/pyodbc/oracledb, Python version mismatches,
   Windows venv path quirks), import errors (`String` vs `StringType`,
-  missing `bocl==0.3.1`, `antlr4-python3-runtime` version mismatch), model
+  missing `bocl==1.0.1`, `antlr4-python3-runtime` version mismatch), model
   construction errors (spaces or hyphens in names, duplicate enum literals,
   invalid multiplicities, generalization-to-self, more than one is_id per
   class), generator crashes (Invalid DBMS, Django subprocess failures,
@@ -64,13 +64,13 @@ most generators work fine with SQLite (no native deps needed).
 
 ### Python version incompatibility
 
-BESSER requires **Python 3.10+** (Django 5.x dependency). Check with:
+BESSER requires **Python 3.11+** (enforced by `python_requires = >=3.11` in setup.cfg). Check with:
 
 ```bash
 python --version
 ```
 
-If you're on 3.9 or earlier, upgrade Python or use `pyenv`/`conda` to manage versions.
+If you're on 3.10 or earlier, upgrade Python or use `pyenv`/`conda` to manage versions.
 
 ### Windows-specific: `venv\Scripts\activate` not found
 
@@ -111,11 +111,11 @@ directly: `from besser.BUML.metamodel.structural import StringType`.
 
 ### `ImportError` related to `bocl`
 
-The OCL constraint checker requires `bocl==0.3.1` (exact version). If you installed
+The OCL constraint checker requires `bocl==1.0.1` (exact version). If you installed
 a different version or it's missing:
 
 ```bash
-pip install bocl==0.3.1
+pip install bocl==1.0.1
 ```
 
 This only affects OCL validation — generators work without it.
@@ -138,7 +138,7 @@ These packages are only needed for specific features:
 
 | Package | Needed for | Install |
 |---------|-----------|---------|
-| `bocl==0.3.1` | OCL constraint validation | `pip install bocl==0.3.1` |
+| `bocl==1.0.1` | OCL constraint validation | `pip install bocl==1.0.1` |
 | `deep_translator` | Agent personalization (translation) | `pip install deep-translator` |
 | `docker` | Docker image building in BackendGenerator | `pip install docker` |
 | `qiskit` | Running generated quantum circuits | `pip install qiskit` |
@@ -242,7 +242,7 @@ skill — particularly its `references/debugging.md`.
 | `ValueError: Invalid backend` (Qiskit) | `backend_type` is not `aer_simulator`, `fake_backend`, or `ibm_quantum` | Pick a valid backend |
 | `subprocess.CalledProcessError` (Django) | Django not installed, project name conflict, or invalid Python identifier | `python -m django --version`; delete stale project; rename |
 | `AttributeError` inside `WebAppGenerator` | `gui_model=None` was passed | Build a `GUIModel` first (see besser-user skill) |
-| `jinja2.TemplateNotFoundError` | BESSER package corrupted or templates missing | `pip install --force-reinstall besser` |
+| `jinja2.TemplateNotFound` | BESSER package corrupted or templates missing | `pip install --force-reinstall besser` |
 | Raw `[[` `]]` in generated React files | ReactGenerator template rendering failed silently | Check console for Jinja errors; React uses `[[ ]]` to avoid JSX clashes |
 
 The Django generator catches subprocess errors and prints them rather than
@@ -286,7 +286,7 @@ docker stop <container_id>
 
 ### Native dependencies fail in Docker
 
-The base image `python:3.10-slim` doesn't include system libraries for `psycopg2`,
+The base image `python:3.11-slim` doesn't include system libraries for `psycopg2`,
 `pyodbc`, etc. Add to the Dockerfile:
 
 ```dockerfile

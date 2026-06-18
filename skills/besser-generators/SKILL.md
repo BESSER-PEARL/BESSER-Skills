@@ -101,7 +101,7 @@ known gotchas for the generators it covers.
 | BackendGenerator | `./output_backend/` | `main_api.py`, `pydantic_classes.py`, `sql_alchemy.py` |
 | DjangoGenerator | CWD (creates project folder) | `myproject/myapp/models.py`, `views.py`, … |
 | WebAppGenerator | must be specified | `frontend/`, `backend/`, `docker-compose.yml` |
-| BAFGenerator | `./output/` | `{agent_name}.py`, `config.ini`, `readme.txt` |
+| BAFGenerator | `./output/` | `{agent_name}.py`, `config.yaml`, `readme.txt` |
 
 `BackendGenerator`'s default `./output_backend/` is the odd one out — easy
 to miss if you assume `./output/` like everyone else.
@@ -139,10 +139,13 @@ output/
 
 ```python
 # custom_queries.py — safe from regeneration
-from sql_alchemy import Book, Author, Session
+# The generated sql_alchemy.py exposes `Base` and `engine` (not a Session);
+# create the Session yourself from SQLAlchemy.
+from sqlalchemy.orm import Session
+from sql_alchemy import Book, Author, engine
 
 def get_books_by_author(author_name: str):
-    with Session() as session:
+    with Session(engine) as session:
         return session.query(Book).join(Author).filter(Author.name == author_name).all()
 ```
 
@@ -167,19 +170,19 @@ Often the cleanest fix: define methods on your model classes with
 the model, where regeneration cannot touch it.
 
 ```python
-from besser.BUML.metamodel.structural import Method, Parameter, StringType
-from besser.BUML.metamodel.action_language import (
-    MethodImplementationType, MethodImplementation,
+from besser.BUML.metamodel.structural import (
+    Method, Parameter, StringType, MethodImplementationType,
 )
 
+# Pass the implementation via the Method constructor: `code` holds the body
+# and `implementation_type` selects BAL or CODE. (There is no separate
+# MethodImplementation class, and the body is not assigned afterwards.)
 search = Method(
     name="search_by_title",
     parameters=[Parameter(name="keyword", type=StringType)],
     type=StringType,
-)
-search.implementation = MethodImplementation(
-    type=MethodImplementationType.BAL,
-    body='return session.query(Book).filter(Book.title.contains(keyword)).all()',
+    code="return session.query(Book).filter(Book.title.contains(keyword)).all()",
+    implementation_type=MethodImplementationType.BAL,
 )
 book.add_method(search)
 ```

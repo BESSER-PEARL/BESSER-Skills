@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.1] - 2026-06-18
+
+### Fixed
+- Corrected **24 API/accuracy errors** across the skills, found by a
+  systematic audit against BESSER v7.8.3 source:
+  - `besser-generators`: the custom-endpoint example now uses
+    `Method(code=..., implementation_type=MethodImplementationType.BAL)`
+    (the previous `MethodImplementation` class/import did not exist); the
+    SQLAlchemy customization example uses `sqlalchemy.orm.Session` + the
+    generated `engine` (no `Session` is generated); `BAFGenerator` output is
+    `config.yaml`, not `config.ini`.
+  - `TerraformGenerator(deployment_model=...)`; the PyTorch/TF generators
+    import from `besser.generators.nn.{pytorch,tf}.*` with `generation_type`
+    as a constructor argument; `FlutterGenerator` requires `main_page` and
+    is registered in the web editor; many-to-many join-table name is the
+    association name only; `jinja2.TemplateNotFound`; `BackendGenerator`
+    filters invalid HTTP methods silently.
+  - Python requirement corrected to **3.11+** (setup.cfg `python_requires`);
+    `bocl==1.0.1`; Docker base `python:3.11-slim`; state-machine transitions
+    live on `State`, not `StateMachine`.
+  - `besser-dev`: `SUPPORTED_GENERATORS` (not `GENERATORS`); documented that
+    BESSER now ships CI (pytest + ruff).
+
+### Added
+- Two evals (documentation delivery, `SQLGenerator` dialect) — the suite is
+  now 10 (`evals/evals.json`), making those behaviors permanent regression
+  checks.
+- README skills table and trigger table now surface "drawing UML for
+  documentation".
+- CI: `.github/workflows/release.yml` automatically creates a GitHub Release
+  from the matching CHANGELOG section whenever a `v*` tag is pushed.
+
 ## [0.2.0] - 2026-06-17
 
 ### Added

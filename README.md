@@ -16,7 +16,7 @@ Works with any agent that supports the Agent Skills standard: **Claude Code**, *
 
 | Skill | Description |
 |-------|-------------|
-| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), code generation, **drawing correct class diagrams for documentation**, PlantUML, web editor (import & render) |
+| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), code generation, **drawing UML for documentation**, PlantUML, web editor (import & render) |
 | [`besser-generators`](skills/besser-generators/SKILL.md) | Per-generator operations, safe customization, template overrides |
 | [`besser-troubleshooting`](skills/besser-troubleshooting/SKILL.md) | Diagnosis guide for install, import, runtime, and deployment issues |
 | [`besser-dev`](skills/besser-dev/SKILL.md) | Contributor guide: adding generators, tests, docs, PR workflow |

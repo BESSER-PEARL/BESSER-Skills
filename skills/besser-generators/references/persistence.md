@@ -55,8 +55,9 @@ Calling `SQLGenerator(...).generate(sql_dialect="postgresql")` raises
 - **Primary key**: if no attribute has `is_id=True`, an auto-incrementing
   `id` column is added. To control it, mark exactly one attribute as
   `is_id=True`.
-- **Many-to-many**: a join table is generated automatically — name is
-  derived from the two class names plus the association name.
+- **Many-to-many**: a join table is generated automatically — its name is
+  the association name, lowercased (the class names are not part of it; e.g.
+  an association named `Enrollment` produces a table `enrollment`).
 - **Inheritance**: BESSER uses concrete table inheritance for SQLAlchemy
   (each concrete class gets its own table; abstract parents are not
   emitted as tables).

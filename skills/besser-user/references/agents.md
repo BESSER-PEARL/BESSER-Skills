@@ -59,7 +59,7 @@ gen.generate()
 Outputs:
 
 - `{agent_name}.py` — the agent script
-- `config.ini` — runtime configuration
+- `config.yaml` — runtime configuration
 - `readme.txt` — quick start instructions
 - optional RAG subdirectories if the agent uses retrieval
 

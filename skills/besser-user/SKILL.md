@@ -109,7 +109,7 @@ Verify:
 python -c "from besser.BUML.metamodel.structural import DomainModel; print('OK')"
 ```
 
-Python 3.10+ required.
+Python 3.11+ required.
 
 ---
 
@@ -245,7 +245,7 @@ gen = BackendGenerator(
 gen.generate()
 ```
 
-Invalid method names are silently filtered with a warning log — double-check
+Invalid method names are silently filtered (no warning is emitted) — double-check
 spelling.
 
 ### Django

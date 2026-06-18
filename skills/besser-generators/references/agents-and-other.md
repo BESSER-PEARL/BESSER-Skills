@@ -16,7 +16,7 @@ gen.generate()
 | Aspect | Detail |
 |--------|--------|
 | Input | `Agent` (from `besser.BUML.metamodel.state_machine.agent`) |
-| Output | `{agent_name}.py`, `config.ini`, `readme.txt`, optional RAG subdirectories |
+| Output | `{agent_name}.py`, `config.yaml`, `readme.txt`, optional RAG subdirectories |
 | Options | `generation_mode` (`FULL`, `PERSONALIZED_ONLY`, `CODE_ONLY`), `config_path`/`config` for personalization, `openai_api_key` for LLM personalization |
 | Known limits | Telegram handler is not fully implemented. Platform names are hardcoded in the template. |
 
@@ -43,7 +43,8 @@ gen.generate()
 
 ```python
 from besser.generators.terraform import TerraformGenerator
-gen = TerraformGenerator(model=deployment_model, output_dir="./infra")
+# the first parameter is named `deployment_model`, not `model`
+gen = TerraformGenerator(deployment_model=deployment_model, output_dir="./infra")
 gen.generate()
 ```
 
@@ -56,10 +57,14 @@ gen.generate()
 ## PytorchGenerator / TFGenerator (neural networks)
 
 ```python
-from besser.generators.pytorch import PytorchGenerator
-gen = PytorchGenerator(model=nn_model, output_dir="./output")
-gen.generate()                                 # default: subclassing API
-gen.generate(generation_type="sequential")     # alternative: nn.Sequential
+# the NN generators live under besser.generators.nn.* (no top-level pytorch/tf module)
+from besser.generators.nn.pytorch.pytorch_code_generator import PytorchGenerator
+
+gen = PytorchGenerator(model=nn_model, output_dir="./output")   # default: subclassing API
+gen.generate()
+
+# generation_type is a CONSTRUCTOR argument, not a generate() argument:
+PytorchGenerator(model=nn_model, output_dir="./output", generation_type="sequential").generate()
 ```
 
 | Aspect | Detail |
@@ -68,4 +73,5 @@ gen.generate(generation_type="sequential")     # alternative: nn.Sequential
 | Output | A PyTorch (or TensorFlow) script |
 | Options | `generation_type`: `"subclassing"` or `"sequential"` |
 
-`TFGenerator` works the same way for TensorFlow targets.
+`TFGenerator` (import `from besser.generators.nn.tf.tf_code_generator import TFGenerator`)
+works the same way for TensorFlow targets.

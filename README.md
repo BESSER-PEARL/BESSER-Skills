@@ -16,7 +16,7 @@ Works with any agent that supports the Agent Skills standard: **Claude Code**, *
 
 | Skill | Description |
 |-------|-------------|
-| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), code generation, PlantUML, web editor |
+| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), code generation, **drawing UML for documentation**, PlantUML, web editor (import & render) |
 | [`besser-generators`](skills/besser-generators/SKILL.md) | Per-generator operations, safe customization, template overrides |
 | [`besser-troubleshooting`](skills/besser-troubleshooting/SKILL.md) | Diagnosis guide for install, import, runtime, and deployment issues |
 | [`besser-dev`](skills/besser-dev/SKILL.md) | Contributor guide: adding generators, tests, docs, PR workflow |
@@ -120,7 +120,7 @@ Skills follow the [Agent Skills](https://agentskills.io) open standard. The agen
 
 | Skill | Triggers on |
 |-------|------------|
-| `besser-user` | Imports from `besser.BUML` or `besser.generators`, questions about modeling with BESSER, mentions of B-UML |
+| `besser-user` | Imports from `besser.BUML` or `besser.generators`, questions about modeling with BESSER, mentions of B-UML, or drawing a correct class diagram for documentation (even without code generation) |
 | `besser-generators` | Questions about generator output, safe customization, template overrides, generation errors |
 | `besser-troubleshooting` | Error messages, import failures, installation problems, deployment issues related to BESSER |
 | `besser-dev` | Contributing to BESSER, adding generators, writing tests, documentation structure |

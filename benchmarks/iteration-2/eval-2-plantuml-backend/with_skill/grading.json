@@ -1,0 +1,31 @@
+{
+  "assertions": [
+    {
+      "text": "Mentions saving the PlantUML to a .plantuml file",
+      "passed": true,
+      "evidence": "Section 2 'Save your PlantUML' instructs: 'Save your diagram exactly as-is to a file, e.g. `ecommerce.plantuml`' and shows the file content; also references it in the inline-string note via Path(\"ecommerce.plantuml\").write_text(...)."
+    },
+    {
+      "text": "Uses plantuml_to_buml() from besser.BUML.notations.structuralPlantUML",
+      "passed": true,
+      "evidence": "Candidate uses 'from besser.BUML.notations.structuralPlantUML import plantuml_to_buml' then 'model = plantuml_to_buml(\"ecommerce.plantuml\")', matching plantuml.md line 10."
+    },
+    {
+      "text": "Uses BackendGenerator (not just RESTAPIGenerator) for FastAPI generation",
+      "passed": true,
+      "evidence": "Imports 'from besser.generators.backend import BackendGenerator' and instantiates 'gen = BackendGenerator(...)'. RESTAPIGenerator is never mentioned; matches SKILL.md line 225."
+    },
+    {
+      "text": "Passes http_methods parameter to limit to GET and POST only",
+      "passed": true,
+      "evidence": "BackendGenerator call includes 'http_methods=[\"GET\", \"POST\"],   # only read + create endpoints', exactly the GET/POST restriction from SKILL.md lines 239-244."
+    },
+    {
+      "text": "No hallucinated function names or wrong import paths",
+      "passed": true,
+      "evidence": "All names verified against skill files: plantuml_to_buml import path, besser.generators.backend.BackendGenerator, http_methods, nested_creations, model.validate(), and output files main_api.py/pydantic_classes.py/sql_alchemy.py all match SKILL.md and plantuml.md. WebAppGenerator+GUIModel note is also accurate (SKILL.md line 176)."
+    }
+  ],
+  "passed_count": 5,
+  "total_count": 5
+}

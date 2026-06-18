@@ -1,0 +1,36 @@
+{
+  "assertions": [
+    {
+      "text": "Specifies creating package at besser/generators/graphql/ (or similar path)",
+      "passed": true,
+      "evidence": "Section 2 'Where the files go' shows the tree 'besser/generators/graphql/' with __init__.py, graphql_generator.py and templates/. Path convention confirmed against the real repo (besser/generators/python_classes/, json/, etc.)."
+    },
+    {
+      "text": "Shows implementing GeneratorInterface with __init__ and generate methods",
+      "passed": true,
+      "evidence": "Section 1 states 'Every generator subclasses GeneratorInterface ... requiring __init__(self, model, output_dir=None) and generate(self)', and section 3 gives a GraphQLGenerator(GeneratorInterface) class implementing both __init__ and generate(). Matches the real generator_interface.py abstract methods."
+    },
+    {
+      "text": "Mentions Jinja2 templates in a templates/ subdirectory",
+      "passed": true,
+      "evidence": "File tree includes 'templates/' with 'graphql_schema.graphql.j2'; generator uses Environment(FileSystemLoader(templates_path)) and env.get_template(...). Confirmed templates/ subdir is the real convention (python_classes/templates/)."
+    },
+    {
+      "text": "Mentions registering in config/generators.py with GeneratorInfo",
+      "passed": true,
+      "evidence": "Section 4(b) edits 'besser/utilities/web_modeling_editor/backend/config/generators.py', adds an entry to SUPPORTED_GENERATORS using the GeneratorInfo NamedTuple with correct fields (output_type, file_extension, category, requires_class_diagram). Verified path and GeneratorInfo schema in repo."
+    },
+    {
+      "text": "Describes test file location (tests/generators/) and pytest patterns",
+      "passed": true,
+      "evidence": "Section 5 places tests at 'tests/generators/graphql/test_graphql_generator.py', uses pytest, tmpdir, shared conftest fixtures, --import-mode=importlib, and provides concrete test functions. Verified tests/generators/ structure and conftest fixtures (library_book_author_model, employee_self_assoc_model) exist."
+    },
+    {
+      "text": "Mentions documentation in docs/source/generators/",
+      "passed": true,
+      "evidence": "Section 6 'Documentation' instructs adding 'docs/source/generators/graphql.rst' and wiring it into the docs/source/generators.rst toctree (plus API docs). Verified docs/source/generators/ and docs/source/generators.rst exist in repo."
+    }
+  ],
+  "passed_count": 6,
+  "total_count": 6
+}

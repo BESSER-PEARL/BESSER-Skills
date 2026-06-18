@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "text": "Explains that B-UML names cannot contain spaces",
+      "passed": true,
+      "evidence": "Candidate states \"'first name' is rejected purely because of the space\" and quotes the verified setter: \"if ' ' in name: raise ValueError(... Name cannot contain spaces.)\" matching structural.py lines 186-187."
+    },
+    {
+      "text": "Recommends using underscores: 'first_name' instead of 'first name'",
+      "passed": true,
+      "evidence": "Candidate says \"Fix: use an underscore ... Property(name=\\\"first_name\\\", type=StringType) # OK\" explicitly replacing the space with an underscore."
+    },
+    {
+      "text": "Explains that enumeration literals must have unique names within the same enum",
+      "passed": true,
+      "evidence": "Candidate states \"Literal names within one enumeration must be unique. Two literals both named 'ACTIVE' collide\" backed by the verified Enumeration.literals/add_literal checks (lines 414-415, 430-431)."
+    },
+    {
+      "text": "Provides corrected code for both issues",
+      "passed": true,
+      "evidence": "Provides corrected Property(name=\"first_name\", ...) for issue 1 and an Enumeration with EnumerationLiteral(name=\"ACTIVE\")/(name=\"INACTIVE\") for issue 2, plus a combined valid Class example."
+    }
+  ],
+  "passed_count": 4,
+  "total_count": 4
+}

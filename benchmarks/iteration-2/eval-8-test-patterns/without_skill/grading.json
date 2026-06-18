@@ -1,0 +1,31 @@
+{
+  "assertions": [
+    {
+      "text": "Recommends @pytest.fixture for domain model setup",
+      "passed": true,
+      "evidence": "The answer explicitly uses @pytest.fixture for domain model setup: 'build it inline in a local @pytest.fixture using the structural metamodel' and shows '@pytest.fixture def domain_model(library_book_author_model): return library_book_author_model' plus '@pytest.fixture def my_model():' building a DomainModel."
+    },
+    {
+      "text": "Recommends tmp_path (not manual directory creation) for output directories",
+      "passed": true,
+      "evidence": "The answer states 'Use a pytest temp-dir fixture, not manually-created directories' and 'Do NOT manually create directories'. It explicitly recommends tmp_path ('If you want the modern API, prefer tmp_path') with a code example. While it notes tmpdir dominates the codebase, it endorses tmp_path as fine/preferred for new code and clearly rejects manual directory creation."
+    },
+    {
+      "text": "Shows a concrete fixture example building a small DomainModel inline",
+      "passed": true,
+      "evidence": "Shows '@pytest.fixture def my_model():' that creates Class objects (library, book), sets attributes, builds a BinaryAssociation, and returns 'DomainModel(name=\"Library_Model\", types={library, book}, associations={has})' inline."
+    },
+    {
+      "text": "Shows a concrete test function asserting both file existence and content",
+      "passed": true,
+      "evidence": "test_json_schema_generator asserts existence via 'assert os.path.isfile(output_file)' and content via reading the file and 'assert \\'\"Library\"\\' in generated_code', etc. Both file existence and content are asserted in one concrete test function."
+    },
+    {
+      "text": "Mentions pytest.raises for testing error conditions",
+      "passed": true,
+      "evidence": "The answer mentions pytest.raises: 'with pytest.raises(TypeError, match=\"ObjectModel\"): JSONObjectGenerator(model=\"not_an_object_model\")' and 'Add a pytest.raises test for any constructor validation your generator performs.'"
+    }
+  ],
+  "passed_count": 5,
+  "total_count": 5
+}

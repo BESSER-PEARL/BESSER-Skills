@@ -1,0 +1,6 @@
+{
+  "total_tokens": 26776,
+  "duration_ms": 53920,
+  "total_duration_seconds": 53.9,
+  "_note": "performance carried over from v0.1.0 benchmark (iteration-1); 0.2.0 changes are skill-text only"
+}

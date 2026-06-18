@@ -1,0 +1,36 @@
+{
+  "assertions": [
+    {
+      "text": "Uses correct imports from besser.BUML.metamodel.structural (DomainModel, Class, Property, etc.)",
+      "passed": true,
+      "evidence": "Candidate imports DomainModel, Class, Property, Multiplicity, BinaryAssociation, StringType, IntegerType from besser.BUML.metamodel.structural. Verified resolvable: 'python -c \"from besser.BUML.metamodel.structural import ...\"' printed 'imports OK'. StringType/IntegerType defined at structural.py:299-300; __init__.py re-exports all via 'from .structural import *'."
+    },
+    {
+      "text": "Defines 3 classes: Student, Course, Professor (or equivalent names)",
+      "passed": true,
+      "evidence": "Class(name=\"Student\", ...), Class(name=\"Course\", attributes={course_name, credits}), Class(name=\"Professor\", ...) all present. Course correctly has name and credits attributes."
+    },
+    {
+      "text": "Creates associations with correct multiplicities (many-to-many for student-course, one/many-to-many for professor-course)",
+      "passed": true,
+      "evidence": "enrollment: both ends Multiplicity(0,\"*\") = many-to-many (Student<->Course). teaching: taughtCourses Multiplicity(0,\"*\") and taughtBy Multiplicity(1,1) = one-to-many (Professor 1--* Course). Multiplicity signature (min, max) with '*' for unlimited matches structural.py:512."
+    },
+    {
+      "text": "Assembles a DomainModel with types and associations",
+      "passed": true,
+      "evidence": "DomainModel(name=\"University\", types={student, course, professor}, associations={enrollment, teaching}). Matches DomainModel.__init__ signature (types=, associations=) at structural.py:1935."
+    },
+    {
+      "text": "Uses SQLAlchemyGenerator with correct import and invocation",
+      "passed": true,
+      "evidence": "'from besser.generators.sql_alchemy import SQLAlchemyGenerator' verified valid (__init__.py: 'from .sql_alchemy_generator import *'). SQLAlchemyGenerator(model=..., output_dir=...) matches __init__(self, model, output_dir=None); generator.generate() matches generate(self, dbms='sqlite'). End-to-end run printed 'Code generated successfully!'."
+    },
+    {
+      "text": "Produced Python code is syntactically plausible (no hallucinated API calls)",
+      "passed": true,
+      "evidence": "Ran the full candidate model script against v7.8.3: executed cleanly, no API errors. Claimed generated output matches the real reference output (library/output/sql_alchemy.py): join Table with Column(ForeignKey, primary_key=True), auto 'id: Mapped[int] = mapped_column(primary_key=True)', String(100) for str, FK column 'x_id ... ForeignKey(...), nullable=False' for one-to-many, and relationship(..., secondary=..., back_populates=...). dbms list and default match generator source."
+    }
+  ],
+  "passed_count": 6,
+  "total_count": 6
+}

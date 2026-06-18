@@ -29,16 +29,26 @@ historically said `'postgres'` — that is wrong, the correct value is
 
 ```python
 from besser.generators.sql import SQLGenerator
-gen = SQLGenerator(model=domain_model, output_dir="./output")
-gen.generate(sql_dialect="sqlite")
+# sql_dialect goes in the CONSTRUCTOR; generate() takes no arguments.
+gen = SQLGenerator(model=domain_model, output_dir="./output", sql_dialect="postgresql")
+gen.generate()
+# Valid sql_dialect: sqlite | postgresql | mysql | mssql | mariadb | oracle
+# (it is "postgresql", not "postgres")
 ```
 
 | Aspect | Detail |
 |--------|--------|
 | Input | `DomainModel` |
 | Output | Single file: `tables_{dialect}.sql` |
+| Dialect | Pass `sql_dialect` to the **constructor** (defaults to `"sqlite"`); `generate()` takes **no** arguments. |
 | Key behavior | Two-stage: first generates SQLAlchemy in a temp directory, then runs it as a subprocess to dump DDL. Requires Python to be callable as a subprocess. |
 | Gotcha | If the intermediate SQLAlchemy file has issues, the subprocess fails silently — error is printed to stdout, not raised. If the output file is missing with no exception, check stdout. |
+
+**Watch out — the two SQL generators take the dialect in different places.**
+`SQLGenerator` takes `sql_dialect` in its **constructor** and `generate()`
+takes no args; `SQLAlchemyGenerator` takes `dbms` in **`generate()`**.
+Calling `SQLGenerator(...).generate(sql_dialect="postgresql")` raises
+`TypeError: generate() got an unexpected keyword argument`.
 
 ## Modeling tips that affect persistence
 

@@ -1,0 +1,36 @@
+{
+  "assertions": [
+    {
+      "text": "Specifies creating package at besser/generators/graphql/ (or similar path)",
+      "passed": true,
+      "evidence": "Step 1 shows the layout 'besser/generators/graphql/' with __init__.py, graphql_generator.py, and templates/, matching the skill's Step 1 (besser/generators/my_generator/)."
+    },
+    {
+      "text": "Shows implementing GeneratorInterface with __init__ and generate methods",
+      "passed": true,
+      "evidence": "Step 2 defines 'class GraphQLGenerator(GeneratorInterface)' with '__init__(self, model, output_dir=None)' calling 'super().__init__(model, output_dir)' and a full 'def generate(self)' method."
+    },
+    {
+      "text": "Mentions Jinja2 templates in a templates/ subdirectory",
+      "passed": true,
+      "evidence": "Step 3 writes 'graphql_template.j2', states 'Keep templates in the templates/ subfolder', and uses FileSystemLoader(templates_path) where templates_path joins __file__ dir with 'templates'."
+    },
+    {
+      "text": "Mentions registering in config/generators.py with GeneratorInfo",
+      "passed": true,
+      "evidence": "Step 4: 'Edit besser/utilities/web_modeling_editor/backend/config/generators.py' and registers '\"graphql\": GeneratorInfo(generator_class=GraphQLGenerator, ...)', plus updates get_filename_for_generator()."
+    },
+    {
+      "text": "Describes test file location (tests/generators/) and pytest patterns",
+      "passed": true,
+      "evidence": "Step 5: 'Create tests/generators/graphql/test_graphql_generator.py' with @pytest.fixture, tmp_path fixture, test_* naming, and pytest.raises for error conditions."
+    },
+    {
+      "text": "Mentions documentation in docs/source/generators/",
+      "passed": true,
+      "evidence": "Step 6: 'Create docs/source/generators/graphql.rst' and 'add graphql to the generators index in docs/source/generators.rst'."
+    }
+  ],
+  "passed_count": 6,
+  "total_count": 6
+}

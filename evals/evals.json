@@ -56,6 +56,20 @@
       "prompt": "I'm writing tests for a new generator. What's the typical test pattern? How do I set up fixtures for domain models? Should I use tmp_path or manually create directories?",
       "expected_output": "Explains pytest patterns used in BESSER: @pytest.fixture for domain models built inline, tmp_path for output directories (auto-cleaned), asserting both file existence and content, testing error conditions with pytest.raises. Should include a concrete example fixture and test function.",
       "files": []
+    },
+    {
+      "id": 9,
+      "skill": "besser-user",
+      "prompt": "We're writing the design doc (docs/data-model.md) for a blog: Users, Posts, and Comments. A User writes many Posts; a Post has many Comments; each Comment is written by one User. Add a class diagram of this data model to the doc.",
+      "expected_output": "Recognizes this as a documentation request and embeds a correct B-UML model as a fenced python code block inside the Markdown doc, rather than only delivering a standalone .py file. The B-UML uses imports from besser.BUML.metamodel.structural, defines User/Post/Comment, uses BinaryAssociation with correct Multiplicity for each relationship (User 1..* Posts; Post 1..* Comments; Comment authored by 1 User), assembles a DomainModel, and calls model.validate(). Mentions the same B-UML can be imported into editor.besser-pearl.org (Import > B-UML) to render the diagram.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "skill": "besser-generators",
+      "prompt": "How do I generate PostgreSQL SQL DDL with SQLGenerator? Show the exact code.",
+      "expected_output": "Shows that sql_dialect is passed to the SQLGenerator CONSTRUCTOR (e.g. SQLGenerator(model=..., output_dir=..., sql_dialect='postgresql')) and that generate() is called with NO arguments. Uses 'postgresql' (not 'postgres') and lists the valid dialects (sqlite, postgresql, mysql, mssql, mariadb, oracle). Must NOT call generate(sql_dialect=...), which would raise TypeError.",
+      "files": []
     }
   ]
 }

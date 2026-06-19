@@ -13,6 +13,7 @@ that the SKILL.md overview does not cover.
 - [Primitive types](#primitive-types)
 - [Enumerations](#enumerations)
 - [Associations](#associations)
+- [Association classes](#association-classes)
 - [Inheritance / generalizations](#inheritance--generalizations)
 - [Methods](#methods)
 - [Assembling the model](#assembling-the-model)
@@ -26,7 +27,7 @@ from besser.BUML.metamodel.structural import (
     DomainModel, Class, Property, Multiplicity,
     BinaryAssociation, Generalization,
     Enumeration, EnumerationLiteral,
-    Method, Parameter,
+    Method, Parameter, AssociationClass,
     StringType, IntegerType, FloatType, BooleanType,
     DateType, DateTimeType, TimeType, TimeDeltaType,
     UNLIMITED_MAX_MULTIPLICITY,  # 9999, means "many"
@@ -123,6 +124,43 @@ Common cardinalities:
 
 For composition (whole-part ownership where the part cannot exist without
 the whole), set `is_composite=True` on the *whole* end.
+
+## Association classes
+
+An `AssociationClass` is both a class (with its own attributes) and a
+binary association between two classes. Define the `BinaryAssociation`
+first, then wrap it with `AssociationClass`.
+
+```python
+# Classes
+person  = Class(name="Person",  attributes={...})
+project = Class(name="Project", attributes={...})
+
+# Underlying association
+person_end  = Property(name="person",  type=person,  multiplicity=Multiplicity(0, "*"))
+project_end = Property(name="project", type=project, multiplicity=Multiplicity(0, "*"))
+assignment_assoc = BinaryAssociation(name="assignment_assoc", ends={person_end, project_end})
+
+# Association class — adds attributes to the link itself
+role       = Property(name="role",       type=StringType)
+start_date = Property(name="startDate",  type=DateType)
+Assignment = AssociationClass(
+    name="Assignment",
+    attributes={role, start_date},
+    association=assignment_assoc,
+)
+```
+
+Add both the `AssociationClass` and its underlying `BinaryAssociation` to
+the model:
+
+```python
+model = DomainModel(
+    name="MyModel",
+    types={person, project, Assignment},
+    associations={assignment_assoc},
+)
+```
 
 ## Inheritance / generalizations
 

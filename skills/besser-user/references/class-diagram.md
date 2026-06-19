@@ -15,6 +15,7 @@ that the SKILL.md overview does not cover.
 - [Associations](#associations)
 - [Association classes](#association-classes)
 - [Inheritance / generalizations](#inheritance--generalizations)
+- [Generalization sets](#generalization-sets)
 - [Methods](#methods)
 - [Assembling the model](#assembling-the-model)
 - [Validation](#validation)
@@ -28,6 +29,7 @@ from besser.BUML.metamodel.structural import (
     BinaryAssociation, Generalization,
     Enumeration, EnumerationLiteral,
     Method, Parameter, MethodImplementationType, AssociationClass,
+    GeneralizationSet,
     StringType, IntegerType, FloatType, BooleanType,
     DateType, DateTimeType, TimeType, TimeDeltaType,
     UNLIMITED_MAX_MULTIPLICITY,  # 9999, means "many"
@@ -243,6 +245,30 @@ gen = Generalization(general=person, specific=employee)
 
 `general` is the parent, `specific` is the child. A class cannot generalize
 itself; circular inheritance is rejected at `model.validate()`.
+
+## Generalization sets
+
+A `GeneralizationSet` groups related generalizations and annotates the
+partition with two UML constraints:
+
+- `is_disjoint=True` — an instance can belong to **at most one** subclass
+- `is_complete=True` — every instance of the superclass **must** belong to a subclass
+
+```python
+gen_lecture = Generalization(general=course, specific=lecture_course)
+gen_lab     = Generalization(general=course, specific=lab_course)
+
+course_partition = GeneralizationSet(
+    name="CourseTypes",
+    generalizations={gen_lecture, gen_lab},
+    is_disjoint=True,   # a course cannot be both a lecture and a lab
+    is_complete=True,   # every course must be one of the two
+)
+```
+
+`GeneralizationSet` is a standalone construct — it references
+`Generalization` objects already registered in the `DomainModel` but is
+not itself added to the model.
 
 ## Methods
 

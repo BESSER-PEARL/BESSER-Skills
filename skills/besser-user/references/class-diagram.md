@@ -285,6 +285,16 @@ greet = Method(
 )
 person.add_method(greet)
 
+# Parameter with a default value
+send = Method(
+    name="send",
+    parameters=[
+        Parameter(name="message", type=StringType),
+        Parameter(name="retries", type=IntegerType, default_value=3),
+    ],
+)
+person.add_method(send)
+
 # Void method — omit type= (defaults to None, meaning no return value)
 notify = Method(
     name="notify",

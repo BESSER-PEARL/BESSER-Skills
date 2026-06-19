@@ -128,6 +128,18 @@ Common cardinalities:
 | One or more | `Multiplicity(1, "*")` |
 | Zero or more | `Multiplicity(0, "*")` |
 
+By default both ends are navigable (`is_navigable=True`). To make an
+association directed, set `is_navigable=False` on the end that should not
+be traversed:
+
+```python
+# User follows User — navigable from follower to followed, not the reverse
+follows     = Property(name="follows",    type=user, multiplicity=Multiplicity(0, "*"))
+followed_by = Property(name="followedBy", type=user, multiplicity=Multiplicity(0, "*"),
+                       is_navigable=False)
+follow_rel  = BinaryAssociation(name="follow_rel", ends={follows, followed_by})
+```
+
 A `BinaryAssociation` can also connect a class to itself (self-referential).
 Both ends have the same `type` — give them distinct names:
 

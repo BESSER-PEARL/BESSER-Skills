@@ -219,14 +219,20 @@ itself; circular inheritance is rejected at `model.validate()`.
 ## Methods
 
 ```python
-# Method without implementation (signature only)
+# Method with a return type
 greet = Method(
     name="greet",
     parameters=[Parameter(name="message", type=StringType)],
     type=StringType,    # return type
-    is_abstract=False,
 )
 person.add_method(greet)
+
+# Void method — omit type= (defaults to None, meaning no return value)
+notify = Method(
+    name="notify",
+    parameters=[Parameter(name="message", type=StringType)],
+)
+person.add_method(notify)
 ```
 
 Methods can also carry a Python implementation using

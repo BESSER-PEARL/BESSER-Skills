@@ -54,7 +54,7 @@ title = Property(name="title", type=StringType)
 pages = Property(name="pages", type=IntegerType)
 book = Class(name="Book", attributes={title, pages})
 
-# Mark a primary key — only one is_id per class
+# Optionally mark a primary key — is_id is False by default, only one per class
 book_id = Property(name="id", type=IntegerType, is_id=True)
 ```
 

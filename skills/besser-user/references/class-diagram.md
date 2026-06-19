@@ -129,7 +129,15 @@ Common cardinalities:
 | Zero or more | `Multiplicity(0, "*")` |
 
 For composition (whole-part ownership where the part cannot exist without
-the whole), set `is_composite=True` on the *whole* end.
+the whole), set `is_composite=True` on the end whose `type` is the
+container (the whole), not the part:
+
+```python
+# A Library owns its Books — Library is the whole, Book is the part
+owns = Property(name="owns", type=book,    multiplicity=Multiplicity(0, "*"))
+in_  = Property(name="in",   type=library, multiplicity=Multiplicity(1, 1), is_composite=True)
+BinaryAssociation(name="lib_owns_book", ends={owns, in_})
+```
 
 ## Association classes
 

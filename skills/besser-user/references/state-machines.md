@@ -51,7 +51,6 @@ Transitions can also be gated on a `Condition` (a boolean function).
 Use `when_condition()` for condition-only transitions:
 
 ```python
-```python
 # From a source string (use when condition is defined inline or from serialised data)
 payment_ok = Condition(
     name="payment_sufficient",

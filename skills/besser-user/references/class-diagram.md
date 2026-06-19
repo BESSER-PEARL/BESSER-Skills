@@ -200,7 +200,7 @@ construction:
 ```python
 decrease_stock = Method(
     name="decrease_stock",
-    parameters={Parameter(name="qty", type=IntegerType)},
+    parameters=[Parameter(name="qty", type=IntegerType)],
     implementation_type=MethodImplementationType.CODE,
 )
 decrease_stock.code = """def decrease_stock(self, qty: int):

@@ -293,9 +293,18 @@ unlisted types fail validation.
 
 ## Validation
 
+`validate()` raises `ValueError` by default when the model has errors.
+Use `raise_exception=False` to get the result dict without an exception:
+
 ```python
-result = model.validate()
-# {"success": True/False, "errors": [...], "warnings": [...]}
+# Safe inspection — never raises
+result = model.validate(raise_exception=False)
+if not result["success"]:
+    for error in result["errors"]:
+        print(error)
+
+# Let it raise — useful in scripts where you want to fail fast
+model.validate()  # raises ValueError listing all errors if invalid
 ```
 
 Always call `validate()` before generating. Common errors caught here:

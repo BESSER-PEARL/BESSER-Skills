@@ -3,7 +3,7 @@
 Reference for generators that produce data classes, schemas, or
 serialization formats — no I/O layer, no UI. Read this when the user is
 running `PythonGenerator`, `JavaGenerator`, `PydanticGenerator`,
-`JSONSchemaGenerator`, or `RDFGenerator`.
+`JSONSchemaGenerator`, `JSONObjectGenerator`, or `RDFGenerator`.
 
 ## PythonGenerator
 
@@ -64,6 +64,27 @@ gen.generate()
 | Input | `DomainModel` |
 | Output | `json_schema.json` (regular mode), or per-class directories with schema + examples (smart_data mode) |
 | Options | `mode="regular"` or `mode="smart_data"` (FIWARE/NGSI-LD compliant) |
+
+## JSONObjectGenerator
+
+Serializes a populated `ObjectModel` (concrete object instances + their links) into a single JSON document. This is the *instance-level* counterpart to `JSONSchemaGenerator`, which emits a *schema* from a `DomainModel`. (See the besser-user skill's `references/object-models.md` for building an `ObjectModel`.)
+
+```python
+from besser.generators.json import JSONObjectGenerator
+gen = JSONObjectGenerator(model=object_model, output_dir="./output")
+gen.generate()
+```
+
+| Aspect | Detail |
+|--------|--------|
+| Input | `ObjectModel` (NOT a `DomainModel`). The constructor raises `TypeError("JSONObjectGenerator expects an ObjectModel instance")` otherwise. |
+| Output | One JSON file `<model.name>.json` (spaces → `_`; empty name falls back to `object_model.json`). Defaults to `./output/`. |
+| Options | None. `__init__(self, model: ObjectModel, output_dir: str = None)` — there is no `mode` parameter (that belongs to `JSONSchemaGenerator`). |
+| Document shape | `{ "name": ..., "objects": [ { "id", "class", "attributes": {...}, "relationships": {...} } ] }`; top-level `"description"` only if `model.metadata.description` is set; empty `attributes`/`relationships` are omitted. |
+| Value handling | `datetime`/`date`/`time` → ISO 8601; `timedelta` → total seconds; `set`/`list`/`tuple` → JSON array (sets sorted by `str()`); enum literals → literal name; written with `indent=2, ensure_ascii=False`. |
+| Gotcha | Malformed `ObjectModel`s degrade silently — slots without an `attribute` and links without resolvable endpoints are skipped, yielding a partial document rather than an error. |
+
+`JSONObjectGenerator` (instances) vs `JSONSchemaGenerator` (structure): the former takes an `ObjectModel` and emits a concrete data document; the latter takes a `DomainModel` and emits a JSON Schema (and optional FIWARE/NGSI-LD Smart Data Models).
 
 ## RDFGenerator
 

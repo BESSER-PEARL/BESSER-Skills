@@ -8,7 +8,8 @@ description: >
   BESSER generator (PythonGenerator, PydanticGenerator, SQLAlchemyGenerator,
   SQLGenerator, BackendGenerator, RESTAPIGenerator, DjangoGenerator,
   WebAppGenerator, ReactGenerator, BAFGenerator, QiskitGenerator,
-  JSONSchemaGenerator, RDFGenerator, TerraformGenerator, PytorchGenerator,
+  JSONSchemaGenerator, JSONObjectGenerator, RDFGenerator, SupabaseGenerator,
+  TerraformGenerator, PytorchGenerator,
   TFGenerator, FlutterGenerator, JavaGenerator), wondering "where does the
   output go", "will my edits survive regeneration", "how do I add custom
   endpoints to a generated FastAPI app", or "how do I switch the database
@@ -27,7 +28,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.2.1"
+  version: "0.3.0"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
@@ -57,8 +58,8 @@ Read the relevant file when the user is working with a specific generator:
 
 | If the user is running… | Read |
 |--------------------------|------|
-| `PythonGenerator`, `JavaGenerator`, `PydanticGenerator`, `JSONSchemaGenerator`, `RDFGenerator` | `references/python-and-data.md` |
-| `SQLAlchemyGenerator`, `SQLGenerator` | `references/persistence.md` |
+| `PythonGenerator`, `JavaGenerator`, `PydanticGenerator`, `JSONSchemaGenerator`, `JSONObjectGenerator`, `RDFGenerator` | `references/python-and-data.md` |
+| `SQLAlchemyGenerator`, `SQLGenerator`, `SupabaseGenerator` | `references/persistence.md` |
 | `BackendGenerator`, `RESTAPIGenerator`, `DjangoGenerator`, `WebAppGenerator`, `ReactGenerator`, `FlutterGenerator` | `references/api-and-web.md` |
 | `BAFGenerator`, `QiskitGenerator`, `TerraformGenerator`, `PytorchGenerator`, `TFGenerator` | `references/agents-and-other.md` |
 | Anything failing or producing wrong output | `references/debugging.md` |
@@ -76,9 +77,11 @@ known gotchas for the generators it covers.
 | Java classes | `JavaGenerator` | `python-and-data.md` |
 | Pydantic models (with optional OCL→validator) | `PydanticGenerator` | `python-and-data.md` |
 | JSON Schema (regular or NGSI-LD) | `JSONSchemaGenerator` | `python-and-data.md` |
+| JSON data from an ObjectModel (instances) | `JSONObjectGenerator` | `python-and-data.md` |
 | RDF Turtle vocabulary | `RDFGenerator` | `python-and-data.md` |
 | SQLAlchemy ORM | `SQLAlchemyGenerator` | `persistence.md` |
 | Raw SQL DDL | `SQLGenerator` | `persistence.md` |
+| Supabase (Postgres + RLS) schema | `SupabaseGenerator` | `persistence.md` |
 | FastAPI + ORM + Pydantic stack | `BackendGenerator` | `api-and-web.md` |
 | Standalone REST API | `RESTAPIGenerator` | `api-and-web.md` |
 | Django project | `DjangoGenerator` | `api-and-web.md` |
@@ -102,6 +105,8 @@ known gotchas for the generators it covers.
 | DjangoGenerator | CWD (creates project folder) | `myproject/myapp/models.py`, `views.py`, … |
 | WebAppGenerator | must be specified | `frontend/`, `backend/`, `docker-compose.yml` |
 | BAFGenerator | `./output/` | `{agent_name}.py`, `config.yaml`, `readme.txt` |
+| JSONObjectGenerator | `./output/` | `<model_name>.json` (from an `ObjectModel`) |
+| SupabaseGenerator | `./output/` | `<timestamp>_<model>.sql` (new file each run — never overwrites) |
 
 `BackendGenerator`'s default `./output_backend/` is the odd one out — easy
 to miss if you assume `./output/` like everyone else.

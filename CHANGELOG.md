@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.0] - 2026-06-18
+
+### Added
+- **Coverage of all remaining B-UML DSLs** in `besser-user` — seven new
+  source-verified references:
+  - `references/object-models.md` — object/instance models (objects,
+    attribute values, links), incl. the fluent builder and OCL test data.
+  - `references/feature-models.md` — software product lines (features,
+    groups, configurations).
+  - `references/ocl.md` — writing and attaching OCL `Constraint`s; `bocl`
+    evaluation; which generators consume OCL.
+  - `references/deployment.md` — deployment models for the
+    `TerraformGenerator`.
+  - `references/neural-networks.md` — NN models for the PyTorch/TF
+    generators.
+  - `references/quantum.md` — quantum circuits for the `QiskitGenerator`.
+  - `references/project.md` — bundling models + metadata.
+- **Two previously undocumented generators** in `besser-generators`:
+  - `SupabaseGenerator` (Postgres DDL + RLS) in `references/persistence.md`.
+  - `JSONObjectGenerator` (JSON data from an `ObjectModel`) in
+    `references/python-and-data.md`.
+- Reference-layout/generator-picker tables, trigger descriptions, and the
+  README updated to surface the new model types and generators. The skills
+  now cover all 19 BESSER generators and every B-UML metamodel/DSL.
+
+### Notes
+- All new content was written against BESSER v7.8.3 source with verified API
+  citations; several upstream documentation bugs were deliberately *not*
+  reproduced (e.g. the wrong `besser.BUML.notations.od.*` import path and the
+  `ObjectModel(instances=…)` kwarg). Known-broken paths are flagged in-place
+  (e.g. the `objectPlantUML` parser is non-functional in v7.8.3).
+
 ## [0.2.1] - 2026-06-18
 
 ### Fixed

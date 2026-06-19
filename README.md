@@ -16,8 +16,8 @@ Works with any agent that supports the Agent Skills standard: **Claude Code**, *
 
 | Skill | Description |
 |-------|-------------|
-| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), code generation, **drawing UML for documentation**, PlantUML, web editor (import & render) |
-| [`besser-generators`](skills/besser-generators/SKILL.md) | Per-generator operations, safe customization, template overrides |
+| [`besser-user`](skills/besser-user/SKILL.md) | End-user guide: UML class modeling (classes, associations, inheritance), object/feature/OCL/deployment/NN/quantum/project models, code generation, **drawing UML for documentation**, PlantUML, web editor (import & render) |
+| [`besser-generators`](skills/besser-generators/SKILL.md) | Per-generator operations (all 19 generators incl. Supabase & JSON-object), safe customization, template overrides |
 | [`besser-troubleshooting`](skills/besser-troubleshooting/SKILL.md) | Diagnosis guide for install, import, runtime, and deployment issues |
 | [`besser-dev`](skills/besser-dev/SKILL.md) | Contributor guide: adding generators, tests, docs, PR workflow |
 
@@ -199,13 +199,20 @@ besser-skills/
         agents.md                         # chatbot/agent modeling
         gui-models.md                     # GUI for WebApp/Django
         delivering-models.md              # .py vs. Markdown delivery, code-vs-docs
+        object-models.md                  # object/instance models, links
+        feature-models.md                 # software product lines
+        ocl.md                            # OCL constraints
+        deployment.md                     # deployment models (Terraform)
+        neural-networks.md                # NN models (PyTorch/TF)
+        quantum.md                        # quantum circuits (Qiskit)
+        project.md                        # bundling models + metadata
       scripts/
         scaffold_model.py                 # prints a starter DomainModel
     besser-generators/
       SKILL.md
       references/
-        python-and-data.md                # Python, Java, Pydantic, JSONSchema, RDF
-        persistence.md                    # SQLAlchemy, SQL
+        python-and-data.md                # Python, Java, Pydantic, JSON(Schema/Object), RDF
+        persistence.md                    # SQLAlchemy, SQL, Supabase
         api-and-web.md                    # Backend, Django, WebApp, React, Flutter
         agents-and-other.md               # BAF, Qiskit, Terraform, Pytorch, TF
         debugging.md                      # generation-failure recipes

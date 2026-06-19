@@ -129,15 +129,21 @@ Common cardinalities:
 | Zero or more | `Multiplicity(0, "*")` |
 
 For composition (whole-part ownership where the part cannot exist without
-the whole), set `is_composite=True` on the end whose `type` is the
-container (the whole), not the part:
+the whole), set `is_composite=True` on the end that navigates **to the
+whole** — i.e., the end whose `type` is the container class. This is the
+end written from the part's point of view ("I belong to a Library").
 
 ```python
-# A Library owns its Books — Library is the whole, Book is the part
-owns = Property(name="owns", type=book,    multiplicity=Multiplicity(0, "*"))
-in_  = Property(name="in",   type=library, multiplicity=Multiplicity(1, 1), is_composite=True)
-BinaryAssociation(name="lib_owns_book", ends={owns, in_})
+# Library (whole) owns Books (parts).
+# has_books  — navigates from Library to its parts (Books)
+# in_library — navigates from a Book back to its container (Library) → mark this one
+has_books  = Property(name="hasBooks",  type=book,    multiplicity=Multiplicity(0, "*"))
+in_library = Property(name="inLibrary", type=library, multiplicity=Multiplicity(1, 1), is_composite=True)
+lib_book   = BinaryAssociation(name="lib_book", ends={has_books, in_library})
 ```
+
+A quick check: `is_composite=True` should always be on the end with the
+lower-bound multiplicity of `1` (the part can belong to at most one whole).
 
 ## Association classes
 

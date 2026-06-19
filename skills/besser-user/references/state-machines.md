@@ -45,7 +45,15 @@ confirmed.when_event(ship_event).go_to(shipped)
 ```
 
 The fluent API reads as: *when this event fires in this state, go to that
-state*.
+state*. The same `Event` instance can be reused across multiple source
+states — create it once and reference it in as many `when_event()` calls
+as needed:
+
+```python
+cancel_event = Event(name="cancel")
+pending.when_event(cancel_event).go_to(cancelled)
+confirmed.when_event(cancel_event).go_to(cancelled)   # same event, different source state
+```
 
 Transitions can also be gated on a `Condition` (a boolean function).
 Use `when_condition()` for condition-only transitions:
@@ -77,6 +85,15 @@ alarm_enabled = Condition(
 )
 armed.when_event(motion_detected).with_condition(alarm_enabled).go_to(triggered)
 ```
+
+Every `Condition` source function must have the signature
+`(session, params)`:
+
+- `session` — the `Session` object for the current user; use
+  `session.get(key)` / `session.set(key, value)` to read and write
+  per-user data
+- `params` — a `dict` of extra parameters passed by the runtime at
+  transition time (often empty `{}`); read with `params.get(key)`
 
 ## State behavior
 
@@ -151,6 +168,29 @@ What it checks:
 
 - **Unreachable states** (warning) — a non-initial state with no incoming transitions
 - **Final states with outgoing transitions** (error) — violates UML semantics
+
+## Embedding in a domain model
+
+A `StateMachine` can be attached to a `Method` in a class diagram as its
+implementation, using `MethodImplementationType.STATE_MACHINE`:
+
+```python
+from besser.BUML.metamodel.structural import (
+    Class, Method, MethodImplementationType
+)
+from besser.BUML.metamodel.state_machine.state_machine import StateMachine
+
+sm = StateMachine(name="OrderProcess")
+# ... define states and transitions ...
+
+process_order = Method(
+    name="process_order",
+    implementation_type=MethodImplementationType.STATE_MACHINE,
+    state_machine=sm,
+)
+order = Class(name="Order")
+order.add_method(process_order)
+```
 
 ## Generation
 

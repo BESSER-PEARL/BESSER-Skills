@@ -54,9 +54,15 @@ title = Property(name="title", type=StringType)
 pages = Property(name="pages", type=IntegerType)
 book = Class(name="Book", attributes={title, pages})
 
+# Abstract class — cannot be instantiated directly
+publication = Class(name="Publication", is_abstract=True)
+
 # Optionally mark a primary key — is_id is False by default, only one per class
 book_id = Property(name="id", type=IntegerType, is_id=True)
 ```
+
+`is_abstract` is `False` by default. Abstract classes are typically used as
+parents in a generalization — see [Inheritance / generalizations](#inheritance--generalizations).
 
 Attributes are `Property` objects whose `type` is a primitive type, an
 `Enumeration`, or another `Class` (when used as an association end).

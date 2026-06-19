@@ -1,8 +1,8 @@
 # Persistence generators
 
-Reference for generators that produce database artifacts — ORM code or raw
-DDL. Read this when the user is running `SQLAlchemyGenerator` or
-`SQLGenerator`.
+Reference for generators that produce database artifacts — ORM code, raw
+DDL, or a Supabase schema. Read this when the user is running
+`SQLAlchemyGenerator`, `SQLGenerator`, or `SupabaseGenerator`.
 
 ## SQLAlchemyGenerator
 
@@ -49,6 +49,30 @@ gen.generate()
 takes no args; `SQLAlchemyGenerator` takes `dbms` in **`generate()`**.
 Calling `SQLGenerator(...).generate(sql_dialect="postgresql")` raises
 `TypeError: generate() got an unexpected keyword argument`.
+
+## SupabaseGenerator
+
+Generates Supabase-flavored Postgres DDL (a single migration-style `.sql` file) from a `DomainModel`: enum types, tables, association foreign keys, an `auth.users` mirror trigger, grants, and Row Level Security policies.
+
+```python
+from besser.generators.supabase import SupabaseGenerator
+
+gen = SupabaseGenerator(
+    model=domain_model,      # a BUML DomainModel
+    output_dir="./output",   # optional; defaults to <cwd>/output
+    user_root="User",        # optional; class mirrored onto auth.users; pass None to skip auth
+)
+gen.generate()               # writes <YYYYMMDDHHMMSS>_<model_slug>.sql; prints the path
+```
+
+| Aspect | Detail |
+|--------|--------|
+| Input | `DomainModel` — reads classes, attributes (`is_id`, `is_optional`, type), enumerations, and binary associations. |
+| Output | One file `<YYYYMMDDHHMMSS>_<model_slug>.sql` in `output_dir`. **Timestamped, so every run creates a NEW file — it never overwrites** (unlike other generators). |
+| Options | `user_root: str = "User"` — the class mirrored onto `auth.users`; pass `None` to disable auth, triggers, and RLS entirely. |
+| Type map | `str→TEXT`, `int→INTEGER`, `float→DOUBLE PRECISION`, `bool→BOOLEAN`, `date→DATE`, `time→TIME`, `datetime→TIMESTAMPTZ`, `timedelta→INTERVAL`, `any→JSONB`; unknown→`TEXT`; enum-typed attrs use the enum type name. |
+| Key behavior | `is_id` attrs → `UUID PRIMARY KEY DEFAULT gen_random_uuid()` (or `REFERENCES auth.users(id)` on the user-root); M:N associations → junction tables; per-user classes get a `user_id` column + RLS policies keyed on `(SELECT auth.uid()) = "user_id"`. |
+| Gotchas | Identifier names are **lowercased** in the DDL. The user-root id is force-emitted as a reference to `auth.users` even if you omit `is_id` on that class. `AssociationClass` is skipped; only **binary** associations are processed; inheritance is flattened (no table-per-hierarchy). |
 
 ## Modeling tips that affect persistence
 

@@ -6,7 +6,10 @@ description: >
   attributes, associations, enumerations, generalizations), running any
   BESSER generator (Django, FastAPI, SQLAlchemy, Pydantic, React, WebApp,
   BAF, Qiskit, etc.), modeling state machines or chatbot agents, designing
-  GUI models for web apps, working with the BESSER web editor at
+  GUI models for web apps, building any other B-UML model type — object
+  (instance) models, feature models, OCL constraints, deployment models,
+  neural-network models, quantum circuits, or project models — working with
+  the BESSER web editor at
   editor.besser-pearl.org, or drawing a correct UML class diagram to
   document a system (classes, attributes, associations, inheritance) — even
   when no code will be generated, e.g. adding a class diagram to a README,
@@ -29,7 +32,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.2.1"
+  version: "0.3.0"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
@@ -75,6 +78,13 @@ when you need depth:
 | Chatbot/agent modeling and the BAFGenerator | `references/agents.md` |
 | GUI modeling for WebAppGenerator/DjangoGenerator | `references/gui-models.md` |
 | How to deliver a model (`.py` vs. Markdown diagram) and code-vs-docs outcomes | `references/delivering-models.md` |
+| Object/instance models (objects, attribute values, links; OCL test data) | `references/object-models.md` |
+| Feature models (software product lines: features, groups, configurations) | `references/feature-models.md` |
+| OCL constraints (writing/attaching `Constraint`s; bocl validation) | `references/ocl.md` |
+| Deployment models (clusters/nodes/services for the TerraformGenerator) | `references/deployment.md` |
+| Neural-network models (layers, tensor ops; Pytorch/TF generators) | `references/neural-networks.md` |
+| Quantum circuits (gates; QiskitGenerator) | `references/quantum.md` |
+| Project models (bundling models + metadata) | `references/project.md` |
 | Per-generator options, output paths, customization | the **besser-generators** skill |
 | Errors and diagnostics | the **besser-troubleshooting** skill |
 

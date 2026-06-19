@@ -36,7 +36,7 @@ from besser.BUML.metamodel.structural import (
 
 ## Naming rules
 
-Everything in B-UML descends from `NamedElement`. Names must:
+Almost every class in B-UML descends from `NamedElement`. Names must:
 
 - not contain spaces (use `My_Name`, not `My Name`)
 - not contain hyphens (use `my_name`, not `my-name`)

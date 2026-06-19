@@ -59,6 +59,11 @@ publication = Class(name="Publication", is_abstract=True)
 
 # Optionally mark a primary key — is_id is False by default, only one per class
 book_id = Property(name="id", type=IntegerType, is_id=True)
+
+# Optionally mark a field as nullable — is_optional is False by default
+nickname = Property(name="nickname", type=StringType, is_optional=True)
+
+# is_id and is_optional are mutually exclusive — setting both raises ValueError
 ```
 
 `is_abstract` is `False` by default. Abstract classes are typically used as

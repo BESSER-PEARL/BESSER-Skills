@@ -57,6 +57,9 @@ book = Class(name="Book", attributes={title, pages})
 # Abstract class — cannot be instantiated directly
 publication = Class(name="Publication", is_abstract=True)
 
+# Read-only class — no instance can be modified after creation
+config = Class(name="Config", is_read_only=True)
+
 # Optionally mark a primary key — is_id is False by default, only one per class
 book_id = Property(name="id", type=IntegerType, is_id=True)
 
@@ -64,6 +67,9 @@ book_id = Property(name="id", type=IntegerType, is_id=True)
 nickname = Property(name="nickname", type=StringType, is_optional=True)
 
 # is_id and is_optional are mutually exclusive — setting both raises ValueError
+
+# Read-only property — cannot be modified after creation
+created_at = Property(name="createdAt", type=DateTimeType, is_read_only=True)
 ```
 
 `is_abstract` is `False` by default. Abstract classes are typically used as

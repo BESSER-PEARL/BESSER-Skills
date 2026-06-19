@@ -128,6 +128,16 @@ Common cardinalities:
 | One or more | `Multiplicity(1, "*")` |
 | Zero or more | `Multiplicity(0, "*")` |
 
+A `BinaryAssociation` can also connect a class to itself (self-referential).
+Both ends have the same `type` — give them distinct names:
+
+```python
+# An Employee can manage 0..* other Employees
+manages     = Property(name="manages",     type=employee, multiplicity=Multiplicity(0, "*"))
+managed_by  = Property(name="managedBy",   type=employee, multiplicity=Multiplicity(0, 1))
+supervision = BinaryAssociation(name="supervision", ends={manages, managed_by})
+```
+
 For composition (whole-part ownership where the part cannot exist without
 the whole), set `is_composite=True` on the end that navigates **to the
 whole** — i.e., the end whose `type` is the container class. This is the

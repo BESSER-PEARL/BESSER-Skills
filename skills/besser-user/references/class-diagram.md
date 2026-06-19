@@ -27,7 +27,7 @@ from besser.BUML.metamodel.structural import (
     DomainModel, Class, Property, Multiplicity,
     BinaryAssociation, Generalization,
     Enumeration, EnumerationLiteral,
-    Method, Parameter, AssociationClass,
+    Method, Parameter, MethodImplementationType, AssociationClass,
     StringType, IntegerType, FloatType, BooleanType,
     DateType, DateTimeType, TimeType, TimeDeltaType,
     UNLIMITED_MAX_MULTIPLICITY,  # 9999, means "many"
@@ -177,8 +177,7 @@ itself; circular inheritance is rejected at `model.validate()`.
 ## Methods
 
 ```python
-from besser.BUML.metamodel.structural import Method, Parameter
-
+# Method without implementation (signature only)
 greet = Method(
     name="greet",
     parameters=[Parameter(name="message", type=StringType)],
@@ -188,9 +187,29 @@ greet = Method(
 person.add_method(greet)
 ```
 
-Methods can carry implementations — see the besser-generators skill for
-`MethodImplementationType.BAL` / `MethodImplementationType.CODE`, which
-auto-generate REST endpoints in `BackendGenerator`.
+Methods can also carry a Python implementation using
+`MethodImplementationType.CODE`. Assign the source to `.code` after
+construction:
+
+```python
+decrease_stock = Method(
+    name="decrease_stock",
+    parameters={Parameter(name="qty", type=IntegerType)},
+    implementation_type=MethodImplementationType.CODE,
+)
+decrease_stock.code = """def decrease_stock(self, qty: int):
+    if qty <= 0:
+        raise ValueError("Quantity must be positive")
+    if qty > self.stock:
+        raise ValueError(f"Only {self.stock} items available")
+    self.stock -= qty
+"""
+book.methods = {decrease_stock}
+```
+
+`MethodImplementationType.BAL` is the alternative — used by
+`BackendGenerator` to auto-generate REST endpoints. See the
+besser-generators skill for details on both modes.
 
 ## Assembling the model
 

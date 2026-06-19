@@ -116,6 +116,23 @@ has_books  = Property(name="has",       type=book,    multiplicity=Multiplicity(
 lib_book = BinaryAssociation(name="lib_book", ends={located_in, has_books})
 ```
 
+**End name uniqueness:** for any class, all the ends that navigate *away*
+from it (the opposite ends across all its associations) must have unique
+names — they become that class's navigable properties in generated code.
+For example, if `Doctor` participates in two associations (to `Appointment`
+and to `Patient`), the ends pointing away from `Doctor` must not share a
+name:
+
+```python
+# WRONG — Doctor has two opposite ends both named "appointments"
+Property(name="appointments", type=appointment, ...)  # in association 1
+Property(name="appointments", type=patient, ...)      # in association 2
+
+# CORRECT — distinct names
+Property(name="appointments", type=appointment, ...)
+Property(name="patients",     type=patient, ...)
+```
+
 `Multiplicity(min, max)` — `max` accepts `"*"` or `UNLIMITED_MAX_MULTIPLICITY`
 (=9999) for "many".
 

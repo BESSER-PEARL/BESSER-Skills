@@ -119,6 +119,10 @@ def send_email(session):
 confirmed.set_body(Body(name="send_email", callable=send_email))
 ```
 
+`session.reply(...)` is provided by the agent/chatbot **runtime**, not by the
+base `Session` metamodel class — the body source is stored verbatim and only
+executed at run time, so helpers like `reply()` resolve then.
+
 `CustomCodeAction(source=...)` embeds Python that runs when the state is
 entered. The `session` object gives access to per-user state at runtime.
 

@@ -486,7 +486,7 @@ session.reply("message")        # send a text reply to the user
 session.message                 # the raw text the user sent
 session.predicted_intent        # IntentClassifierPrediction or None
 session.file                    # File object if a file was received
-session.chat_history            # list of (role, message) tuples
+session.chat_history            # typed list[tuple[str, int]] in the metamodel
 ```
 
 Reading a matched intent's extracted parameter values:

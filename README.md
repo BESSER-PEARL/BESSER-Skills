@@ -193,7 +193,7 @@ besser-skills/
     besser-user/
       SKILL.md
       references/                         # progressive-disclosure references
-        metamodel.md                      # full B-UML structural reference
+        class-diagram.md                  # class diagram (structural model) reference
         plantuml.md                       # PlantUML notation
         state-machines.md
         agents.md                         # chatbot/agent modeling

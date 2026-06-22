@@ -72,7 +72,7 @@ when you need depth:
 
 | You need | Read |
 |----------|------|
-| Full B-UML metamodel (classes, attributes, associations, enums, generalizations, methods, validation) | `references/metamodel.md` |
+| Class diagram modeling (classes, attributes, associations, enums, generalizations, methods, validation) | `references/class-diagram.md` |
 | PlantUML notation and the `plantuml_to_buml()` call | `references/plantuml.md` |
 | State machine modeling | `references/state-machines.md` |
 | Chatbot/agent modeling and the BAFGenerator | `references/agents.md` |
@@ -128,7 +128,7 @@ Python 3.11+ required.
 Most projects only need classes, attributes, and associations. Here is the
 minimum that gets you to a runnable generator. For the full reference (all
 multiplicities, generalizations, enumerations, methods, OCL constraints),
-read `references/metamodel.md`.
+read `references/class-diagram.md`.
 
 ```python
 from besser.BUML.metamodel.structural import (

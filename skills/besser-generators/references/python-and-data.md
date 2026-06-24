@@ -1,9 +1,12 @@
 # Data-shape generators
 
 Reference for generators that produce data classes, schemas, or
-serialization formats — no I/O layer, no UI. Read this when the user is
-running `PythonGenerator`, `JavaGenerator`, `PydanticGenerator`,
-`JSONSchemaGenerator`, `JSONObjectGenerator`, or `RDFGenerator`.
+serialization formats — no I/O layer, no UI.
+
+**Covers:** [`PythonGenerator`](#pythongenerator) ·
+[`JavaGenerator`](#javagenerator) · [`PydanticGenerator`](#pydanticgenerator) ·
+[`JSONSchemaGenerator`](#jsonschemagenerator) ·
+[`JSONObjectGenerator`](#jsonobjectgenerator) · [`RDFGenerator`](#rdfgenerator)
 
 ## PythonGenerator
 
@@ -77,14 +80,17 @@ gen.generate()
 
 | Aspect | Detail |
 |--------|--------|
-| Input | `ObjectModel` (NOT a `DomainModel`). The constructor raises `TypeError("JSONObjectGenerator expects an ObjectModel instance")` otherwise. |
-| Output | One JSON file `<model.name>.json` (spaces → `_`; empty name falls back to `object_model.json`). Defaults to `./output/`. |
-| Options | None. `__init__(self, model: ObjectModel, output_dir: str = None)` — there is no `mode` parameter (that belongs to `JSONSchemaGenerator`). |
-| Document shape | `{ "name": ..., "objects": [ { "id", "class", "attributes": {...}, "relationships": {...} } ] }`; top-level `"description"` only if `model.metadata.description` is set; empty `attributes`/`relationships` are omitted. |
-| Value handling | `datetime`/`date`/`time` → ISO 8601; `timedelta` → total seconds; `set`/`list`/`tuple` → JSON array (sets sorted by `str()`); enum literals → literal name; written with `indent=2, ensure_ascii=False`. |
-| Gotcha | Malformed `ObjectModel`s degrade silently — slots without an `attribute` and links without resolvable endpoints are skipped, yielding a partial document rather than an error. |
+| Input | `ObjectModel` (NOT a `DomainModel`); constructor raises `TypeError` otherwise |
+| Output | One JSON file `<model.name>.json` (spaces → `_`; empty name → `object_model.json`); defaults to `./output/` |
+| Options | None (`__init__(self, model: ObjectModel, output_dir=None)`) — no `mode` parameter; that belongs to `JSONSchemaGenerator` |
+| Key behavior | Emits a concrete data document `{ "name", "objects": [ { "id", "class", "attributes", "relationships" } ] }` (see Details) |
+| Gotcha | Malformed `ObjectModel`s degrade silently — unresolvable slots/links are skipped, yielding a partial document, not an error |
 
-`JSONObjectGenerator` (instances) vs `JSONSchemaGenerator` (structure): the former takes an `ObjectModel` and emits a concrete data document; the latter takes a `DomainModel` and emits a JSON Schema (and optional FIWARE/NGSI-LD Smart Data Models).
+### Details
+
+- **Document shape:** top-level `"description"` appears only if `model.metadata.description` is set; empty `attributes`/`relationships` keys are omitted.
+- **Value handling:** `datetime`/`date`/`time` → ISO 8601; `timedelta` → total seconds; `set`/`list`/`tuple` → JSON array (sets sorted by `str()`); enum literals → literal name; written with `indent=2, ensure_ascii=False`.
+- **vs `JSONSchemaGenerator`:** this generator takes an `ObjectModel` and emits concrete *data*; `JSONSchemaGenerator` takes a `DomainModel` and emits a JSON *Schema* (plus optional FIWARE/NGSI-LD Smart Data Models).
 
 ## RDFGenerator
 

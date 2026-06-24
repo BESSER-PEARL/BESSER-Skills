@@ -230,24 +230,25 @@ won't block generation.
 
 ## Generator Failures (quick reference)
 
-When a `generate()` call fails or produces wrong output, the table below
-maps symptom → likely cause → first thing to try. For per-generator deep
-dives (every option, every gotcha), defer to the **besser-generators**
-skill — particularly its `references/debugging.md`.
+This skill is the fast lookup for a generator error *message*: the table
+maps symptom → likely cause → first fix. For *wrong-output* debugging (a
+generator that runs but produces nothing or the wrong content) and
+per-generator deep dives, defer to the **besser-generators** skill's
+`references/debugging.md`.
 
 | Symptom | Likely cause | First fix |
 |---------|--------------|-----------|
-| No output file, no exception | Invalid model or `SQLGenerator` subprocess swallowed an error | `model.validate()` and check stdout |
 | `ValueError: Invalid DBMS` | DBMS string is not one of `sqlite`, `postgresql`, `mysql`, `mssql`, `mariadb`, `oracle` | Use exactly `postgresql` (not `postgres`) |
 | `ValueError: Invalid backend` (Qiskit) | `backend_type` is not `aer_simulator`, `fake_backend`, or `ibm_quantum` | Pick a valid backend |
 | `subprocess.CalledProcessError` (Django) | Django not installed, project name conflict, or invalid Python identifier | `python -m django --version`; delete stale project; rename |
-| `AttributeError` inside `WebAppGenerator` | `gui_model=None` was passed | Build a `GUIModel` first (see besser-user skill) |
+| `AttributeError` inside `WebAppGenerator` | `gui_model=None` was passed | Build a `GUIModel` first (see the besser-user skill's `references/gui-models.md`) |
 | `jinja2.TemplateNotFound` | BESSER package corrupted or templates missing | `pip install --force-reinstall besser` |
 | Raw `[[` `]]` in generated React files | ReactGenerator template rendering failed silently | Check console for Jinja errors; React uses `[[ ]]` to avoid JSX clashes |
 
 The Django generator catches subprocess errors and prints them rather than
 re-raising — if the generator "succeeded" but produced no project, scroll
-back through the console.
+back through the console. (A generator that produces *no file and no error*
+is a debugging case → `references/debugging.md` in besser-generators.)
 
 ---
 

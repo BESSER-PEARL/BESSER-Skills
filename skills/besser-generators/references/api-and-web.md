@@ -96,11 +96,14 @@ gen.generate()
 
 ## ReactGenerator
 
-Used internally by `WebAppGenerator`. Direct usage is rare. Produces a
-full React/Vite project from `DomainModel + GUIModel`. Uses non-standard
-Jinja delimiters (`[[`/`]]` instead of `{{`/`}}`) to avoid conflicts with
-JSX — if you see raw `[[ ]]` markers in generated files, template
-rendering failed.
+*Used internally by `WebAppGenerator`; rarely invoked directly.*
+
+| Aspect | Detail |
+|--------|--------|
+| Input | `DomainModel` + `GUIModel` |
+| Output | A full React/Vite project (`frontend/`) |
+| Key behavior | Uses non-standard Jinja delimiters (`[[`/`]]` instead of `{{`/`}}`) to avoid clashing with JSX braces |
+| Gotcha | Raw `[[ ]]` markers in generated files mean template rendering failed silently — check the console for Jinja errors |
 
 ## FlutterGenerator
 

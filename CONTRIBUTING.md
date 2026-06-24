@@ -7,7 +7,7 @@ Thank you for your interest in improving BESSER skills! This guide covers how to
 1. Edit the `SKILL.md` in the relevant `skills/<name>/` directory
 2. Keep the body under 500 lines -- move detailed reference material to a `references/` subdirectory if needed
 3. Ensure the YAML frontmatter is valid (name, description, license, compatibility, metadata)
-4. Write the description in 3rd person ("Guides building..." not "Use this skill when...")
+4. Write a trigger-oriented description: open with what the skill provides, then an explicit "Use this skill whenever the user is …" clause listing concrete triggers (symbols, file paths, phrasings). This is the effective activation style used by all four BESSER skills.
 5. Run the relevant evals to verify the change doesn't break correctness
 6. Submit a pull request with a clear description of what changed and why
 
@@ -84,7 +84,7 @@ Include the new skill, eval definitions, and benchmark results.
 - **Include code examples**: Show complete, runnable code snippets
 - **Cover error cases**: Document common pitfalls and their solutions
 - **Stay focused**: Each skill should have a clear scope. Don't overlap with other skills
-- **Use 3rd person descriptions**: "Guides building..." not "Use this skill when the user..."
+- **Write trigger-oriented descriptions**: open with what the skill provides, then "Use this skill whenever the user is …" with concrete triggers (symbols, file paths, phrasings) — the activation style all four skills use
 - **Test with Claude Code**: Verify the skill activates on the right prompts and provides useful responses
 
 ## Commit Conventions

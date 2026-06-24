@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.3.0] - 2026-06-18
+## [0.3.0] - unreleased
+
+Full coverage of every B-UML DSL and generator, deeper class-diagram /
+state-machine / agent references, and a complete editorial-review pass. Not
+yet announced — all of the below is the single pending 0.3.0.
 
 ### Added
 - **Coverage of all remaining B-UML DSLs** in `besser-user` — seven new
@@ -25,9 +29,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   - `SupabaseGenerator` (Postgres DDL + RLS) in `references/persistence.md`.
   - `JSONObjectGenerator` (JSON data from an `ObjectModel`) in
     `references/python-and-data.md`.
-- Reference-layout/generator-picker tables, trigger descriptions, and the
-  README updated to surface the new model types and generators. The skills
-  now cover all 19 BESSER generators and every B-UML metamodel/DSL.
+- **Much deeper class-diagram, state-machine, and agent references**
+  (community contribution): `metamodel.md` renamed to `class-diagram.md` and
+  expanded (`AssociationClass`, `GeneralizationSet`,
+  `is_abstract`/`is_optional`/`is_read_only`, navigability, composition
+  direction, void methods, end-name uniqueness); state machines gain final
+  states, conditions, fallback bodies, config properties, and the
+  `STATE_MACHINE` method-implementation pattern; agents gain LLM integration,
+  entities/slot-filling, intent-classifier config, RAG, `DBReply`,
+  `ReasoningState`, tools/skills/workspaces, and rich platform replies.
+- The skills now cover all 19 BESSER generators and every B-UML
+  metamodel/DSL; reference-layout tables, trigger descriptions, and the
+  README were updated to surface them.
+
+### Changed
+- **`besser-dev` restructured** from a 487-line monolith into a lean overview
+  + routing table plus five `references/` (adding-a-generator,
+  adding-a-metamodel, testing, docs-and-build, contributing-workflow),
+  matching the progressive-disclosure pattern of the other skills.
+- **De-duplicated drift-prone content across skills**: the web-editor
+  registry snippet is now single-sourced in `besser-dev`; the
+  composite-generator tree lives only in `debugging.md`; the
+  `besser-troubleshooting` generator-failure table is scoped to error-message
+  lookups with a clear hand-off to `besser-generators`.
+- **`besser-generators` editorial fixes**: merged the redundant
+  reference-layout/generator-picker tables; replaced the partial
+  output-directory table with an exhaustive-by-rule "Output locations"
+  call-out; normalized the Supabase/JSON-object entries to the house table
+  style; clarified that BAL/CODE method bodies are inserted verbatim.
+- **Consistency pass**: standardized reference "Gotchas" headings, added
+  tables of contents to the longer references, and moved per-file version
+  stamps to a single note; relaxed the attribute-naming guidance to match
+  what BESSER actually enforces (no spaces/hyphens; snake_case or camelCase).
+
+### Fixed
+- Corrected a broken copy-paste example (an always-false chained-comparison
+  assertion) in `object-models.md`, and the `chat_history` type in
+  `agents.md`. Reconciled `CONTRIBUTING.md`'s description-voice rule with the
+  trigger style all four skills actually use.
 
 ### Notes
 - All new content was written against BESSER v7.8.3 source with verified API

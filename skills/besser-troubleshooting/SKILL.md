@@ -19,7 +19,7 @@ description: >
   parse failures, and model-to-output drift (changes not appearing in
   regenerated code). Trigger on any error message that mentions `besser`
   in the traceback, even if the user does not explicitly ask for
-  troubleshooting. Provides minimal-reproduction templates and quick
+  troubleshooting. Provides a minimal-reproduction template and quick
   diagnostic commands; defer to besser-generators for non-error questions
   about specific generator behavior.
 license: Apache-2.0
@@ -37,7 +37,9 @@ metadata:
 
 # BESSER Troubleshooting
 
-Quick reference for diagnosing and fixing common issues. Organized by symptom.
+Quick reference for diagnosing and fixing common issues. Organized by
+symptom. This is an intentionally flat, single-file skill — a fast lookup
+you scan top-to-bottom or search, with no `references/` subdirectory.
 
 ---
 
@@ -58,7 +60,7 @@ most generators work fine with SQLite (no native deps needed).
 
 ### `pip install -e .` fails or installs nothing
 
-- Must be run from the repository root where `pyproject.toml` lives.
+- Must be run from the repository root (where `setup.cfg` and `pyproject.toml` live; `setup.cfg` holds the package metadata and `python_requires`).
 - Requires `setuptools>=42` and `wheel`. Upgrade first: `pip install --upgrade setuptools wheel`.
 - Check you're in the right virtual environment: `which python` (Unix) or `where python` (Windows).
 
@@ -132,13 +134,22 @@ pip install antlr4-python3-runtime>=4.13.1
 If you get runtime parse errors after upgrading, the ANTLR runtime version may be
 too new for the shipped grammar. Pin to `4.13.1` or `4.13.2`.
 
+### `plantuml_to_buml()` parses but the model is empty or wrong
+
+The converter only handles a subset of PlantUML class-diagram syntax. If a
+`.plantuml` file converts without error but yields missing classes,
+associations, or attributes, the input likely used unsupported notation
+(n-ary associations, non-class diagrams, stereotypes/OCL) rather than a
+BESSER bug. See the besser-user skill's `references/plantuml.md` for the
+exact supported subset, then adjust the diagram or add the missing pieces in
+Python after conversion.
+
 ### `ImportError` for optional packages
 
 These packages are only needed for specific features:
 
 | Package | Needed for | Install |
 |---------|-----------|---------|
-| `bocl==1.0.1` | OCL constraint validation | `pip install bocl==1.0.1` |
 | `deep_translator` | Agent personalization (translation) | `pip install deep-translator` |
 | `docker` | Docker image building in BackendGenerator | `pip install docker` |
 | `qiskit` | Running generated quantum circuits | `pip install qiskit` |
@@ -226,28 +237,38 @@ If the `bocl` library can't parse a constraint, it falls back to a regex-based
 parser. Complex OCL that neither parser handles will be reported as invalid but
 won't block generation.
 
+**Two distinct OCL failure classes — don't conflate them:**
+
+- *Structural* (blocking): a `Constraint` whose context class isn't in
+  `model.types` is a `model.validate()` error — it fails validation and you
+  should fix it before generating (see the table above).
+- *Expression* (non-blocking): a constraint that is attached correctly but
+  whose OCL text neither parser can evaluate is reported as invalid but does
+  **not** block generation — generators that don't consume OCL run fine.
+
 ---
 
 ## Generator Failures (quick reference)
 
-When a `generate()` call fails or produces wrong output, the table below
-maps symptom → likely cause → first thing to try. For per-generator deep
-dives (every option, every gotcha), defer to the **besser-generators**
-skill — particularly its `references/debugging.md`.
+This skill is the fast lookup for a generator error *message*: the table
+maps symptom → likely cause → first fix. For *wrong-output* debugging (a
+generator that runs but produces nothing or the wrong content) and
+per-generator deep dives, defer to the **besser-generators** skill's
+`references/debugging.md`.
 
 | Symptom | Likely cause | First fix |
 |---------|--------------|-----------|
-| No output file, no exception | Invalid model or `SQLGenerator` subprocess swallowed an error | `model.validate()` and check stdout |
 | `ValueError: Invalid DBMS` | DBMS string is not one of `sqlite`, `postgresql`, `mysql`, `mssql`, `mariadb`, `oracle` | Use exactly `postgresql` (not `postgres`) |
 | `ValueError: Invalid backend` (Qiskit) | `backend_type` is not `aer_simulator`, `fake_backend`, or `ibm_quantum` | Pick a valid backend |
 | `subprocess.CalledProcessError` (Django) | Django not installed, project name conflict, or invalid Python identifier | `python -m django --version`; delete stale project; rename |
-| `AttributeError` inside `WebAppGenerator` | `gui_model=None` was passed | Build a `GUIModel` first (see besser-user skill) |
+| `AttributeError` inside `WebAppGenerator` | `gui_model=None` was passed | Build a `GUIModel` first (see the besser-user skill's `references/gui-models.md`) |
 | `jinja2.TemplateNotFound` | BESSER package corrupted or templates missing | `pip install --force-reinstall besser` |
 | Raw `[[` `]]` in generated React files | ReactGenerator template rendering failed silently | Check console for Jinja errors; React uses `[[ ]]` to avoid JSX clashes |
 
 The Django generator catches subprocess errors and prints them rather than
 re-raising — if the generator "succeeded" but produced no project, scroll
-back through the console.
+back through the console. (A generator that produces *no file and no error*
+is a debugging case → `references/debugging.md` in besser-generators.)
 
 ---
 
@@ -356,6 +377,11 @@ assoc = BinaryAssociation(name="a_b", ends={
 })
 model = DomainModel(name="repro", types={a, b}, associations={assoc})
 
+# Validate first — validate() returns {"success": bool, "errors": [...], "warnings": [...]}
+result = model.validate()
+assert result["success"], result["errors"]
+
+# Swap in whichever generator reproduces your bug
 gen = SQLAlchemyGenerator(model=model, output_dir="./repro_output")
 gen.generate(dbms="sqlite")
 ```

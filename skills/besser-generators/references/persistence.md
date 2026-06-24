@@ -1,8 +1,10 @@
 # Persistence generators
 
 Reference for generators that produce database artifacts — ORM code, raw
-DDL, or a Supabase schema. Read this when the user is running
-`SQLAlchemyGenerator`, `SQLGenerator`, or `SupabaseGenerator`.
+DDL, or a Supabase schema.
+
+**Covers:** [`SQLAlchemyGenerator`](#sqlalchemygenerator) ·
+[`SQLGenerator`](#sqlgenerator) · [`SupabaseGenerator`](#supabasegenerator)
 
 ## SQLAlchemyGenerator
 
@@ -67,12 +69,17 @@ gen.generate()               # writes <YYYYMMDDHHMMSS>_<model_slug>.sql; prints 
 
 | Aspect | Detail |
 |--------|--------|
-| Input | `DomainModel` — reads classes, attributes (`is_id`, `is_optional`, type), enumerations, and binary associations. |
-| Output | One file `<YYYYMMDDHHMMSS>_<model_slug>.sql` in `output_dir`. **Timestamped, so every run creates a NEW file — it never overwrites** (unlike other generators). |
-| Options | `user_root: str = "User"` — the class mirrored onto `auth.users`; pass `None` to disable auth, triggers, and RLS entirely. |
-| Type map | `str→TEXT`, `int→INTEGER`, `float→DOUBLE PRECISION`, `bool→BOOLEAN`, `date→DATE`, `time→TIME`, `datetime→TIMESTAMPTZ`, `timedelta→INTERVAL`, `any→JSONB`; unknown→`TEXT`; enum-typed attrs use the enum type name. |
-| Key behavior | `is_id` attrs → `UUID PRIMARY KEY DEFAULT gen_random_uuid()` (or `REFERENCES auth.users(id)` on the user-root); M:N associations → junction tables; per-user classes get a `user_id` column + RLS policies keyed on `(SELECT auth.uid()) = "user_id"`. |
-| Gotchas | Identifier names are **lowercased** in the DDL. The user-root id is force-emitted as a reference to `auth.users` even if you omit `is_id` on that class. `AssociationClass` is skipped; only **binary** associations are processed; inheritance is flattened (no table-per-hierarchy). |
+| Input | `DomainModel` (reads classes, attributes' `is_id`/`is_optional`/type, enumerations, binary associations) |
+| Output | One file `<YYYYMMDDHHMMSS>_<model_slug>.sql` in `output_dir`. **Timestamped — every run creates a NEW file, never overwrites** (unlike other generators) |
+| Options | `user_root: str = "User"` — class mirrored onto `auth.users`; pass `None` to disable auth/triggers/RLS |
+| Key behavior | Emits enum types, tables, FK `ALTER`s, an `auth.users` mirror trigger, grants, and Row Level Security policies (see Details) |
+| Gotcha | Identifier names are **lowercased**; `AssociationClass` is skipped; only **binary** associations are processed; inheritance is flattened (no table-per-hierarchy) |
+
+### Details
+
+- **Type map:** `str→TEXT`, `int→INTEGER`, `float→DOUBLE PRECISION`, `bool→BOOLEAN`, `date→DATE`, `time→TIME`, `datetime→TIMESTAMPTZ`, `timedelta→INTERVAL`, `any→JSONB`; unknown→`TEXT`; enum-typed attrs use the enum type name.
+- **Keys & relations:** `is_id` attrs → `UUID PRIMARY KEY DEFAULT gen_random_uuid()` (or `REFERENCES auth.users(id)` on the user-root); M:N associations → junction tables.
+- **Auth & RLS:** per-user classes get a `user_id` column + RLS policies keyed on `(SELECT auth.uid()) = "user_id"`. The user-root id is force-emitted as a reference to `auth.users` even if you omit `is_id` on that class.
 
 ## Modeling tips that affect persistence
 

@@ -46,8 +46,11 @@ Almost every class in B-UML descends from `NamedElement`. Names must:
   name in a `DomainModel`, no two literals with the same name in an
   `Enumeration`, etc.)
 
-Conventions: `snake_case` for attributes/methods, `PascalCase` for classes
-and enums, `UPPER_CASE` for enumeration literals.
+Conventions (style, not enforced): `PascalCase` for classes and enums,
+`UPPER_CASE` for enumeration literals, and `snake_case` *or* `camelCase` for
+attributes/association ends — BESSER only forbids spaces and hyphens, so
+both `written_by` and `writtenBy` are valid (this reference uses camelCase
+for association ends in places). Pick one and stay consistent.
 
 Using a Python keyword as a name (`class`, `type`, `id`, `list`, `import`,
 etc.) is not rejected — it logs a warning instead. Avoid them anyway: they

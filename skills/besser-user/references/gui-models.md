@@ -92,7 +92,7 @@ gen.generate()
 # Run with: cd webapp && docker-compose up --build
 ```
 
-## Common pitfalls
+## Gotchas
 
 - **No main page**: at least one `Screen` must have `is_main_page=True`.
 - **Field references**: `fields={...}` must reference `Property` objects

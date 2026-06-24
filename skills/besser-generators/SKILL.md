@@ -48,31 +48,18 @@ is created automatically (`os.makedirs(..., exist_ok=True)`).
 **Regeneration always overwrites.** Every call to `generate()` replaces the
 output files entirely. This is by design — the model is the source of truth.
 Customizations belong in *separate files* (see "Safe customization" below).
-
----
-
-## Reference layout
-
-To keep this skill scannable, per-generator detail lives in `references/`.
-Read the relevant file when the user is working with a specific generator:
-
-| If the user is running… | Read |
-|--------------------------|------|
-| `PythonGenerator`, `JavaGenerator`, `PydanticGenerator`, `JSONSchemaGenerator`, `JSONObjectGenerator`, `RDFGenerator` | `references/python-and-data.md` |
-| `SQLAlchemyGenerator`, `SQLGenerator`, `SupabaseGenerator` | `references/persistence.md` |
-| `BackendGenerator`, `RESTAPIGenerator`, `DjangoGenerator`, `WebAppGenerator`, `ReactGenerator`, `FlutterGenerator` | `references/api-and-web.md` |
-| `BAFGenerator`, `QiskitGenerator`, `TerraformGenerator`, `PytorchGenerator`, `TFGenerator` | `references/agents-and-other.md` |
-| Anything failing or producing wrong output | `references/debugging.md` |
-
-Each reference file documents inputs, outputs, options, templates, and
-known gotchas for the generators it covers.
+Once you have generated, the **besser-user** skill's "Verification checklist"
+covers what to check next (files exist, syntax parses, it runs).
 
 ---
 
 ## Generator picker
 
-| Want | Generator | Where it lives |
-|------|-----------|----------------|
+Per-generator detail (inputs, outputs, options, templates, gotchas) lives in
+`references/`. Find your target, then read the listed reference:
+
+| Want | Generator | Reference |
+|------|-----------|-----------|
 | Python data classes | `PythonGenerator` | `python-and-data.md` |
 | Java classes | `JavaGenerator` | `python-and-data.md` |
 | Pydantic models (with optional OCL→validator) | `PydanticGenerator` | `python-and-data.md` |
@@ -92,24 +79,22 @@ known gotchas for the generators it covers.
 | Terraform infrastructure | `TerraformGenerator` | `agents-and-other.md` |
 | PyTorch / TensorFlow neural net | `PytorchGenerator` / `TFGenerator` | `agents-and-other.md` |
 
-## Output directory summary
+Not generating, but stuck?
+- A generator runs but produces wrong or empty output → `references/debugging.md`.
+- Installation / import errors (not generation itself) → the **besser-troubleshooting** skill.
 
-| Generator | Default output_dir | Output structure |
-|-----------|--------------------|------------------|
-| PythonGenerator | `./output/` | `classes.py` |
-| JavaGenerator | `./output/` | `Book.java`, `Author.java`, … |
-| PydanticGenerator | `./output/` | `pydantic_classes.py` |
-| SQLAlchemyGenerator | `./output/` | `sql_alchemy.py` |
-| SQLGenerator | `./output/` | `tables_<dialect>.sql` |
-| BackendGenerator | `./output_backend/` | `main_api.py`, `pydantic_classes.py`, `sql_alchemy.py` |
-| DjangoGenerator | CWD (creates project folder) | `myproject/myapp/models.py`, `views.py`, … |
-| WebAppGenerator | must be specified | `frontend/`, `backend/`, `docker-compose.yml` |
-| BAFGenerator | `./output/` | `{agent_name}.py`, `config.yaml`, `readme.txt` |
-| JSONObjectGenerator | `./output/` | `<model_name>.json` (from an `ObjectModel`) |
-| SupabaseGenerator | `./output/` | `<timestamp>_<model>.sql` (new file each run — never overwrites) |
+## Output locations
 
-`BackendGenerator`'s default `./output_backend/` is the odd one out — easy
-to miss if you assume `./output/` like everyone else.
+By default a generator writes to `<cwd>/output/` and produces the single
+file documented in its reference. The exceptions worth memorizing:
+
+- **`BackendGenerator`** → defaults to `./output_backend/` (not `./output/`); emits `main_api.py`, `pydantic_classes.py`, `sql_alchemy.py`.
+- **`WebAppGenerator`** → `output_dir` must be specified; emits `frontend/`, `backend/`, `docker-compose.yml`.
+- **`DjangoGenerator`** → creates a project folder in the CWD (`myproject/myapp/models.py`, …).
+- **`SupabaseGenerator`** → timestamped filename, so every run creates a *new* file and never overwrites.
+
+For the exact output filename of any other generator, see its row in the
+relevant `references/` file.
 
 ---
 
@@ -192,6 +177,13 @@ search = Method(
 book.add_method(search)
 ```
 
+The method body is inserted **verbatim** into the generated FastAPI handler
+— it is not parsed or scoped by the metamodel. So any name it references
+(here `session`) must actually exist in the generated handler at that point.
+Treat the body as code you are responsible for: check the generated
+`main_api.py` to confirm what is in scope (e.g. the SQLAlchemy session
+variable name the handler uses) and reference exactly those names.
+
 ### 5. Template overrides (advanced)
 
 Copy a generator's template, edit it, and point the generator at your
@@ -220,52 +212,23 @@ Works for small, stable changes. For larger customizations, prefer #2 or #4.
 
 ## Composite generator architecture
 
-Several generators orchestrate sub-generators. When debugging, trace which
-sub-generator is actually failing — the error rarely lives in the wrapper.
-
-```
-WebAppGenerator
-  ├── ReactGenerator          → frontend/
-  ├── BackendGenerator        → backend/
-  │     ├── RESTAPIGenerator  → main_api.py
-  │     ├── PydanticGenerator → pydantic_classes.py
-  │     └── SQLAlchemyGenerator → sql_alchemy.py
-  └── BAFGenerator (optional) → agent/
-
-SQLGenerator
-  └── SQLAlchemyGenerator (temp) → subprocess → .sql file
-```
-
-For debugging recipes per symptom, see `references/debugging.md`.
+Several generators orchestrate sub-generators (e.g. `WebAppGenerator` drives
+`ReactGenerator` + `BackendGenerator` + optional `BAFGenerator`;
+`BackendGenerator` drives `RESTAPIGenerator` + `PydanticGenerator` +
+`SQLAlchemyGenerator`; `SQLGenerator` drives `SQLAlchemyGenerator` in a
+subprocess). When debugging, trace which sub-generator is actually failing —
+the error rarely lives in the wrapper. The full tree and per-symptom recipes
+are in `references/debugging.md`.
 
 ---
 
 ## Web editor registry
 
-Generators that should appear in the web editor's "Generate" dropdown must
-be registered in
-`besser/utilities/web_modeling_editor/backend/config/generators.py`. Two
-hooks:
-
-```python
-# 1) Add to SUPPORTED_GENERATORS:
-SUPPORTED_GENERATORS = {
-    "my_generator": GeneratorInfo(
-        generator_class=MyGenerator,
-        output_type="file",           # or "zip" for multi-file
-        file_extension=".py",
-        category="my_category",
-        requires_class_diagram=True,
-    ),
-}
-
-# 2) Add to get_filename_for_generator():
-filenames = {
-    "my_generator": "my_output.py",
-    ...
-}
-```
-
-Both registrations are required for the dropdown to populate. For the full
-authoring workflow (package layout, tests, docs, PR), see the **besser-dev**
-skill.
+A generator only appears in the web editor's "Generate" dropdown once it is
+registered in
+`besser/utilities/web_modeling_editor/backend/config/generators.py` via two
+hooks: an entry in `SUPPORTED_GENERATORS` and its filename in
+`get_filename_for_generator()`. Both are required for the dropdown to
+populate. For the annotated `GeneratorInfo` snippet and the full authoring
+workflow (package layout, tests, docs, PR), see the **besser-dev** skill's
+`references/adding-a-generator.md`.

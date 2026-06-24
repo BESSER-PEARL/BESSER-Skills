@@ -73,7 +73,7 @@ player = (
     .build()
 )
 
-assert player.name == "Lakers" is False  # player.name == "LeBron"
+assert player.name == "LeBron"   # player.name reads the 'name' attribute value
 assert player.plays_for == team
 ```
 

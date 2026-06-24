@@ -10,6 +10,14 @@ It is a thin container: it holds a list of models plus a few scalar fields and
 adds no validation or generation logic of its own. Read this when the user
 wants to bundle multiple models together or round-trip a project file.
 
+## Table of contents
+
+- [Imports](#imports)
+- [Key classes](#key-classes)
+- [Minimal build example](#minimal-build-example)
+- [Generation](#generation)
+- [Gotchas](#gotchas)
+
 ## Imports
 
 ```python

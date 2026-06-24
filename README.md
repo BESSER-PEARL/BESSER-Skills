@@ -216,9 +216,15 @@ besser-skills/
         api-and-web.md                    # Backend, Django, WebApp, React, Flutter
         agents-and-other.md               # BAF, Qiskit, Terraform, Pytorch, TF
         debugging.md                      # generation-failure recipes
-    besser-troubleshooting/SKILL.md
+    besser-troubleshooting/SKILL.md       # flat single-file quick-reference
     besser-dev/
       SKILL.md
+      references/
+        adding-a-generator.md             # 6-step generator authoring + scaffold
+        adding-a-metamodel.md             # new sub-DSL + JSON↔BUML converters
+        testing.md                        # pytest fixtures and conventions
+        docs-and-build.md                 # Sphinx docs build + structure
+        contributing-workflow.md          # code style, commits, PRs, CI/release
       scripts/
         scaffold_generator.py             # scaffolds a new generator package
   evals/                                  # eval definitions

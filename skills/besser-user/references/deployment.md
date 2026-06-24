@@ -4,10 +4,6 @@ Full reference for building a `DeploymentModel` in Python and feeding it to
 `TerraformGenerator`. Read this when the user is modelling clusters, nodes,
 services, networking, or generating Terraform (GCP/AWS) infrastructure code.
 
-Verified against BESSER v7.8.3 source
-(`besser/BUML/metamodel/deployment/deployment.py`,
-`besser/generators/terraform/terraform_generator.py`).
-
 ## Table of contents
 
 - [Imports](#imports)

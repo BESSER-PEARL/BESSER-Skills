@@ -3,7 +3,7 @@
 Reference for building a `QuantumCircuit` B-UML model in the BESSER quantum
 metamodel and generating runnable Qiskit code with `QiskitGenerator`. Read
 this when the user is modelling qubit registers, gates, and measurements, or
-generating a Qiskit script. Verified against BESSER v7.8.3.
+generating a Qiskit script.
 
 ## Table of contents
 

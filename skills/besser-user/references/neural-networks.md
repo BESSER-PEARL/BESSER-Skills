@@ -6,8 +6,6 @@ training/evaluation code from it. The metamodel lives in
 `besser.BUML.metamodel.nn`; the generators in
 `besser.generators.nn.{pytorch,tf}`.
 
-Verified against BESSER v7.8.3.
-
 ## Table of contents
 
 - [Imports](#imports)

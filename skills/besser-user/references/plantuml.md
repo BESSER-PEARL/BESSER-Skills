@@ -80,7 +80,7 @@ a `--` association line. Quotes are required.
 | `Whole *-- Part` | Composition (Whole owns Part) |
 | `Whole --* Part` | Composition (Part is owned by Whole) |
 
-## Limitations
+## Gotchas
 
 - Only structural diagrams are supported. State machines, sequence diagrams,
   and use-case diagrams are not handled — model those with the Python API.

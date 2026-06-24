@@ -4,6 +4,18 @@ For behavioral modeling — workflows, order processing, anything with
 discrete states and transitions. For NLP-driven chatbots specifically, see
 the related `agents.md` reference.
 
+## Table of contents
+
+- [Imports](#imports)
+- [Building a state machine](#building-a-state-machine)
+- [Transitions](#transitions)
+- [State behavior](#state-behavior)
+- [Configuration properties](#configuration-properties)
+- [Fallback bodies](#fallback-bodies)
+- [Validation](#validation)
+- [Embedding in a domain model](#embedding-in-a-domain-model)
+- [Generation](#generation)
+
 ## Imports
 
 ```python

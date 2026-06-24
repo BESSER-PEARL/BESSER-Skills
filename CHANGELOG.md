@@ -4,6 +4,49 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.0] - 2026-06-24
+
+Expanded modeling references (contributed) plus a full editorial-review pass
+across all four skills.
+
+### Added
+- **`besser-user` — much deeper class-diagram, state-machine, and agent
+  references** (community contribution): `metamodel.md` renamed to
+  `class-diagram.md` and expanded (`AssociationClass`, `GeneralizationSet`,
+  `is_abstract`/`is_optional`/`is_read_only`, navigability, composition
+  direction, void methods, end-name uniqueness); state machines gain final
+  states, conditions, fallback bodies, config properties, and the
+  `STATE_MACHINE` method-implementation pattern; agents gain LLM integration,
+  entities/slot-filling, intent-classifier config, RAG, `DBReply`,
+  `ReasoningState`, tools/skills/workspaces, and rich platform replies — all
+  verified against BESSER v7.8.3 source.
+
+### Changed
+- **`besser-dev` restructured** from a 487-line monolith into a lean overview
+  + routing table plus five `references/` (adding-a-generator,
+  adding-a-metamodel, testing, docs-and-build, contributing-workflow),
+  matching the progressive-disclosure pattern of the other skills.
+- **De-duplicated drift-prone content across skills**: the web-editor
+  registry snippet is now single-sourced in `besser-dev`; the
+  composite-generator tree lives only in `debugging.md`; the
+  `besser-troubleshooting` generator-failure table is scoped to error-message
+  lookups with a clear hand-off to `besser-generators`.
+- **`besser-generators` editorial fixes**: merged the redundant
+  reference-layout/generator-picker tables; replaced the partial
+  output-directory table with an exhaustive-by-rule "Output locations"
+  call-out; normalized the Supabase/JSON-object entries to the house table
+  style; clarified that BAL/CODE method bodies are inserted verbatim.
+- **Consistency pass**: standardized reference "Gotchas" headings, added
+  tables of contents to the longer references, and moved per-file version
+  stamps to a single note; relaxed the attribute-naming guidance to match
+  what BESSER actually enforces (no spaces/hyphens; snake_case or camelCase).
+
+### Fixed
+- Corrected a broken copy-paste example (an always-false chained-comparison
+  assertion) in `object-models.md`, and the `chat_history` type in
+  `agents.md`. Reconciled `CONTRIBUTING.md`'s description-voice rule with the
+  trigger style all four skills actually use.
+
 ## [0.3.0] - 2026-06-18
 
 ### Added

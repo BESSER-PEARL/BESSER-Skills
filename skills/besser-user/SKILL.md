@@ -32,7 +32,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.3.0"
+  version: "0.4.0"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
@@ -61,14 +61,18 @@ A B-UML model is useful even if you never run a generator. Feed it to a
 generator for **code**, *or* embed it in a README/design doc as a correct,
 `validate()`-checked class **diagram** that documents **any** project. So
 reach for this skill whenever you need an accurate class diagram — not only
-when the project will use BESSER's generators. For how to deliver a model
-(`.py` file vs. Markdown-embedded diagram, and what to tell the user), see
-`references/delivering-models.md`.
+when the project will use BESSER's generators.
+
+Deliver it accordingly: default to a runnable `.py` file, or embed the same
+B-UML in Markdown when the request is documentation-oriented. For the full
+how-to — making the file self-contained, and the two ways the user runs or
+imports it — see `references/delivering-models.md`.
 
 ## Reference layout
 
 This skill keeps SKILL.md short. Reach into `references/` and `scripts/`
-when you need depth:
+when you need depth. All references are verified against the BESSER version
+shown in the README badge.
 
 | You need | Read |
 |----------|------|
@@ -162,15 +166,6 @@ path.
 
 ---
 
-## Delivering the model to the user
-
-Default to writing the model as a runnable `.py` file; embed the same B-UML
-in Markdown instead when the request is documentation-oriented. Full
-guidance — choosing the format, making the file self-contained, and the two
-ways the user runs or imports it — is in `references/delivering-models.md`.
-
----
-
 ## Picking a generator
 
 | Goal | Generator | Input | Output |
@@ -198,16 +193,19 @@ ways the user runs or imports it — is in `references/delivering-models.md`.
 - **REST API?** `BackendGenerator` — gives you FastAPI + SQLAlchemy + Pydantic in one shot.
 - **Full web app?** `WebAppGenerator` — React + FastAPI + Docker Compose, but you must also build a `GUIModel` (see `references/gui-models.md`).
 - **Django specifically?** `DjangoGenerator`.
+- **Mobile app?** `FlutterGenerator` — also needs a `GUIModel` (see `references/gui-models.md`).
 - **Chatbot?** Model the dialog as an `Agent` (state machine + intents) and use `BAFGenerator` (see `references/agents.md`).
 
-For per-generator details — every option, every gotcha, every output path
+This table is a starting-point overview, not the full catalog. For every
+generator, option, gotcha, and exact output path — the authoritative matrix
 — defer to the **besser-generators** skill.
 
 ---
 
 ## Running a generator
 
-All generators share the same shape:
+All generators share the same shape — construct with the model, call
+`generate()`:
 
 ```python
 from besser.generators.python_classes import PythonGenerator
@@ -215,87 +213,17 @@ generator = PythonGenerator(model=my_model, output_dir="./output")
 generator.generate()
 ```
 
-If `output_dir` is omitted, output goes to `<cwd>/output/`. **Each call to
-`generate()` overwrites prior output** — that is intentional, the model is
-the source of truth.
+**Each call to `generate()` overwrites prior output** — that is intentional;
+the model is the source of truth. Output usually goes to `<cwd>/output/`
+when `output_dir` is omitted, but some generators differ (e.g.
+`BackendGenerator` uses `./output_backend/`, `WebAppGenerator` requires an
+explicit `output_dir`, `DjangoGenerator` creates a project folder).
 
-### SQLAlchemy with a specific DBMS
-
-```python
-from besser.generators.sql_alchemy import SQLAlchemyGenerator
-gen = SQLAlchemyGenerator(model=my_model, output_dir="./output")
-gen.generate(dbms="postgresql")
-# Valid: sqlite | postgresql | mysql | mssql | mariadb | oracle
-# Note: it is "postgresql" not "postgres".
-```
-
-### FastAPI backend, with control over endpoints
-
-```python
-from besser.generators.backend import BackendGenerator
-
-gen = BackendGenerator(
-    model=my_model,
-    output_dir="./output_backend",
-    http_methods=["GET", "POST", "PUT", "DELETE"],  # subset to limit endpoints
-    nested_creations=False,                           # True allows nested creates in payloads
-)
-gen.generate()
-# Produces: main_api.py, pydantic_classes.py, sql_alchemy.py
-```
-
-To generate only read+create endpoints:
-
-```python
-gen = BackendGenerator(
-    model=my_model,
-    output_dir="./output_backend",
-    http_methods=["GET", "POST"],
-)
-gen.generate()
-```
-
-Invalid method names are silently filtered (no warning is emitted) — double-check
-spelling.
-
-### Django
-
-```python
-from besser.generators.django import DjangoGenerator
-
-gen = DjangoGenerator(
-    model=my_model,
-    project_name="myproject",
-    app_name="myapp",
-    output_dir="./output",
-    containerization=False,  # True adds docker-compose.yml + Dockerfile
-)
-gen.generate()
-```
-
-Requires `django` installed in the environment (the generator runs
-`django-admin startproject` as a subprocess).
-
-### Full-stack web app
-
-Requires both a `DomainModel` and a `GUIModel`:
-
-```python
-from besser.generators.web_app import WebAppGenerator
-
-gen = WebAppGenerator(
-    model=domain_model,
-    gui_model=gui_model,
-    output_dir="./webapp_output",
-    agent_model=None,        # optional Agent for an embedded chatbot
-)
-gen.generate()
-# Produces: frontend/ (React/Vite), backend/ (FastAPI),
-#           optional agent/, docker-compose.yml, Dockerfiles
-# Run with: cd webapp_output && docker-compose up --build
-```
-
-Default ports: frontend 3000, backend 8000, agent WS 8765.
+Per-generator constructor options and exact output paths — `dbms` for
+SQLAlchemy, `http_methods`/`nested_creations` for the backend,
+`containerization` for Django, the required `gui_model` for WebApp/Flutter,
+and the rest — live in the **besser-generators** skill. Reach for it whenever
+you need more than the bare `generate()` call above.
 
 ---
 
@@ -313,8 +241,8 @@ You can also **import an existing model** instead of starting from a
 blank diagram: use **Import** and select the **B-UML** format to load a
 `.py` model file (or JSON). This means a model you build with the Python
 API can be opened in the editor, edited visually, and exported again — so
-handing the user a `.py` file (see "Delivering the model" above) doubles
-as a web-editor import.
+handing the user a `.py` file (see `references/delivering-models.md`)
+doubles as a web-editor import.
 
 The editor uses the same generators as the Python API — the backend
 converts the visual diagram to a B-UML model, runs the generator, and
@@ -345,4 +273,4 @@ maps symptoms to fixes.
 - **Regeneration overwrites.** Every `generate()` replaces output files. Customizations live in *separate* files (see the besser-generators skill for safe customization patterns).
 - **Validate early.** Call `model.validate()` before generating.
 - **One model, many targets.** The same `DomainModel` feeds multiple generators — Python classes, SQL, REST API, etc. — so it is rarely worth maintaining target-specific models.
-- **Names matter.** B-UML names become identifiers in generated code: `snake_case` for attributes, `PascalCase` for classes, no spaces or hyphens.
+- **Names matter.** B-UML names become identifiers in generated code. The only hard rule is **no spaces and no hyphens**; `PascalCase` for classes/enums and `snake_case` or `camelCase` for attributes are conventions, not requirements.

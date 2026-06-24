@@ -4,22 +4,43 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.4.0] - 2026-06-24
+## [0.3.0] - unreleased
 
-Expanded modeling references (contributed) plus a full editorial-review pass
-across all four skills.
+Full coverage of every B-UML DSL and generator, deeper class-diagram /
+state-machine / agent references, and a complete editorial-review pass. Not
+yet announced — all of the below is the single pending 0.3.0.
 
 ### Added
-- **`besser-user` — much deeper class-diagram, state-machine, and agent
-  references** (community contribution): `metamodel.md` renamed to
-  `class-diagram.md` and expanded (`AssociationClass`, `GeneralizationSet`,
+- **Coverage of all remaining B-UML DSLs** in `besser-user` — seven new
+  source-verified references:
+  - `references/object-models.md` — object/instance models (objects,
+    attribute values, links), incl. the fluent builder and OCL test data.
+  - `references/feature-models.md` — software product lines (features,
+    groups, configurations).
+  - `references/ocl.md` — writing and attaching OCL `Constraint`s; `bocl`
+    evaluation; which generators consume OCL.
+  - `references/deployment.md` — deployment models for the
+    `TerraformGenerator`.
+  - `references/neural-networks.md` — NN models for the PyTorch/TF
+    generators.
+  - `references/quantum.md` — quantum circuits for the `QiskitGenerator`.
+  - `references/project.md` — bundling models + metadata.
+- **Two previously undocumented generators** in `besser-generators`:
+  - `SupabaseGenerator` (Postgres DDL + RLS) in `references/persistence.md`.
+  - `JSONObjectGenerator` (JSON data from an `ObjectModel`) in
+    `references/python-and-data.md`.
+- **Much deeper class-diagram, state-machine, and agent references**
+  (community contribution): `metamodel.md` renamed to `class-diagram.md` and
+  expanded (`AssociationClass`, `GeneralizationSet`,
   `is_abstract`/`is_optional`/`is_read_only`, navigability, composition
   direction, void methods, end-name uniqueness); state machines gain final
   states, conditions, fallback bodies, config properties, and the
   `STATE_MACHINE` method-implementation pattern; agents gain LLM integration,
   entities/slot-filling, intent-classifier config, RAG, `DBReply`,
-  `ReasoningState`, tools/skills/workspaces, and rich platform replies — all
-  verified against BESSER v7.8.3 source.
+  `ReasoningState`, tools/skills/workspaces, and rich platform replies.
+- The skills now cover all 19 BESSER generators and every B-UML
+  metamodel/DSL; reference-layout tables, trigger descriptions, and the
+  README were updated to surface them.
 
 ### Changed
 - **`besser-dev` restructured** from a 487-line monolith into a lean overview
@@ -46,31 +67,6 @@ across all four skills.
   assertion) in `object-models.md`, and the `chat_history` type in
   `agents.md`. Reconciled `CONTRIBUTING.md`'s description-voice rule with the
   trigger style all four skills actually use.
-
-## [0.3.0] - 2026-06-18
-
-### Added
-- **Coverage of all remaining B-UML DSLs** in `besser-user` — seven new
-  source-verified references:
-  - `references/object-models.md` — object/instance models (objects,
-    attribute values, links), incl. the fluent builder and OCL test data.
-  - `references/feature-models.md` — software product lines (features,
-    groups, configurations).
-  - `references/ocl.md` — writing and attaching OCL `Constraint`s; `bocl`
-    evaluation; which generators consume OCL.
-  - `references/deployment.md` — deployment models for the
-    `TerraformGenerator`.
-  - `references/neural-networks.md` — NN models for the PyTorch/TF
-    generators.
-  - `references/quantum.md` — quantum circuits for the `QiskitGenerator`.
-  - `references/project.md` — bundling models + metadata.
-- **Two previously undocumented generators** in `besser-generators`:
-  - `SupabaseGenerator` (Postgres DDL + RLS) in `references/persistence.md`.
-  - `JSONObjectGenerator` (JSON data from an `ObjectModel`) in
-    `references/python-and-data.md`.
-- Reference-layout/generator-picker tables, trigger descriptions, and the
-  README updated to surface the new model types and generators. The skills
-  now cover all 19 BESSER generators and every B-UML metamodel/DSL.
 
 ### Notes
 - All new content was written against BESSER v7.8.3 source with verified API

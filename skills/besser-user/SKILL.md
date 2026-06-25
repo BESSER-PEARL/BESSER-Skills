@@ -68,6 +68,17 @@ B-UML in Markdown when the request is documentation-oriented. For the full
 how-to — making the file self-contained, and the two ways the user runs or
 imports it — see `references/delivering-models.md`.
 
+> **Don't deliver the diagram as a Mermaid block.** This skill exists so the
+> diagram is a real, `validate()`-checked B-UML model — not a throwaway
+> ` ```mermaid classDiagram``` ` that drifts from the code. When asked for a
+> class diagram, the deliverable is **B-UML** (the `.py` model and/or the same
+> model embedded in Markdown); when a rendered image is wanted, produce an
+> **SVG/PNG from the B-UML** — one call to BESSER's headless `B-UML → SVG`
+> endpoint (`POST https://editor.besser-pearl.org/besser_api/get-svg`, send the
+> `.py`), or Import → B-UML in the web editor, then export. A quick ASCII sketch
+> is fine as an inline preview, but the authoritative artifact is always the
+> B-UML model — not Mermaid.
+
 ## Reference layout
 
 This skill keeps SKILL.md short. Reach into `references/` and `scripts/`

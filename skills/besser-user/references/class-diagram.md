@@ -120,9 +120,17 @@ genre = Enumeration(name="Genre", literals={
 book_genre = Property(name="genre", type=genre)
 
 # Access literals by name: genre.FICTION, genre.SCIENCE
-# Default values:
-status = Property(name="genre", type=genre, default_value=genre.FICTION)
 ```
+
+> **Do not set a `default_value` on an enum-typed `Property`.** It is valid
+> B-UML and passes `validate()`, but the Pydantic and SQLAlchemy generators
+> cannot serialize an enum-literal default back to source — they emit the
+> literal's raw `repr()` (the whole enumeration object graph, including
+> timestamps), producing invalid Python (e.g. `SyntaxError: leading zeros in
+> decimal integer literals are not permitted`). The headless SVG endpoint
+> rejects it too. Leave the enum attribute without a default and set the
+> initial value in your app/auth layer or as a DB column default instead.
+> (Primitive defaults like `True` or `0` round-trip fine.)
 
 ## Associations
 

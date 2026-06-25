@@ -343,7 +343,7 @@ When the generated code doesn't match what you expect from your model:
 ### Enumeration values wrong in generated code
 
 1. Check literal names: `print([lit.name for lit in my_enum.literals])`.
-2. Default values: `Property(name="status", type=my_enum, default_value=my_enum.ACTIVE)` — make sure to reference the literal via the enum object.
+2. **Don't give an enum-typed attribute a `default_value`.** It passes `validate()`, but the Pydantic/SQLAlchemy generators can't serialize an enum-literal default — they emit its raw `repr()` (the whole enum graph, with timestamps), so `pydantic_classes.py` / `sql_alchemy.py` won't even parse (`SyntaxError: leading zeros in decimal integer literals are not permitted`). Omit the default and set it in the app layer or as a DB column default. (Primitive defaults like `True`/`0` are fine.)
 
 ---
 

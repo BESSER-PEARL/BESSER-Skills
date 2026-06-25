@@ -18,6 +18,22 @@ misbehaves.
    Check the console — you may see a Python traceback there with no
    exception bubbled up.
 
+## Generated `pydantic_classes.py` / `sql_alchemy.py` won't parse
+
+- **Symptom**: `main_api.py` is fine but the Pydantic/SQLAlchemy files raise a
+  `SyntaxError` — often `leading zeros in decimal integer literals are not
+  permitted` — and won't import.
+- **Cause**: an **enum-typed attribute with a `default_value`**, e.g.
+  `Property(name="role", type=role, default_value=role.MEMBER)`. It's valid
+  B-UML (`validate()` passes), but these generators can't serialize an
+  enum-literal default — they dump the literal's raw `repr()` (the whole
+  enumeration object graph, including a timestamp like `13:37:05.00…`, which
+  parses as a leading-zero number).
+- **Fix**: remove the `default_value` from enum attributes (keep the enums
+  themselves). Set the initial value in the app/auth layer or as a DB column
+  default instead. Primitive defaults (`is_active: bool = True`, `0`, …)
+  round-trip fine; only enum-literal defaults break.
+
 ## Generator produces wrong content
 
 - **Class names**: names with spaces or hyphens raise `ValueError` at

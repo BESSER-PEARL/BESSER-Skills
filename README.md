@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agent--skills-compatible-brightgreen)](https://agentskills.io)
-[![BESSER](https://img.shields.io/badge/BESSER-v7.8.3-orange)](https://github.com/BESSER-PEARL/BESSER)
+[![BESSER](https://img.shields.io/badge/BESSER-v7.9.0-orange)](https://github.com/BESSER-PEARL/BESSER)
 
 [Agent Skills](https://agentskills.io) for [BESSER](https://github.com/BESSER-PEARL/BESSER), the low-code model-driven engineering platform. These skills give AI coding agents deep knowledge of BESSER's metamodel, code generators, troubleshooting patterns, and contributor workflows -- without needing the full BESSER codebase in context.
 
@@ -11,6 +11,17 @@ With these skills an agent can build **UML class models** -- classes, attributes
 The same knowledge lets an agent **draw correct UML class diagrams in B-UML and embed them straight into your Markdown docs** -- B-UML is BESSER's own model representation, so the diagram is valid, runnable, and *is* the model rather than a throwaway picture. See [Drawing correct UML diagrams](#drawing-correct-uml-diagrams).
 
 Works with any agent that supports the Agent Skills standard: **Claude Code**, **Cursor**, **Cline**, **Windsurf**, **GitHub Copilot**, and [40+ others](https://agentskills.io).
+
+## What your agent can build
+
+With these skills loaded, an agent can do **anything you'd do with BESSER** — not just class diagrams:
+
+- **Model it correctly.** Build a structurally-valid B-UML model of *any* kind — class/structural, object (instance), feature, OCL constraints, state machines, chatbot agents, GUI, deployment, neural networks, quantum circuits, project models — with multiplicities, associations, and inheritance that actually check out (`validate()`-passing, not freehand guesses).
+- **Generate working code — deterministically.** Feed that one model to any of BESSER's **19 generators**: Python, Pydantic, SQLAlchemy, SQL, FastAPI/Backend, REST API, Django, WebApp, React, Flutter, Java, BAF, Qiskit, JSON Schema, JSON Object, RDF, Supabase, Terraform, PyTorch, TensorFlow. The generators are **template-based and deterministic** — the same model produces the same code on every run, so the output is reproducible and reviewable, not a one-off the LLM might rewrite differently next time.
+- **Diagnose what breaks** — install, import, runtime, and deployment errors (`besser-troubleshooting`).
+- **Extend BESSER itself** — add generators, metamodels, tests, and docs, then open a PR (`besser-dev`).
+
+The throughline: **one correct model, many trustworthy outputs.** The agent draws a UML model that is right by construction, then turns it into real, deterministic code — the diagram you made to *explain* the system can *become* the system, with no drift between the two.
 
 ## Skills
 
@@ -65,9 +76,20 @@ The same B-UML works **two ways**:
 - **As documentation** -- a precise, readable structural model embedded in
   your `README`, design doc, or `.md` spec, to document **any** project --
   no code generation required, even one that will never use BESSER's
-  generators. Drop it into
-  [editor.besser-pearl.org](https://editor.besser-pearl.org) (Import →
-  B-UML) whenever you want the rendered visual class diagram.
+  generators. Want the rendered picture? The agent fetches it in **one call** --
+  POST the model to BESSER's headless `B-UML → SVG` endpoint and embed the
+  result (no browser):
+
+  ```bash
+  curl -X POST https://editor.besser-pearl.org/besser_api/get-svg \
+    -F "buml_file=@library.py;type=text/x-python" -o docs/img/library.svg
+  ```
+
+  …then `![Library](docs/img/library.svg)`. For a hand-tuned layout, Import →
+  B-UML in the [web editor](https://editor.besser-pearl.org) and Export →
+  SVG/PNG instead. (Just embedding diagrams in docs? The focused
+  [**uml-drawing**](https://github.com/BESSER-PEARL/uml-drawing) skill wraps
+  exactly this flow.)
 - **As a real model** -- it isn't a drawing *of* the system, it *is* the
   system: `validate()`-checked and fed straight to any generator (Python,
   SQL, FastAPI, Django, React, …). No separate, drifting diagram to keep
@@ -242,6 +264,7 @@ and points into `references/` for detail when it's needed.
 ## Related
 
 - [BESSER](https://github.com/BESSER-PEARL/BESSER) -- the main platform
+- [uml-drawing](https://github.com/BESSER-PEARL/uml-drawing) -- focused skill for embedding correct UML class diagrams in docs (code or rendered SVG/PNG), built on B-UML
 - [BESSER Documentation](https://besser.readthedocs.io/)
 - [BESSER Web Editor](https://editor.besser-pearl.org/)
 - [BESSER Examples](https://github.com/BESSER-PEARL/BESSER-examples)

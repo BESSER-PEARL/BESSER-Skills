@@ -51,6 +51,15 @@ Customizations belong in *separate files* (see "Safe customization" below).
 Once you have generated, the **besser-user** skill's "Verification checklist"
 covers what to check next (files exist, syntax parses, it runs).
 
+**Generate the baseline, then build on top.** The point of these generators is
+that you *don't* hand-write the boilerplate. The output is template-based and
+**deterministic** — the same model produces the same code on every run — so
+regenerate the baseline freely (cheap and identical each time) and spend your
+effort only where the work is actually custom: extending and overriding in
+*separate* files so a re-run never clobbers it. Often the generated code is all
+you need; when it isn't, the "Safe customization" patterns below are how you
+build on top without fighting regeneration.
+
 ---
 
 ## Generator picker

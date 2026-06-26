@@ -8,7 +8,7 @@
 
 With these skills an agent can build **UML class models** -- classes, attributes, associations, inheritance -- plus state machines and chatbot agents, then generate working code (Python, SQL, REST APIs, Django, React, and more) straight from the model.
 
-The same knowledge lets an agent **draw correct UML class diagrams in B-UML and embed them straight into your Markdown docs** -- B-UML is BESSER's own model representation, so the diagram is valid, runnable, and *is* the model rather than a throwaway picture. See [Drawing correct UML diagrams](#drawing-correct-uml-diagrams).
+The same knowledge lets an agent **draw correct UML class diagrams in B-UML and embed them straight into your Markdown docs** -- B-UML is BESSER's own model representation, so the diagram is valid, runnable, and *is* the model rather than a throwaway picture. See the dedicated [**uml-drawing**](https://github.com/BESSER-PEARL/uml-drawing) skill.
 
 Works with any agent that supports the Agent Skills standard: **Claude Code**, **Cursor**, **Cline**, **Windsurf**, **GitHub Copilot**, and [40+ others](https://agentskills.io).
 
@@ -102,6 +102,8 @@ is the source of truth, so the documentation and the generated code never
 diverge.
 
 ## Installation
+
+Browse the skills on the [Agent Skills directory](https://skills.sh/besser-pearl/besser-skills).
 
 ### Using the skills CLI (any agent)
 

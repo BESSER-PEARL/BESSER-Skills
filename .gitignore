@@ -9,6 +9,7 @@ Desktop.ini
 *.swp
 *.swo
 *~
+docs/
 
 # Node
 node_modules/

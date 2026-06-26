@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.3.0] - unreleased
+## [0.3.0] - 2026-06-26
 
 Full coverage of every B-UML DSL and generator, deeper class-diagram /
-state-machine / agent references, and a complete editorial-review pass. Not
-yet announced — all of the below is the single pending 0.3.0.
+state-machine / agent references, a complete editorial-review pass, a
+marketing/positioning rework of the README, and field fixes surfaced by real
+agent runs.
 
 ### Added
 - **Coverage of all remaining B-UML DSLs** in `besser-user` — seven new
@@ -41,6 +42,18 @@ yet announced — all of the below is the single pending 0.3.0.
 - The skills now cover all 19 BESSER generators and every B-UML
   metamodel/DSL; reference-layout tables, trigger descriptions, and the
   README were updated to surface them.
+- **README "What your agent can build" capability block** — surfaces the full
+  BESSER surface an agent can drive: every B-UML model type, all 19 generators,
+  the deterministic-codegen-then-build-on-top workflow, troubleshooting, and
+  extending BESSER itself. Cross-links the standalone
+  [`uml-drawing`](https://github.com/BESSER-PEARL/uml-drawing) skill and adds an
+  [Agent Skills directory](https://skills.sh/besser-pearl/besser-skills) link.
+- **One-call `B-UML → SVG` rendering** in `besser-user` and the README — POST a
+  model to BESSER v7.9.0's headless `/besser_api/get-svg` endpoint and embed the
+  result, no browser required.
+- **"Generate the baseline, then build on top"** guidance in `besser-generators`:
+  regenerate the deterministic baseline freely (cheap and identical each run) and
+  put customizations in *separate* files so a re-run never clobbers them.
 
 ### Changed
 - **`besser-dev` restructured** from a 487-line monolith into a lean overview
@@ -61,12 +74,28 @@ yet announced — all of the below is the single pending 0.3.0.
   tables of contents to the longer references, and moved per-file version
   stamps to a single note; relaxed the attribute-naming guidance to match
   what BESSER actually enforces (no spaces/hyphens; snake_case or camelCase).
+- **README refreshed for v7.9.0**: BESSER badge bumped to v7.9.0, the drawing
+  section now leads with the one-call headless SVG endpoint, and the codegen
+  bullet is reframed around deterministic baselines you extend on top — spend
+  tokens only on what is genuinely custom. The intro now links directly to the
+  `uml-drawing` repo instead of an in-page anchor.
 
 ### Fixed
 - Corrected a broken copy-paste example (an always-false chained-comparison
   assertion) in `object-models.md`, and the `chat_history` type in
   `agents.md`. Reconciled `CONTRIBUTING.md`'s description-voice rule with the
   trigger style all four skills actually use.
+- **Stopped recommending `default_value` on enum-typed attributes** across
+  `besser-user`, `besser-troubleshooting`, and `besser-generators`'
+  `debugging.md`. It passes `validate()`, but the Pydantic/SQLAlchemy generators
+  serialize the literal's raw `repr()` → invalid Python (e.g. `SyntaxError:
+  leading zeros…`), and the headless SVG endpoint rejects it. Set the initial
+  value in the app/auth layer or as a DB column default instead. (Primitive
+  defaults like `True` or `0` round-trip fine.)
+- **Class diagrams are delivered as B-UML, never Mermaid** (`besser-user`). The
+  authoritative artifact is the `validate()`-checked B-UML model; a rendered
+  SVG/PNG is the picture and a quick ASCII sketch is fine as a preview, but
+  Mermaid (un-validated, can't be generated from) is no longer produced.
 
 ### Notes
 - All new content was written against BESSER v7.8.3 source with verified API
@@ -74,6 +103,9 @@ yet announced — all of the below is the single pending 0.3.0.
   reproduced (e.g. the wrong `besser.BUML.notations.od.*` import path and the
   `ObjectModel(instances=…)` kwarg). Known-broken paths are flagged in-place
   (e.g. the `objectPlantUML` parser is non-functional in v7.8.3).
+- The headless `B-UML → SVG` flow and the v7.9.0 badge track BESSER v7.9.0
+  (PR #554, ELK auto-layout); all other API citations remain verified against
+  v7.8.3 source.
 
 ## [0.2.1] - 2026-06-18
 

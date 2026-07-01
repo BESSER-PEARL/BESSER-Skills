@@ -2,6 +2,8 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agent--skills-compatible-brightgreen)](https://agentskills.io)
+[![Install with skills.sh](https://img.shields.io/badge/install-skills.sh-6f42c1)](https://skills.sh/besser-pearl/besser-skills)
+[![Release](https://img.shields.io/github/v/release/BESSER-PEARL/BESSER-Skills?color=orange&label=release)](https://github.com/BESSER-PEARL/besser-skills/releases/latest)
 [![BESSER](https://img.shields.io/badge/BESSER-v7.9.0-orange)](https://github.com/BESSER-PEARL/BESSER)
 
 [Agent Skills](https://agentskills.io) for [BESSER](https://github.com/BESSER-PEARL/BESSER), the low-code model-driven engineering platform. These skills give AI coding agents deep knowledge of BESSER's metamodel, code generators, troubleshooting patterns, and contributor workflows -- without needing the full BESSER codebase in context.

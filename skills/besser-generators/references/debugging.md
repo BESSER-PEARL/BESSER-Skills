@@ -106,7 +106,8 @@ look like a failure of the wrapper:
 WebAppGenerator
   ├── ReactGenerator          → frontend/
   ├── BackendGenerator        → backend/
-  │     ├── RESTAPIGenerator  → main_api.py
+  │     ├── RESTAPIGenerator  → main_api.py, database.py, bal_stdlib.py,
+  │     │                       routers/<class>.py (one per class)
   │     ├── PydanticGenerator → pydantic_classes.py
   │     └── SQLAlchemyGenerator → sql_alchemy.py
   └── BAFGenerator (optional) → agent/

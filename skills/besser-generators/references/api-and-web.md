@@ -16,10 +16,31 @@ gen.generate()
 | Aspect | Detail |
 |--------|--------|
 | Input | `DomainModel` |
-| Output | Three files: `main_api.py` (FastAPI), `pydantic_classes.py`, `sql_alchemy.py` |
+| Output | A package, not a single module (see below) |
 | Default `output_dir` | `./output_backend/` (note: not the usual `./output/`) |
 | Options | `http_methods` (default: GET/POST/PUT/DELETE), `nested_creations`, `docker_image=True` to build/push a Docker image |
 | Key behavior | Composite generator — orchestrates `RESTAPIGenerator` + `PydanticGenerator` + `SQLAlchemyGenerator`. Optionally emits `Dockerfile` + `requirements.txt` + `.dockerignore`. |
+
+The API is split per class rather than written into one module:
+
+```
+output_backend/
+  main_api.py          # app setup and include_router() calls only
+  database.py          # engine, SessionLocal, the get_db dependency
+  bal_stdlib.py        # helpers the generated method bodies call
+  routers/
+    __init__.py
+    <class>.py         # one per class: its endpoints and method handlers
+  pydantic_classes.py
+  sql_alchemy.py
+  requirements.txt
+```
+
+**Where to look for what.** `main_api.py` still defines `app`, so
+`from main_api import app` and `uvicorn main_api:app` are unchanged. But an
+endpoint body lives in `routers/<class>.py`, and the SQLAlchemy session comes
+from the `get_db` dependency in `database.py` — those are the files to read when
+you need to know what is in scope inside a handler.
 
 To limit endpoints:
 
@@ -42,7 +63,7 @@ gen.generate()
 | Aspect | Detail |
 |--------|--------|
 | Input | `DomainModel` |
-| Output | Standalone mode: `rest_api.py` + `pydantic_classes.py` + `requirements.txt`. Backend mode: `main_api.py` + `requirements.txt` |
+| Output | Standalone mode: `rest_api.py` + `pydantic_classes.py` + `requirements.txt`. Backend mode: the same per-class package `BackendGenerator` emits — `main_api.py`, `database.py`, `bal_stdlib.py`, `routers/<class>.py` — plus `requirements.txt` |
 | Options | `http_methods`, `nested_creations`, `backend=True` (used internally by `BackendGenerator`), `port` |
 
 Use `BackendGenerator` for the typical "FastAPI + ORM + Pydantic" stack;
@@ -80,14 +101,20 @@ gen = WebAppGenerator(
     model=domain_model,
     gui_model=gui_model,    # required
     output_dir="./webapp",
-    agent_model=None,       # optional Agent for embedded chatbot
+    agent_models=None,      # optional list of Agents for embedded chatbots
+    agent_configs=None,     # optional matching list of configs
 )
 gen.generate()
 ```
 
+`agent_model` and `agent_config` (singular) still work but are a deprecated
+back-compat shim for the one-agent case; use the list forms. With more than one
+agent, each subsequent agent's ports increment from the first — WebSocket from
+8765, HTTP from 5000.
+
 | Aspect | Detail |
 |--------|--------|
-| Input | `DomainModel` + `GUIModel` (both required), optional `Agent` |
+| Input | `DomainModel` + `GUIModel` (both required), optional `Agent`s |
 | Output | `frontend/` (React/Vite), `backend/` (FastAPI), optional `agent/`, `docker-compose.yml`, Dockerfiles |
 | Default ports | Frontend 3000, backend 8000, agent WS 8765, agent HTTP 5000 |
 | Key behavior | Composite — orchestrates `ReactGenerator` + `BackendGenerator` + optional `BAFGenerator`, then emits Docker orchestration. |

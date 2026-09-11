@@ -28,7 +28,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.3.0"
+  version: "0.3.1"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
@@ -52,13 +52,19 @@ Once you have generated, the **besser-user** skill's "Verification checklist"
 covers what to check next (files exist, syntax parses, it runs).
 
 **Generate the baseline, then build on top.** The point of these generators is
-that you *don't* hand-write the boilerplate. The output is template-based and
-**deterministic** — the same model produces the same code on every run — so
-regenerate the baseline freely (cheap and identical each time) and spend your
-effort only where the work is actually custom: extending and overriding in
-*separate* files so a re-run never clobbers it. Often the generated code is all
-you need; when it isn't, the "Safe customization" patterns below are how you
-build on top without fighting regeneration.
+that you *don't* hand-write the boilerplate. Regenerate the baseline freely and
+spend your effort only where the work is actually custom: extending and
+overriding in *separate* files so a re-run never clobbers it. Often the
+generated code is all you need; when it isn't, the "Safe customization"
+patterns below are how you build on top without fighting regeneration.
+
+**The output is equivalent across runs, but not byte-identical.** Generators
+iterate unordered collections, so the same model can emit the same members in a
+different order each run — fields, columns, constructor arguments, table
+columns. Nothing changes semantically. Two consequences worth knowing: don't
+diff one regeneration against another expecting silence, and don't hard-code a
+column *position* when reading generated output (in a test, say) — look columns
+up by name.
 
 ---
 
@@ -97,7 +103,7 @@ Not generating, but stuck?
 By default a generator writes to `<cwd>/output/` and produces the single
 file documented in its reference. The exceptions worth memorizing:
 
-- **`BackendGenerator`** → defaults to `./output_backend/` (not `./output/`); emits `main_api.py`, `pydantic_classes.py`, `sql_alchemy.py`.
+- **`BackendGenerator`** → defaults to `./output_backend/` (not `./output/`); emits a package, not a single module: `main_api.py` (app setup only), `database.py`, `bal_stdlib.py`, `routers/<class>.py` per class, plus `pydantic_classes.py` and `sql_alchemy.py`.
 - **`WebAppGenerator`** → `output_dir` must be specified; emits `frontend/`, `backend/`, `docker-compose.yml`.
 - **`DjangoGenerator`** → creates a project folder in the CWD (`myproject/myapp/models.py`, …).
 - **`SupabaseGenerator`** → timestamped filename, so every run creates a *new* file and never overwrites.
@@ -189,9 +195,15 @@ book.add_method(search)
 The method body is inserted **verbatim** into the generated FastAPI handler
 — it is not parsed or scoped by the metamodel. So any name it references
 (here `session`) must actually exist in the generated handler at that point.
-Treat the body as code you are responsible for: check the generated
-`main_api.py` to confirm what is in scope (e.g. the SQLAlchemy session
-variable name the handler uses) and reference exactly those names.
+Treat the body as code you are responsible for: read `routers/<class>.py` to
+see what is in scope where the body lands, and `database.py` for the session
+dependency, then reference exactly those names.
+
+Two things the body cannot assume. A method may not share its name with an
+attribute or an association end of the same class — the model will not validate,
+because one generated name cannot be both. And a name the *diagram* uses is not
+always the name the *generated object* uses, so confirm against the generated
+class before calling it.
 
 ### 5. Template overrides (advanced)
 

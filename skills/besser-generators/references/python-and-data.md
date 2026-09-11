@@ -27,16 +27,22 @@ gen.generate()
 
 ```python
 from besser.generators.java_classes import JavaGenerator
-gen = JavaGenerator(model=domain_model, output_dir="./output")
+gen = JavaGenerator(model=domain_model, output_dir="./output", package_name="com.example.model")
 gen.generate()
 ```
 
 | Aspect | Detail |
 |--------|--------|
 | Input | `DomainModel` |
-| Output | One `.java` file per class (e.g., `Book.java`, `Author.java`) |
-| Template | `java_template.py.j2` |
-| Key behavior | Package name auto-detected from output path. Files sorted by inheritance. |
+| Output | One `.java` file per class (e.g., `Book.java`, `Author.java`) and one per enumeration (`MemberType.java`) |
+| Options | `package_name` — emitted as the `package` line. Omit it and the files carry no package declaration |
+| Template | `java_template.py.j2`, `java_enum_template.py.j2` |
+| Key behavior | Files sorted by inheritance. An enumeration becomes a Java `enum` and is used as the type of every attribute, parameter and return value referencing it. Both ends of a bidirectional association get a field, and a non-navigable end gets none. Methods declared on the model are emitted as stubs that throw `UnsupportedOperationException`, so the sources compile whatever a method returns. |
+
+`package_name` is a constructor parameter, not something inferred: earlier
+versions guessed a package from the output path, which made the same model
+generate differently depending on where you ran it. If you need a package line,
+pass one.
 
 ## PydanticGenerator
 
@@ -52,7 +58,21 @@ gen.generate()
 | Output | Single file: `pydantic_classes.py` |
 | Options | `backend=True` switches to backend API mode; `nested_creations=True` allows nested object creation in API payloads |
 | Template | `pydantic_classes_template.py.j2` |
-| Key behavior | OCL constraints translate to Pydantic validators. Unicode-safe via `ascii_identifier` filter. |
+| Key behavior | OCL constraints translate to Pydantic validators — see `besser-user`'s `references/ocl.md` for which ones. Unicode-safe via `ascii_identifier` filter. |
+
+**Association classes** (`backend=True`). When the model has an
+`AssociationClass`, the generator emits a `<AssocClass>LinkCreate` payload
+alongside the entity models, and the two related classes take
+`Union["<AssocClass>LinkCreate", int]` in place of a plain id — so a request can
+create the link and its attributes in one go:
+
+```python
+{"rooms": [{"target": 101, "agreed_price": 90.0}]}
+```
+
+An attribute the model marks optional stays optional in that payload. If you
+are hand-writing a client, send the link object rather than a bare id whenever
+the link itself carries data.
 
 ## JSONSchemaGenerator
 

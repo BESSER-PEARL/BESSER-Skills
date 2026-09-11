@@ -4,6 +4,55 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.1] - 2026-09-11
+
+Re-verified against BESSER 7.16.1. The backend generator's output shape and the
+Java generator's options had both moved since the last pass, and two claims were
+simply wrong.
+
+### Fixed
+- **`BackendGenerator` output is a package, not three files.** The API is split
+  per class: `main_api.py` (app setup and `include_router` calls only),
+  `database.py`, `bal_stdlib.py` and `routers/<class>.py`. Corrected in
+  `besser-generators` SKILL.md, `references/api-and-web.md` (both
+  `BackendGenerator` and `RESTAPIGenerator` backend mode) and the composite
+  diagram in `references/debugging.md`. The guidance to "check `main_api.py` for
+  what is in scope" now points at `routers/<class>.py` and `database.py`, where
+  handler bodies and the session dependency actually live.
+- **Generated output is not byte-identical between runs.** The skill promised
+  determinism; generators iterate unordered collections, so members can come out
+  in a different order each run. Regenerating the same model twice produced 216
+  differing lines. The claim is replaced with what holds - equivalent, not
+  identical - plus the two consequences: do not diff regenerations, and look
+  table columns up by name rather than by position.
+- **`JavaGenerator` no longer guesses a package from the output path.** That was
+  removed; `package_name` is an explicit constructor parameter. Documented, along
+  with the enum files, method stubs and navigability-filtered bidirectional
+  associations the generator gained.
+- **OCL consumers were understated.** `DjangoGenerator`, `BackendGenerator` /
+  `RESTAPIGenerator` and `TestGenerator` all consume OCL, not only
+  `PydanticGenerator`. More importantly, the split is not "single versus
+  multi-property": a constraint over several properties of one object *is*
+  enforced, as a `model_validator`; a constraint navigating a collection is
+  *not*, and is emitted as a comment. `references/ocl.md` now states this in a
+  table, with a warning not to assume a collection rule is applied.
+- **`scaffold_model.py` emitted a non-ASCII character.** Redirected on a console
+  that is not UTF-8 (cp1252 on Windows), the generated file would not parse:
+  `SyntaxError: Non-UTF-8 code starting with ''`. The emitted text is ASCII
+  now; same fix in `scaffold_generator.py`.
+
+### Added
+- `DomainModel.validate()` runs seven checks, not the four listed. The three
+  missing ones are documented in `references/class-diagram.md`, including the
+  rule added in BESSER 7.16.0: a method may not share its name with an attribute
+  or association end of the same class, because generated code reaches both
+  through that one name.
+- Association-class link payloads (`<AssocClass>LinkCreate`) for
+  `PydanticGenerator(backend=True)`, including that an optional link attribute
+  stays optional in the payload.
+- `WebAppGenerator`'s `agent_models` / `agent_configs` lists, and that the
+  singular forms are a deprecated back-compat shim.
+
 ## [0.3.0] - 2026-06-26
 
 Full coverage of every B-UML DSL and generator, deeper class-diagram /

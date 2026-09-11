@@ -217,20 +217,37 @@ Re-exported from both `besser.BUML.metamodel.ocl` and
 
 ## Generators that consume constraints
 
-OCL support across generators is **limited**. The notable consumer is the
-**Pydantic generator** (`besser.generators.pydantic_classes`), which converts
-simple OCL invariants into Pydantic field validators via
+Four generators consume OCL, all through the same translator in
 `besser/generators/pydantic_classes/ocl_utils.py`:
 
-- It only picks up constraints where `constraint.language == "OCL"`.
-- It handles single-property comparisons (`self.x > 5`) and simple compound
-  forms (`self.age > 10 and self.age < 20`); falls back to regex parsing when
-  the ANTLR parse yields nothing usable. Multi-property and complex iterator
-  constraints are skipped for field validation.
+- **`PydanticGenerator`** — emits the validators.
+- **`BackendGenerator`** / **`RESTAPIGenerator`** — the generated FastAPI stack
+  carries the same validators, since it builds its Pydantic models with that
+  generator.
+- **`DjangoGenerator`** — imports `build_constraints_map` directly and applies
+  the same rules.
+- **`TestGenerator`** — turns method post-conditions into Hypothesis tests.
+
+Only constraints where `constraint.language == "OCL"` are picked up.
+
+**What actually gets enforced.** The line that matters is not how many
+properties the constraint touches, but whether it navigates a collection:
+
+| Constraint | Emitted as | Enforced |
+|---|---|---|
+| `self.age > 16` — one property | `@field_validator` | yes |
+| `self.check_in <= self.check_out` — several properties of the same object | `@model_validator(mode='after')` | yes |
+| `self.guests->size() <= self.rooms->collect(r \| r.max_people)->sum()` — over a collection | a `# NOTE:` comment | **no** |
+
+A constraint over a collection or a relationship is written into the generated
+file as a comment saying it is not enforced, and nothing checks it at runtime.
+If your rule has to hold — capacity, uniqueness across a set, "at least one of"
+— enforce it yourself in the application, or keep it as a documented invariant
+and test for it. Do not assume the generated app applies it.
 
 The SQL and Supabase generators emit their own `CHECK` constraints from
 enums/multiplicities — they do **not** translate the OCL `Constraint`
-expressions. Other generators ignore OCL constraints.
+expressions.
 
 ## Gotchas
 

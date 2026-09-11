@@ -32,7 +32,7 @@ compatibility:
   - copilot
 metadata:
   author: BESSER-PEARL
-  version: "0.3.0"
+  version: "0.3.1"
   repository: https://github.com/BESSER-PEARL/BESSER-Skills
 ---
 
@@ -82,8 +82,8 @@ imports it — see `references/delivering-models.md`.
 ## Reference layout
 
 This skill keeps SKILL.md short. Reach into `references/` and `scripts/`
-when you need depth. All references are verified against the BESSER version
-shown in the README badge.
+when you need depth. All references are verified against the BESSER version shown in the README
+badge; where behaviour changed after it, the reference says so.
 
 | You need | Read |
 |----------|------|

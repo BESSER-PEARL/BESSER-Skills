@@ -369,12 +369,24 @@ if not result["success"]:
 model.validate()  # raises ValueError listing all errors if invalid
 ```
 
-Always call `validate()` before generating. Common errors caught here:
+Always call `validate()` before generating. The seven checks it runs:
 
 - generalization references class not in `types`
 - association end references type not in `types`
-- circular inheritance
+- multiplicity bounds are impossible (`min` above `max`)
 - OCL constraint context not in `types`
+- circular inheritance
+- an attribute shadows one of the same name in a parent class
+- **a method shares its name with an attribute or an association end of the
+  same class**
+
+That last one bites in a way worth spelling out. Generated code reaches an
+attribute and a method through the same name, so an object cannot carry both:
+declare `check_in` as a date *and* as a method and one of them becomes
+unreachable — a body reading `self.check_out - self.check_in` subtracts two
+methods instead of two dates, and the failure only shows up at runtime. Rename
+one of the two; the action usually reads better as a verb phrase anyway
+(`register_arrival` beside a `check_in` date).
 
 ## Complete example
 

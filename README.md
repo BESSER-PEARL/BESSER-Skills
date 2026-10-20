@@ -124,6 +124,15 @@ npx skills add BESSER-PEARL/besser-skills --skill besser-user -a cursor
 npx skills add BESSER-PEARL/besser-skills --skill besser-user -a cline
 ```
 
+### Claude Code plugin
+
+```text
+/plugin marketplace add BESSER-PEARL/BESSER-Skills
+/plugin install besser@besser-pearl
+```
+
+This installs all four skills and keeps them updated with `/plugin marketplace update besser-pearl`.
+
 ### Manual installation (Claude Code)
 
 Copy a skill directory into your project's `.claude/skills/` or your global `~/.claude/skills/`:

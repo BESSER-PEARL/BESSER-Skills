@@ -6,6 +6,8 @@
 [![Release](https://img.shields.io/github/v/release/BESSER-PEARL/BESSER-Skills?color=orange&label=release)](https://github.com/BESSER-PEARL/besser-skills/releases/latest)
 [![BESSER](https://img.shields.io/badge/BESSER-v7.16.1-orange)](https://github.com/BESSER-PEARL/BESSER)
 
+> ⭐ **Part of [BESSER](https://github.com/BESSER-PEARL/BESSER)**, the open-source low-code platform that turns models into working apps. If this project is useful to you, please [star the main repo](https://github.com/BESSER-PEARL/BESSER) too.
+
 [Agent Skills](https://agentskills.io) for [BESSER](https://github.com/BESSER-PEARL/BESSER), the low-code model-driven engineering platform. These skills give AI coding agents deep knowledge of BESSER's metamodel, code generators, troubleshooting patterns, and contributor workflows -- without needing the full BESSER codebase in context.
 
 With these skills an agent can build **UML class models** -- classes, attributes, associations, inheritance -- plus state machines and chatbot agents, then generate working code (Python, SQL, REST APIs, Django, React, and more) straight from the model.

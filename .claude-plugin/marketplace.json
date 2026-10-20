@@ -1,0 +1,29 @@
+{
+  "name": "besser-pearl",
+  "owner": {
+    "name": "BESSER-PEARL",
+    "email": "info@besser-pearl.org"
+  },
+  "metadata": {
+    "description": "Agent Skills for BESSER, the open-source low-code model-driven platform",
+    "version": "0.3.1"
+  },
+  "plugins": [
+    {
+      "name": "besser",
+      "description": "Build UML/B-UML models with BESSER, run its code generators (FastAPI, React, Django, SQLAlchemy and more), fix BESSER errors and contribute to BESSER itself",
+      "source": "./",
+      "strict": false,
+      "homepage": "https://github.com/BESSER-PEARL/BESSER",
+      "repository": "https://github.com/BESSER-PEARL/BESSER-Skills",
+      "license": "Apache-2.0",
+      "keywords": ["besser", "uml", "low-code", "model-driven", "code-generation", "fastapi", "django", "react"],
+      "skills": [
+        "./skills/besser-user",
+        "./skills/besser-generators",
+        "./skills/besser-troubleshooting",
+        "./skills/besser-dev"
+      ]
+    }
+  ]
+}
